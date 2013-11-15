@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Ormikon.Owin.Static</id>
+    <version>0.1.0</version>
+    <title>OWIN Static</title>
+    <authors>Ormikon</authors>
+    <owners>Ormikon</owners>
+    <licenseUrl>https://github.com/Ormikon/OWIN-Static/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Ormikon/OWIN-Static</projectUrl>
+    <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      The package with middleware for processing static content.
+    </description>
+    <summary>
+      Ormikon.Owin.Static package.
+    </summary>
+    <releaseNotes>Released.</releaseNotes>
+    <copyright>Copyright Ormikon 2013</copyright>
+    <tags>owin,katana,static,system.web</tags>
+    <dependencies>
+      <group targetFramework="net40">
+        <dependency id="Microsoft.Owin" version="2.0.1" />
+      </group>
+      <group targetFramework="net45">
+        <dependency id="Owin" version="1.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static\bin\Release\Ormikon.Owin.Static.dll" target="lib\net45" />
+    <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static\bin\Release\Ormikon.Owin.Static.pdb" target="lib\net45" />
+  </files>
+</package>
