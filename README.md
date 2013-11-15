@@ -15,7 +15,7 @@ using Ormikon.Owin.Static;
 using Owin;
 using System;
 
-namespace HackatonStartUp
+namespace StaticExample
 {
     class Startup
     {
