@@ -15,7 +15,7 @@ namespace Ormikon.Owin.Static.Example
                       //.MapStatic("/css", ContentPath("css"))
                       //.MapStatic("/js", ContentPath("js"))
                       //.MapStatic("/font-awesome", ContentPath("font-awesome"))
-                      .UseStatic(new StaticSettings(ContentPath("")))
+                      .UseStatic(new StaticSettings("..\\..\\Content\\"){Cached = true})
                       .UseErrorPage();
         }
     }
