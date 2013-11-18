@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Ormikon.Owin.Static")]
-[assembly: AssemblyDescription("Processes static content in OWIN applications")]
+[assembly: AssemblyTitle("Ormikon.Owin.Static.Example")]
+[assembly: AssemblyDescription("Examle application for Ormikon.Owin.Static middleware")]
 [assembly: AssemblyCompany("Ormikon")]
-[assembly: AssemblyProduct("Ormikon.Owin.Static")]
+[assembly: AssemblyProduct("Ormikon.Owin.Static.Example")]
 [assembly: AssemblyCopyright("Copyright © Ormikon 2013")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("59347b51-7ef0-43f6-90da-446ae72cfc44")]
+[assembly: Guid("44591f35-1969-4a05-84cc-5dc825cc921a")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -28,5 +28,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.2.0.0")]
-[assembly: AssemblyFileVersion("0.2.0.0")]
+[assembly: AssemblyVersion("0.1.0.0")]
+[assembly: AssemblyFileVersion("0.1.0.0")]

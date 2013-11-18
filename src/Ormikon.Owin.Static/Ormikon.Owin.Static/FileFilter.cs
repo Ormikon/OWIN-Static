@@ -8,7 +8,7 @@ namespace Ormikon.Owin.Static
 {
     internal class FileFilter
     {
-        private static char[] filterSeparator = new[] { ';' };
+        private static readonly char[] filterSeparator = new[] { ';' };
 
         private readonly Regex filterRegEx;
         private readonly char[] invalidChars;

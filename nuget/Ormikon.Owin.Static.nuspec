@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Ormikon.Owin.Static</id>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <title>OWIN Static</title>
     <authors>Ormikon</authors>
     <owners>Ormikon</owners>
@@ -20,12 +20,8 @@
     <copyright>Copyright Ormikon 2013</copyright>
     <tags>owin,katana,static,system.web</tags>
     <dependencies>
-      <group targetFramework="net40">
-        <dependency id="Microsoft.Owin" version="2.0.1" />
-      </group>
-      <group targetFramework="net45">
-        <dependency id="Owin" version="1.0" />
-      </group>
+      <dependency id="Owin" version="1.0" />
+      <dependency id="Microsoft.Owin" version="2.0.1" />
     </dependencies>
   </metadata>
   <files>

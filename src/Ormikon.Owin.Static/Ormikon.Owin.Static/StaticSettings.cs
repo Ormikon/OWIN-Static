@@ -7,7 +7,7 @@ namespace Ormikon.Owin.Static
     /// </summary>
     public class StaticSettings
     {
-        private static char[] sourceSeparators = new [] { ';' };
+        private static readonly char[] sourceSeparators = new [] { ';' };
 
         public StaticSettings()
         {

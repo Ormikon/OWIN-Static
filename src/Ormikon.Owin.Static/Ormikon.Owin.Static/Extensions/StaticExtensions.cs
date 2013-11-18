@@ -1,7 +1,10 @@
-﻿using Ormikon.Owin.Static;
+﻿using System.Linq;
+using Ormikon.Owin.Static;
 using Ormikon.Owin.Static.Config;
 
+// ReSharper disable CheckNamespace
 namespace Owin
+// ReSharper restore CheckNamespace
 {
     /// <summary>
     /// Extension methods for OWIN to add the StaticMiddleware to the pipeline
@@ -23,9 +26,11 @@ namespace Owin
         /// Adds the StaticMiddleware to the pipeline
         /// </summary>
         /// <param name="appBuilder">App builder</param>
-        /// <param name="settings">A collection of the source paths</param>
+        /// <param name="sources">A collection of the source paths</param>
         /// <returns>App builder</returns>
+// ReSharper disable MethodOverloadWithOptionalParameter
         public static IAppBuilder UseStatic(this IAppBuilder appBuilder, params string[] sources)
+// ReSharper restore MethodOverloadWithOptionalParameter
         {
             return appBuilder.Use<StaticMiddleware>(new StaticSettings(sources));
         }
@@ -34,7 +39,7 @@ namespace Owin
         /// Adds the StaticMiddleware to the pipeline
         /// </summary>
         /// <param name="appBuilder">App builder</param>
-        /// <param name="settings">Single source path or a collection separated by comma</param>
+        /// <param name="sources">Single source path or a collection separated by comma</param>
         /// <returns>App builder</returns>
         public static IAppBuilder UseStatic(this IAppBuilder appBuilder, string sources)
         {
@@ -58,7 +63,7 @@ namespace Owin
         /// </summary>
         /// <param name="appBuilder">App builder</param>
         /// <param name="pathMatch">Custom path</param>
-        /// <param name="settings">A collection of the source paths</param>
+        /// <param name="sources">A collection of the source paths</param>
         /// <returns>App builder</returns>
         public static IAppBuilder MapStatic(this IAppBuilder appBuilder, string pathMatch, params string[] sources)
         {
@@ -70,7 +75,7 @@ namespace Owin
         /// </summary>
         /// <param name="appBuilder">App builder</param>
         /// <param name="pathMatch">Custom path</param>
-        /// <param name="settings">Single source path or a collection separated by comma</param>
+        /// <param name="sources">Single source path or a collection separated by comma</param>
         /// <returns>App builder</returns>
         public static IAppBuilder MapStatic(this IAppBuilder appBuilder, string pathMatch, string sources)
         {
@@ -88,14 +93,10 @@ namespace Owin
             if (cs == null)
                 return appBuilder;
 
-            foreach (var map in cs.EnumerateSettings())
-            {
-                appBuilder = map.HasPath
-                    ? appBuilder.MapStatic(map.Path, map.Value)
-                    : appBuilder.UseStatic(map.Value);
-            }
-
-            return appBuilder;
+            return cs.EnumerateSettings()
+                     .Aggregate(appBuilder,
+                                (current, map) =>
+                                map.HasPath ? current.MapStatic(map.Path, map.Value) : current.UseStatic(map.Value));
         }
     }
 }

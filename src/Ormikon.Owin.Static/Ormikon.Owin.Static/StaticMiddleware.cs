@@ -39,7 +39,7 @@ namespace Ormikon.Owin.Static
 
         #region private methods
 
-        private static string[] NormalizeSources(string[] sources)
+        private static string[] NormalizeSources(IEnumerable<string> sources)
         {
             return sources.Select(s => s.NormalizePath().GetFullPathForLocalPath()).ToArray();
         }

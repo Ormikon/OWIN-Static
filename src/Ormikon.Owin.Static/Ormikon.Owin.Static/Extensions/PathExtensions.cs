@@ -1,4 +1,5 @@
-﻿using Microsoft.Owin;
+﻿using System.Linq;
+using Microsoft.Owin;
 using System;
 using System.IO;
 
@@ -47,13 +48,7 @@ namespace Ormikon.Owin.Static.Extensions
             {
                 return null;
             }
-            for (int i = 0; i < sources.Length; i++)
-            {
-                string fileNameInSource = Path.Combine(sources[i], pathStr);
-                if (TryFindFile(fileNameInSource))
-                    return fileNameInSource;
-            }
-            return null;
+            return sources.Select(t => Path.Combine(t, pathStr)).FirstOrDefault(TryFindFile);
         }
     }
 }
