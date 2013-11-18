@@ -48,9 +48,13 @@ namespace Ormikon.Owin.Static
                 if (i > 0)
                     rb.Append('|');
                 rb.Append("(.*?");
-                f = f.Replace("\\", "\\\\").Replace(".", "\\.")
-                    .Replace("\\**\\", "\\.*?")
-                    .Replace("*", "[^\\\\]*?");
+                f = f.Replace("\\", "\\/").Replace(".", "\\.")
+                    .Replace("?", ".")
+                    .Replace("/**/", "-#####-")
+                    .Replace("**", "-######-")
+                    .Replace("*", "[^\\/]*?")
+                    .Replace("-#####-", "\\/.*?")
+                    .Replace("-######-", ".*?");
                 rb.Append(f);
                 rb.Append(')');
             }
@@ -63,6 +67,8 @@ namespace Ormikon.Owin.Static
         {
             if (filterRegEx == null)
                 return false;
+            // to linux
+            fileName = fileName.Replace("\\", "/");
             return filterRegEx.IsMatch(fileName);
         }
 
