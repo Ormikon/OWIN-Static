@@ -5,8 +5,8 @@
     /// </summary>
     public class Settings
     {
-        private string path;
-        private StaticSettings val;
+        private readonly string path;
+        private readonly StaticSettings val;
 
         /// <summary>
         /// Creates settings from the path and static settings
@@ -34,6 +34,7 @@
             {
                 Cached = map.Cached,
                 Expires = map.Expires,
+                MaxAgeExpression = map.MaxAge,
                 Include = map.Include,
                 Exclude = map.Exclude
             };

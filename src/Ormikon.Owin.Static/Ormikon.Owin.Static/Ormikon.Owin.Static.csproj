@@ -53,6 +53,7 @@
     <Compile Include="Config\MapElementCollection.cs" />
     <Compile Include="Config\Settings.cs" />
     <Compile Include="Extensions\ContentTypeExtensions.cs" />
+    <Compile Include="Extensions\MaxAgeExtensions.cs" />
     <Compile Include="FileFilter.cs" />
     <Compile Include="Config\Section.cs" />
     <Compile Include="Extensions\StaticExtensions.cs" />

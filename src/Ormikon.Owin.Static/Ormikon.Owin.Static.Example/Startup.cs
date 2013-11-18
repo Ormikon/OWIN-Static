@@ -11,11 +11,11 @@ namespace Ormikon.Owin.Static.Example
 
         public void Configuration(IAppBuilder appBuilder)
         {
-            appBuilder.UseStatic(ContentPath("Index.html"))
+            appBuilder//.UseStatic(ContentPath("Index.html"))
                       //.MapStatic("/css", ContentPath("css"))
                       //.MapStatic("/js", ContentPath("js"))
                       //.MapStatic("/font-awesome", ContentPath("font-awesome"))
-                      .UseStatic(ContentPath(""))
+                      .UseStatic(new StaticSettings(ContentPath("")))
                       .UseErrorPage();
         }
     }

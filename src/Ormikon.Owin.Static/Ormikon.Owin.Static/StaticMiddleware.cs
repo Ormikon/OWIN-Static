@@ -14,6 +14,9 @@ namespace Ormikon.Owin.Static
         private readonly string[] sources;
         private readonly IDictionary<string, byte[]> cache;
         private readonly DateTimeOffset expires;
+        private readonly int maxAge;
+        private readonly string indexFile;
+        private readonly bool redirectIfFolder;
         private readonly FileFilter include;
         private readonly FileFilter exclude;
 
@@ -28,6 +31,9 @@ namespace Ormikon.Owin.Static
             sources = NormalizeSources(sources);
             cache = settings.Cached ? new ConcurrentDictionary<string, byte[]>() : null;
             expires = settings.Expires;
+            maxAge = settings.MaxAge;
+            indexFile = settings.DefaultFile;
+            redirectIfFolder = settings.RedirectIfFolderFound;
             include = new FileFilter(settings.Include);
             exclude = new FileFilter(settings.Exclude);
         }
@@ -59,6 +65,13 @@ namespace Ormikon.Owin.Static
                     if (task.Exception != null)
                         throw new AggregateException(task.Exception);
                 });
+        }
+
+        private Task RedirectToFolder(IOwinContext ctx)
+        {
+            string newLocation = ctx.Request.Path.Value + "/";
+            ctx.Response.Redirect(newLocation);
+            return ctx.Response.WriteAsync("Redirecting to " + newLocation);
         }
 
         private Task SendFileAsync(string fileName, IOwinContext ctx)
@@ -102,9 +115,16 @@ namespace Ormikon.Owin.Static
             return SendStreamAsync(s, ctx.Response.Body);
         }
 
+        private static void AddMaxAgeHeader(int maxAge, IOwinResponse response)
+        {
+            if (maxAge > 0)
+                response.Headers["Cache-Control"] = "public, max-age=" + maxAge;
+        }
+
         private Task ProcessStaticIfFound(IOwinContext ctx)
         {
-            string fileName = ctx.Request.Path.GetLocalFileName(sources);
+            bool isFolder;
+            string fileName = ctx.Request.Path.GetLocalFileName(sources, indexFile, out isFolder);
             if (string.IsNullOrEmpty(fileName))
             {
                 return null;
@@ -114,9 +134,15 @@ namespace Ormikon.Owin.Static
                 (exclude.IsActive() && exclude.Contains(fileName)))
                 return null;
 
+            if (isFolder)
+            {
+                return redirectIfFolder ? RedirectToFolder(ctx) : null;
+            }
+
             ctx.Response.ContentType = fileName.GetContentType();
             if (expires > DateTimeOffset.MinValue)
                 ctx.Response.Expires = expires;
+            AddMaxAgeHeader(maxAge, ctx.Response);
             return SendFileAsync(fileName, ctx);
         }
 

@@ -64,6 +64,13 @@ namespace Ormikon.Owin.Static.Config
             }
         }
 
+        [ConfigurationProperty("maxAge", IsRequired = false, DefaultValue = "0")]
+        public string MaxAge
+        {
+            get { return (string) this["maxAge"]; }
+            set { this["maxAge"] = value; }
+        }
+
         [ConfigurationProperty("include", IsRequired = false)]
         public string Include
         {
