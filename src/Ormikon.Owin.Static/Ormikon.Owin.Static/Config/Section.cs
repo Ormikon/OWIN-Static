@@ -23,15 +23,12 @@ namespace Ormikon.Owin.Static.Config
     {
         public const string Name = "owinStatic";
 
-        private static Lazy<Section> defaultSection;
+        private static readonly Lazy<Section> defaultSection;
 
         static Section()
         {
             defaultSection = new Lazy<Section>(
-                () =>
-                {
-                    return ConfigurationManager.GetSection(Name) as Section;
-                }, true);
+                () => ConfigurationManager.GetSection(Name) as Section, true);
         }
 
         /// <summary>
@@ -66,6 +63,13 @@ namespace Ormikon.Owin.Static.Config
             {
                 return defaultSection.Value;
             }
+        }
+
+        [ConfigurationProperty("map", IsRequired = false)]
+        public string MapPath
+        {
+            get { return (string)this["map"]; }
+            set { this["map"] = value; }
         }
 
         [ConfigurationProperty("maps", IsRequired = false)]
