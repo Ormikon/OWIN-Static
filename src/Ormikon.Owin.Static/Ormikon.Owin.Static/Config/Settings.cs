@@ -35,6 +35,8 @@
                 Cached = map.Cached,
                 Expires = map.Expires,
                 MaxAgeExpression = map.MaxAge,
+                DefaultFile = map.DefaultFile,
+                RedirectIfFolderFound = map.RedirectIfFolder,
                 Include = map.Include,
                 Exclude = map.Exclude
             };

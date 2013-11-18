@@ -71,6 +71,20 @@ namespace Ormikon.Owin.Static.Config
             set { this["maxAge"] = value; }
         }
 
+        [ConfigurationProperty("default", IsRequired = false, DefaultValue = StaticSettings.DefaultFileValue)]
+        public string DefaultFile
+        {
+            get { return (string)this["default"]; }
+            set { this["default"] = value; }
+        }
+
+        [ConfigurationProperty("redirectIfFolder", IsRequired = false, DefaultValue = true)]
+        public bool RedirectIfFolder
+        {
+            get { return (bool)this["redirectIfFolder"]; }
+            set { this["redirectIfFolder"] = value; }
+        }
+
         [ConfigurationProperty("include", IsRequired = false)]
         public string Include
         {

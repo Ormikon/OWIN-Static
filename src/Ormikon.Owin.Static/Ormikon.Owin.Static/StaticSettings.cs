@@ -8,7 +8,7 @@ namespace Ormikon.Owin.Static
     /// </summary>
     public class StaticSettings
     {
-        private const string DefaultFileValue = "index.html";
+        internal const string DefaultFileValue = "index.html";
         private static readonly char[] sourceSeparators = new [] { ';' };
 
         private int maxAge;
