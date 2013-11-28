@@ -9,6 +9,10 @@ namespace Ormikon.Owin.Static
     internal class FileFilter
     {
         private static readonly char[] filterSeparator = new[] { ';' };
+        private static readonly Regex slashes = new Regex(@"[\\,\/]+", RegexOptions.Compiled);
+        private static readonly Regex multyStars1 = new Regex(@"(?<=\/|^)\*{3,}(?=\/|$)", RegexOptions.Compiled);
+        private static readonly Regex multyStars2 = new Regex(@"((?<!\/)\*{2,})|(\*{2,}(?!\/|$))", RegexOptions.Compiled);
+        private static readonly Regex searchGroups = new Regex(@"(\/\*\*\/?)|(\*)|(\?)|(\.)", RegexOptions.Compiled);
 
         private readonly Regex filterRegEx;
         private readonly char[] invalidChars;
@@ -44,23 +48,40 @@ namespace Ormikon.Owin.Static
             var rb = new StringBuilder("^");
             for (int i = 0; i < fArray.Length; i++)
             {
-                string f = ThrowIfInvalid(fArray[i]);
                 if (i > 0)
                     rb.Append('|');
-                rb.Append("(.*?");
-                f = f.Replace("\\", "\\/").Replace(".", "\\.")
-                    .Replace("?", ".")
-                    .Replace("/**/", "-#####-")
-                    .Replace("**", "-######-")
-                    .Replace("*", "[^\\/]*?")
-                    .Replace("-#####-", "\\/.*?")
-                    .Replace("-######-", ".*?");
-                rb.Append(f);
-                rb.Append(')');
+                ConvertFilter(fArray[i], rb);
             }
             rb.Append('$');
 
             return new Regex(rb.ToString(), RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        }
+
+        private void ConvertFilter(string filter, StringBuilder regexBuilder)
+        {
+            filter = ThrowIfInvalid(filter);
+            filter = OptimizeFilter(filter);
+            regexBuilder.Append(@"((.*?\/)?");// group start
+            filter = searchGroups.Replace(filter,
+                                          match =>
+                                              {
+                                                  if (match.Groups[1].Success)
+                                                      return @"((\/.*?\/)|\/)";
+                                                  if (match.Groups[2].Success)
+                                                      return @"[^\/]*?";
+                                                  if (match.Groups[3].Success)
+                                                      return ".";
+                                                  return @"\.";
+                                              });
+            regexBuilder.Append(filter);
+            regexBuilder.Append(")");// group end
+        }
+
+        private static string OptimizeFilter(string filter)
+        {
+            filter = slashes.Replace(filter, "/").Trim('/');
+            filter = multyStars1.Replace(filter, "**");
+            return multyStars2.Replace(filter, "*");
         }
 
         public bool Contains(string fileName)
