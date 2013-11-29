@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Ormikon.Owin.Static</id>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <title>OWIN Static</title>
     <authors>Ormikon</authors>
     <owners>Ormikon</owners>
@@ -16,7 +16,7 @@
     <summary>
       Ormikon.Owin.Static package.
     </summary>
-    <releaseNotes>Released.</releaseNotes>
+    <releaseNotes>Directory redirect with mapping used was fixed.</releaseNotes>
     <copyright>Copyright Ormikon 2013</copyright>
     <tags>owin,katana,static,system.web</tags>
     <dependencies>
