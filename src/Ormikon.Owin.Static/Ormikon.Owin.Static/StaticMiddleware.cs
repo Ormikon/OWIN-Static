@@ -42,7 +42,9 @@ namespace Ormikon.Owin.Static
 
         public override Task Invoke(IOwinContext context)
         {
-            return ProcessStaticIfFound(context) ?? Next.Invoke(context);
+            return IsMethodAllowed(context)
+                       ? ProcessStaticIfFound(context) ?? Next.Invoke(context)
+                       : Next.Invoke(context);
         }
 
         #region private methods
@@ -168,7 +170,20 @@ namespace Ormikon.Owin.Static
             if (expires > DateTimeOffset.MinValue)
                 ctx.Response.Expires = expires;
             AddMaxAgeHeader(maxAge, ctx.Response);
-            return SendFileAsync(fileName, ctx);
+            return IsBodyRequested(ctx)
+                       ? SendFileAsync(fileName, ctx)
+                       : Task.FromResult((object) null);
+        }
+
+        private static bool IsMethodAllowed(IOwinContext ctx)
+        {
+            string method = ctx.Request.Method.ToUpperInvariant();
+            return method == "GET" || method == "HEAD";
+        }
+
+        private static bool IsBodyRequested(IOwinContext ctx)
+        {
+            return ctx.Request.Method.ToUpperInvariant() == "GET";
         }
 
         #endregion
