@@ -69,7 +69,9 @@ namespace Ormikon.Owin.Static
 
         private Task RedirectToFolder(IOwinContext ctx)
         {
-            string newLocation = ctx.Request.Path.Value + "/";
+            string newLocation = ctx.Request.PathBase.HasValue
+                                     ? ctx.Request.PathBase.Value + ctx.Request.Path.Value + "/"
+                                     : ctx.Request.Path.Value + "/";
             ctx.Response.Redirect(newLocation);
             return ctx.Response.WriteAsync("Redirecting to " + newLocation);
         }

@@ -4,7 +4,7 @@ using Ormikon.Owin.Static.Extensions;
 namespace Ormikon.Owin.Static
 {
     /// <summary>
-    /// Configuration stettings for StaticMiddleware
+    /// Configuration settings for StaticMiddleware
     /// </summary>
     public class StaticSettings
     {

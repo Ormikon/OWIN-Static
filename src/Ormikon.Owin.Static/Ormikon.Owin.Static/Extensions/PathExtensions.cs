@@ -64,7 +64,17 @@ namespace Ormikon.Owin.Static.Extensions
             }
             if (string.IsNullOrEmpty(pathStr))
             {
-                return sources.Length != 1 ? null : TryFindFile(sources[0]) ? sources[0] : null;
+                if (sources.Length == 1)
+                {
+                    if (TryFindFile(sources[0]))
+                        return sources[0];
+                    if (TryFindFolder(sources[0]))
+                    {
+                        isFolder = true;
+                        return sources[0];
+                    }
+                }
+                return null;
             }
             if (pathStr.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
             {
