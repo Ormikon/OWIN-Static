@@ -1,7 +1,7 @@
-﻿using Microsoft.Owin;
+﻿using System.Runtime.Caching;
+using Microsoft.Owin;
 using Ormikon.Owin.Static.Extensions;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,8 +11,10 @@ namespace Ormikon.Owin.Static
 {
     internal class StaticMiddleware : OwinMiddleware
     {
+        private const string StaticMemoryCacheConfigurationName = "StaticMemoryCache";
+
         private readonly string[] sources;
-        private readonly IDictionary<string, byte[]> cache;
+        private readonly ObjectCache cache;
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
         private readonly string indexFile;
@@ -29,7 +31,12 @@ namespace Ormikon.Owin.Static
             if (sources == null || sources.Length == 0)
                 throw new ArgumentException("Sources count should be one or more.", "settings");
             sources = NormalizeSources(sources);
-            cache = settings.Cached ? new ConcurrentDictionary<string, byte[]>() : null;
+            if (settings.Cached)
+            {
+                cache = settings.Cache ?? new MemoryCache(StaticMemoryCacheConfigurationName);
+            }
+            else
+                cache = null;
             expires = settings.Expires;
             maxAge = settings.MaxAge;
             indexFile = settings.DefaultFile;
@@ -67,13 +74,22 @@ namespace Ormikon.Owin.Static
                 });
         }
 
-        private Task RedirectToFolder(IOwinContext ctx)
+        private static Task RedirectToFolder(IOwinContext ctx)
         {
             string newLocation = ctx.Request.PathBase.HasValue
                                      ? ctx.Request.PathBase.Value + ctx.Request.Path.Value + "/"
                                      : ctx.Request.Path.Value + "/";
             ctx.Response.Redirect(newLocation);
             return ctx.Response.WriteAsync("Redirecting to " + newLocation);
+        }
+
+        private DateTimeOffset GetCacheOffset()
+        {
+            if (maxAge > 0)
+                return DateTimeOffset.Now.AddSeconds(maxAge);
+            if (expires != DateTimeOffset.MinValue && expires > DateTimeOffset.Now)
+                return expires;
+            return DateTimeOffset.MaxValue;// never expires
         }
 
         private Task SendFileAsync(string fileName, IOwinContext ctx)
@@ -83,7 +99,7 @@ namespace Ormikon.Owin.Static
             {
                 string path = ctx.Request.Path.Value.NormalizePath() ?? "";
                 byte[] cachedData;
-                if (cache.TryGetValue(path, out cachedData))
+                if ((cachedData = cache.Get(path) as byte[]) != null)
                 {
                     s = new MemoryStream(cachedData);
                 }
@@ -97,7 +113,7 @@ namespace Ormikon.Owin.Static
                         {
                             if (task.Exception == null)
                             {
-                                cache[path] = ms.GetBuffer();
+                                cache.Add(path, ms.ToArray(), GetCacheOffset());
                             }
                             else
                             {

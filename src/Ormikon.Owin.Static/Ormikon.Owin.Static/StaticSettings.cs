@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Caching;
 using Ormikon.Owin.Static.Extensions;
 
 namespace Ormikon.Owin.Static
@@ -52,6 +53,11 @@ namespace Ormikon.Owin.Static
         /// If files in the collection should be cached
         /// </summary>
         public bool Cached { get; set; }
+
+        /// <summary>
+        /// Cache implementation. MemoryCache will be used by default
+        /// </summary>
+        public ObjectCache Cache { get; set; }
 
         /// <summary>
         /// Expires header value for the static content

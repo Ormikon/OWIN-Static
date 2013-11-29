@@ -68,7 +68,7 @@ namespace Ormikon.Owin.Static.Extensions
 
         private static readonly string[] tokens = new[] { "one", "two", "three", "four", "five", "six", "seven", "eight",
             "nine", "ten", "eleven", "twelve", "years", "year", "y", "months", "month", "mths", "mth", "weeks", "week", "w",
-            "days", "day", "d", "hours", "hour", "h", "minutes", "minute", "mins", "min", "seconds", "second", "secs", "s" };
+            "days", "day", "d", "hours", "hour", "h", "minutes", "minute", "mins", "min", "seconds", "second", "secs", "sec", "s" };
 
         private static string GetDecimal(string token)
         {
