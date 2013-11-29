@@ -11,9 +11,8 @@ namespace Ormikon.Owin.Static
 {
     internal class StaticMiddleware : OwinMiddleware
     {
-        private const string StaticMemoryCacheConfigurationName = "StaticMemoryCache";
-
         private readonly string[] sources;
+        private readonly bool cached;
         private readonly ObjectCache cache;
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
@@ -31,12 +30,8 @@ namespace Ormikon.Owin.Static
             if (sources == null || sources.Length == 0)
                 throw new ArgumentException("Sources count should be one or more.", "settings");
             sources = NormalizeSources(sources);
-            if (settings.Cached)
-            {
-                cache = settings.Cache ?? new MemoryCache(StaticMemoryCacheConfigurationName);
-            }
-            else
-                cache = null;
+            cached = settings.Cached;
+            cache = settings.Cache;
             expires = settings.Expires;
             maxAge = settings.MaxAge;
             indexFile = settings.DefaultFile;
@@ -92,14 +87,26 @@ namespace Ormikon.Owin.Static
             return DateTimeOffset.MaxValue;// never expires
         }
 
+        private byte[] CacheGet(string path)
+        {
+            var c = cache ?? StaticSettings.DefaultCache;
+            return c.Get(path) as byte[];
+        }
+
+        private void CacheSet(string path, byte[] data)
+        {
+            var c = cache ?? StaticSettings.DefaultCache;
+            c.Set(path, data, GetCacheOffset());
+        }
+
         private Task SendFileAsync(string fileName, IOwinContext ctx)
         {
             Stream s;
-            if (cache != null)
+            if (cached)
             {
                 string path = ctx.Request.Path.Value.NormalizePath() ?? "";
                 byte[] cachedData;
-                if ((cachedData = cache.Get(path) as byte[]) != null)
+                if ((cachedData = CacheGet(path)) != null)
                 {
                     s = new MemoryStream(cachedData);
                 }
@@ -113,7 +120,7 @@ namespace Ormikon.Owin.Static
                         {
                             if (task.Exception == null)
                             {
-                                cache.Add(path, ms.ToArray(), GetCacheOffset());
+                                CacheSet(path, ms.ToArray());
                             }
                             else
                             {

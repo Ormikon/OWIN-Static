@@ -9,8 +9,12 @@ namespace Ormikon.Owin.Static
     /// </summary>
     public class StaticSettings
     {
+        private const string StaticMemoryCacheConfigurationName = "StaticMemoryCache";
         internal const string DefaultFileValue = "index.html";
         private static readonly char[] sourceSeparators = new [] { ';' };
+
+        private static readonly ObjectCache defaultMemoryCache = new MemoryCache(StaticMemoryCacheConfigurationName);
+        private static ObjectCache defaultCache = defaultMemoryCache;
 
         private int maxAge;
 
@@ -42,6 +46,15 @@ namespace Ormikon.Owin.Static
                 Sources = sources.Split(sourceSeparators, StringSplitOptions.RemoveEmptyEntries);
             else
                 Sources = new []{sources};
+        }
+
+        /// <summary>
+        /// Default memory cache that will used in the middleware if custom cache was not set.
+        /// </summary>
+        public static ObjectCache DefaultCache
+        {
+            get { return defaultCache; }
+            set { defaultCache = value ?? defaultMemoryCache; }
         }
 
         /// <summary>
