@@ -38,7 +38,8 @@
                 DefaultFile = map.DefaultFile,
                 RedirectIfFolderFound = map.RedirectIfFolder,
                 Include = map.Include,
-                Exclude = map.Exclude
+                Exclude = map.Exclude,
+                AllowHidden = map.AllowHidden
             };
         }
 

@@ -23,13 +23,25 @@ namespace Ormikon.Owin.Static.Extensions
             return Path.GetFullPath(localPath).NormalizePath();
         }
 
-        private static bool TryFindFile(string fileName)
+        private static bool IsUnixHidden(string name)
+        {
+            return name.IndexOf(Path.DirectorySeparatorChar + ".", StringComparison.Ordinal) >= 0;
+        }
+
+        private static bool TryFindFile(string fileName, bool allowHidden)
         {
             if (string.IsNullOrEmpty(fileName))
                 return false;
             try
             {
-                return File.Exists(fileName);
+                if (File.Exists(fileName))
+                {
+                    if (allowHidden)
+                        return true;
+                    return (File.GetAttributes(fileName) & FileAttributes.Hidden) != FileAttributes.Hidden &&
+                           !IsUnixHidden(fileName);
+                }
+                return false;
             }
             catch (Exception)
             {
@@ -37,13 +49,20 @@ namespace Ormikon.Owin.Static.Extensions
             }
         }
 
-        private static bool TryFindFolder(string folderName)
+        private static bool TryFindFolder(string folderName, bool allowHidden)
         {
             if (string.IsNullOrEmpty(folderName))
                 return false;
             try
             {
-                return Directory.Exists(folderName);
+                if (Directory.Exists(folderName))
+                {
+                    if (allowHidden)
+                        return true;
+                    return (new DirectoryInfo(folderName).Attributes & FileAttributes.Hidden) != FileAttributes.Hidden &&
+                           !IsUnixHidden(folderName);
+                }
+                return false;
             }
             catch (Exception)
             {
@@ -51,7 +70,7 @@ namespace Ormikon.Owin.Static.Extensions
             }
         }
 
-        public static string GetLocalFileName(this PathString path, string[] sources, string indexFile, out bool isFolder)
+        public static string GetLocalFileName(this PathString path, string[] sources, string indexFile, bool allowHidden, out bool isFolder)
         {
             isFolder = false;
             bool isFolderRequested = path.Value.EndsWith("/", StringComparison.Ordinal);
@@ -66,9 +85,9 @@ namespace Ormikon.Owin.Static.Extensions
             {
                 if (sources.Length == 1)
                 {
-                    if (TryFindFile(sources[0]))
+                    if (TryFindFile(sources[0], allowHidden))
                         return sources[0];
-                    if (TryFindFolder(sources[0]))
+                    if (TryFindFolder(sources[0], allowHidden))
                     {
                         isFolder = true;
                         return sources[0];
@@ -80,10 +99,12 @@ namespace Ormikon.Owin.Static.Extensions
             {
                 return null;
             }
-            string result = sources.Select(t => Path.Combine(t, pathStr)).FirstOrDefault(TryFindFile);
+            string result =
+                sources.Select(t => Path.Combine(t, pathStr)).FirstOrDefault(p => TryFindFile(p, allowHidden));
             if (result == null && !isFolderRequested)
             {
-                result = sources.Select(t => Path.Combine(t, pathStr)).FirstOrDefault(TryFindFolder);
+                result = sources.Select(t => Path.Combine(t, pathStr))
+                                .FirstOrDefault(p => TryFindFolder(p, allowHidden));
                 isFolder = result != null;
             }
             return result;

@@ -127,5 +127,10 @@ namespace Ormikon.Owin.Static
         /// The file pattern for the files that should be excluded from the collection
         /// </summary>
         public string Exclude { get; set; }
+
+        /// <summary>
+        /// Is hidden files and directories allowed
+        /// </summary>
+        public bool AllowHidden { get; set; }
     }
 }

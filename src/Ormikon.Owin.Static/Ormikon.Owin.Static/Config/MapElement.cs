@@ -110,5 +110,18 @@ namespace Ormikon.Owin.Static.Config
                 this["exclude"] = value;
             }
         }
+
+        [ConfigurationProperty("hidden", IsRequired = false, DefaultValue = false)]
+        public bool AllowHidden
+        {
+            get
+            {
+                return (bool)this["hidden"];
+            }
+            set
+            {
+                this["hidden"] = value;
+            }
+        }
     }
 }

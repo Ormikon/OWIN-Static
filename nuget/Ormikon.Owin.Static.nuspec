@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Ormikon.Owin.Static</id>
-    <version>0.2.2</version>
+    <version>0.2.3</version>
     <title>OWIN Static</title>
     <authors>Ormikon</authors>
     <owners>Ormikon</owners>
@@ -16,7 +16,7 @@
     <summary>
       Ormikon.Owin.Static package.
     </summary>
-    <releaseNotes>Directory redirect with mapping used was fixed.</releaseNotes>
+    <releaseNotes>Hidden files option. Microsoft ObjectCache as configurable cache object.</releaseNotes>
     <copyright>Copyright Ormikon 2013</copyright>
     <tags>owin,katana,static,system.web</tags>
     <dependencies>

@@ -20,6 +20,7 @@ namespace Ormikon.Owin.Static
         private readonly bool redirectIfFolder;
         private readonly FileFilter include;
         private readonly FileFilter exclude;
+        private readonly bool allowHidden;
 
         public StaticMiddleware(OwinMiddleware next, StaticSettings settings) :
             base(next)
@@ -38,6 +39,7 @@ namespace Ormikon.Owin.Static
             redirectIfFolder = settings.RedirectIfFolderFound;
             include = new FileFilter(settings.Include);
             exclude = new FileFilter(settings.Exclude);
+            allowHidden = settings.AllowHidden;
         }
 
         public override Task Invoke(IOwinContext context)
@@ -151,7 +153,7 @@ namespace Ormikon.Owin.Static
         private Task ProcessStaticIfFound(IOwinContext ctx)
         {
             bool isFolder;
-            string fileName = ctx.Request.Path.GetLocalFileName(sources, indexFile, out isFolder);
+            string fileName = ctx.Request.Path.GetLocalFileName(sources, indexFile, allowHidden, out isFolder);
             if (string.IsNullOrEmpty(fileName))
             {
                 return null;
