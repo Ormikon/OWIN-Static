@@ -115,6 +115,10 @@ The middleware automatically seaches for the index file if directory was pointed
 
 If you do not want to use the index file just set DefaultFile as null or empty string.
 
+# Hidden files
+
+Hidden files and directories are not used by default. They can be enabled by AllowHidden option in StaticSettings.
+
 # Redirect if folder
 
 If a user pointed a folder in the URL like http://somesite.su/css this request by default will be redirected to the folder: http://somesite.su/css/
@@ -123,7 +127,9 @@ It can be disabled via RedirectIfFolderFound setting.
 
 # Cache
  
-Used only memory cache. If caching is enabled files will be preloaded into memory only once then memory cache is used.
+By default Microsoft MemoryCache is used. Default cache can be configured for the application via DefaultCache static property of StaticSettings or localy for every map via Cache property in StaticSettings. Cache can be any kind of the cache based on the System.Runtime.Caching.ObjectCache class.
+
+Expiration time for the cache uses values from MaxAge if set and then from Expires if set. If both options are not set the cache value will never expire.
 
 # Expires
 
