@@ -55,7 +55,7 @@ namespace Ormikon.Owin.Static
             return new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
 
-        private Task SendStreamAsync(Stream from, Stream to)
+        private static Task SendStreamAsync(Stream from, Stream to)
         {
             return from.CopyToAsync(to)
                 .ContinueWith(
