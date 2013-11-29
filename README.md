@@ -22,6 +22,64 @@ namespace StaticExample
         public void Configuration(IAppBuilder app)
         {
             app.UseStatic() // Loading settings from app.config
+                .UseWelcomePage("/welcome")
+                .UseErrorPage();
+        }
+    }
+}
+```
+
+```C#
+using Ormikon.Owin.Static;
+using Owin;
+using System;
+
+namespace StaticExample
+{
+    class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            app.MapStatic("/content") // Loading settings from app.config and map to 'content' path
+                .UseWelcomePage("/welcome")
+                .UseErrorPage();
+        }
+    }
+}
+```
+
+```C#
+using Ormikon.Owin.Static;
+using Owin;
+using System;
+
+namespace StaticExample
+{
+    class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            app.UseStatic("..\\..\\Index.html")
+                .MapStatic("/content") // Loading settings from app.config and map to 'content' path
+                .UseWelcomePage("/welcome")
+                .UseErrorPage();
+        }
+    }
+}
+```
+
+```C#
+using Ormikon.Owin.Static;
+using Owin;
+using System;
+
+namespace StaticExample
+{
+    class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            app.UseStatic() // Loading settings from app.config
                 .UseStatic("..\\..\\Index.html") // single file
                 .MapStatic("/scripts", new StaticSettings("..\\..\\Scripts") { Expires = DateTimeOffset.Now.AddDays(1), Cached = true, Include = "*.min.*.js" })
                 .MapStatic("/styles", new StaticSettings("..\\..\\Styles") { Expires = DateTimeOffset.Now.AddDays(1), Cached = true })
@@ -47,24 +105,63 @@ In the methods with single string sources parameter possible to add multiple sou
 .UseStatic("Index.html;Error.html;Help.html");
 ```
 
+# Index file
+
+The middleware automatically seaches for the index file if directory was pointed. By default the file name is 'Index.html' but you can change it via configuration settings.
+
+```C#
+.UseStatic(new StaticSettings("..\\..\\Styles") { DefaultFile = "start.htm" });
+```
+
+If you do not want to use the index file just set DefaultFile as null or empty string.
+
+# Redirect if folder
+
+If a user pointed a folder in the URL like http://somesite.su/css this request by default will be redirected to the folder: http://somesite.su/css/
+
+It can be disabled via RedirectIfFolderFound setting.
+
 # Cache
  
-Used only memory cache. If caching is enabled files will be preloaded into memory only once then memory cache uses.
+Used only memory cache. If caching is enabled files will be preloaded into memory only once then memory cache is used.
 
 # Expires
 
 Setting up Expires HTTP header for the response.
 
+# MaxAge
+
+Another way to set content lifetime is MaxAge. This setting adds max-age value for 'Cache-Control' response header.
+StaticSettings has MaxAgeExpression property to assign max-age in a user friendly way:
+
+```C#
+settings.MaxAgeExpression = "1day";
+```
+```C#
+settings.MaxAgeExpression = "5days";
+```
+```C#
+settings.MaxAgeExpression = "oneDayTwoWeeksFiveYears55sec";
+```
+```C#
+settings.MaxAgeExpression = "60";//by default time in seconds
+```
+
+This property is default for app.config maxAge attribute of a map element.
+
 # Include & Exclude
 
 If include is configured, the files will be filtered by the pointed pattern and will be excluded from included if the excluded is set.
-Supports \* (\*, \*\*, \*.\*) pattern style (Forgot to add question mark, it will be added in the future).
+Supports \* (\*, \*\*, \*.\*), ? pattern style.
 
 # app.config
 
 The middleware suppors loading values from the application configuration file:
 ```C#
 .UseStatic()
+```
+```C#
+.MapStatic("/content")
 ```
 
 ## Example
