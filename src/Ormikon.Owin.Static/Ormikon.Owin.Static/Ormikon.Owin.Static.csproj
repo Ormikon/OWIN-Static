@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyResourcesMiddleware.cs" />
     <Compile Include="Config\MapElement.cs" />
     <Compile Include="Config\MapElementCollection.cs" />
     <Compile Include="Config\Settings.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Config\Section.cs" />
     <Compile Include="Extensions\StaticExtensions.cs" />
     <Compile Include="StaticMiddleware.cs" />
+    <Compile Include="StaticMiddlewareBase.cs" />
     <Compile Include="StaticSettings.cs" />
     <Compile Include="Extensions\PathExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

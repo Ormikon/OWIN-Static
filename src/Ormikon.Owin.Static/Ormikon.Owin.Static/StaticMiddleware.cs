@@ -1,191 +1,128 @@
-﻿using System.Runtime.Caching;
+﻿using System;
+using System.Linq;
 using Microsoft.Owin;
 using Ormikon.Owin.Static.Extensions;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Ormikon.Owin.Static
 {
-    internal class StaticMiddleware : OwinMiddleware
+    internal class StaticMiddleware : StaticMiddlewareBase
     {
-        private readonly string[] sources;
-        private readonly bool cached;
-        private readonly ObjectCache cache;
-        private readonly DateTimeOffset expires;
-        private readonly int maxAge;
-        private readonly string indexFile;
-        private readonly bool redirectIfFolder;
-        private readonly FileFilter include;
-        private readonly FileFilter exclude;
-        private readonly bool allowHidden;
-
-        public StaticMiddleware(OwinMiddleware next, StaticSettings settings) :
-            base(next)
+        public StaticMiddleware(OwinMiddleware next, StaticSettings settings) : base(next, settings)
         {
-            if (settings == null)
-                throw new ArgumentNullException("settings");
-            sources = settings.Sources;
-            if (sources == null || sources.Length == 0)
-                throw new ArgumentException("Sources count should be one or more.", "settings");
-            sources = NormalizeSources(sources);
-            cached = settings.Cached;
-            cache = settings.Cache;
-            expires = settings.Expires;
-            maxAge = settings.MaxAge;
-            indexFile = settings.DefaultFile;
-            redirectIfFolder = settings.RedirectIfFolderFound;
-            include = new FileFilter(settings.Include);
-            exclude = new FileFilter(settings.Exclude);
-            allowHidden = settings.AllowHidden;
         }
 
-        public override Task Invoke(IOwinContext context)
+        protected override string ResolveResource(PathString path, out bool isFolder)
         {
-            return IsMethodAllowed(context)
-                       ? ProcessStaticIfFound(context) ?? Next.Invoke(context)
-                       : Next.Invoke(context);
+            return GetLocalFileName(path, Sources, IndexFiles, AllowHidden, out isFolder);
+        }
+
+        protected override Stream GetResourceStream(string path)
+        {
+            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
 
         #region private methods
 
-        private static string[] NormalizeSources(IEnumerable<string> sources)
+        private static bool TryFindFile(string fileName, bool allowHidden)
         {
-            return sources.Select(s => s.NormalizePath().GetFullPathForLocalPath()).ToArray();
-        }
-
-        private static Stream OpenFileStream(string fileName)
-        {
-            return new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        }
-
-        private static Task SendStreamAsync(Stream from, Stream to)
-        {
-            return from.CopyToAsync(to)
-                .ContinueWith(
-                task =>
-                {
-                    from.Close();
-                    if (task.Exception != null)
-                        throw new AggregateException(task.Exception);
-                });
-        }
-
-        private static Task RedirectToFolder(IOwinContext ctx)
-        {
-            string newLocation = ctx.Request.PathBase.HasValue
-                                     ? ctx.Request.PathBase.Value + ctx.Request.Path.Value + "/"
-                                     : ctx.Request.Path.Value + "/";
-            ctx.Response.Redirect(newLocation);
-            return ctx.Response.WriteAsync("Redirecting to " + newLocation);
-        }
-
-        private DateTimeOffset GetCacheOffset()
-        {
-            if (maxAge > 0)
-                return DateTimeOffset.Now.AddSeconds(maxAge);
-            if (expires != DateTimeOffset.MinValue && expires > DateTimeOffset.Now)
-                return expires;
-            return DateTimeOffset.MaxValue;// never expires
-        }
-
-        private byte[] CacheGet(string path)
-        {
-            var c = cache ?? StaticSettings.DefaultCache;
-            return c.Get(path) as byte[];
-        }
-
-        private void CacheSet(string path, byte[] data)
-        {
-            var c = cache ?? StaticSettings.DefaultCache;
-            c.Set(path, data, GetCacheOffset());
-        }
-
-        private Task SendFileAsync(string fileName, IOwinContext ctx)
-        {
-            Stream s;
-            if (cached)
-            {
-                string path = ctx.Request.Path.Value.NormalizePath() ?? "";
-                byte[] cachedData;
-                if ((cachedData = CacheGet(path)) != null)
-                {
-                    s = new MemoryStream(cachedData);
-                }
-                else
-                {
-                    s = OpenFileStream(fileName);
-                    var ms = new MemoryStream();
-                    return SendStreamAsync(s, ms)
-                        .ContinueWith(
-                        task =>
-                        {
-                            if (task.Exception == null)
-                            {
-                                CacheSet(path, ms.ToArray());
-                            }
-                            else
-                            {
-                                ms.Close();
-                                throw new AggregateException(task.Exception);
-                            }
-                            ms.Seek(0, SeekOrigin.Begin);
-                            ms.CopyTo(ctx.Response.Body);
-                            ms.Close();
-                        });
-                }
-            }
-            else
-            {
-                s = OpenFileStream(fileName);
-            }
-            return SendStreamAsync(s, ctx.Response.Body);
-        }
-
-        private static void AddMaxAgeHeader(int maxAge, IOwinResponse response)
-        {
-            if (maxAge > 0)
-                response.Headers["Cache-Control"] = "public, max-age=" + maxAge;
-        }
-
-        private Task ProcessStaticIfFound(IOwinContext ctx)
-        {
-            bool isFolder;
-            string fileName = ctx.Request.Path.GetLocalFileName(sources, indexFile, allowHidden, out isFolder);
             if (string.IsNullOrEmpty(fileName))
+                return false;
+            try
             {
-                return null;
+                if (File.Exists(fileName))
+                {
+                    if (allowHidden)
+                        return true;
+                    return (File.GetAttributes(fileName) & FileAttributes.Hidden) != FileAttributes.Hidden &&
+                           !fileName.IsUnixHidden();
+                }
+                return false;
             }
-
-            if ((include.IsActive() && !include.Contains(fileName)) ||
-                (exclude.IsActive() && exclude.Contains(fileName)))
-                return null;
-
-            if (isFolder)
+            catch (Exception)
             {
-                return redirectIfFolder ? RedirectToFolder(ctx) : null;
+                return false;
             }
-
-            ctx.Response.ContentType = fileName.GetContentType();
-            if (expires > DateTimeOffset.MinValue)
-                ctx.Response.Expires = expires;
-            AddMaxAgeHeader(maxAge, ctx.Response);
-            return IsBodyRequested(ctx)
-                       ? SendFileAsync(fileName, ctx)
-                       : Task.FromResult((object) null);
         }
 
-        private static bool IsMethodAllowed(IOwinContext ctx)
+        private static bool TryFindFolder(string folderName, bool allowHidden)
         {
-            string method = ctx.Request.Method.ToUpperInvariant();
-            return method == "GET" || method == "HEAD";
+            if (string.IsNullOrEmpty(folderName))
+                return false;
+            try
+            {
+                if (Directory.Exists(folderName))
+                {
+                    if (allowHidden)
+                        return true;
+                    return (new DirectoryInfo(folderName).Attributes & FileAttributes.Hidden) != FileAttributes.Hidden &&
+                           !folderName.IsUnixHidden();
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        private static bool IsBodyRequested(IOwinContext ctx)
+        private static bool TryResolvePath(string path, bool lookForFolders, bool allowHidden, out bool isFolder)
         {
-            return ctx.Request.Method.ToUpperInvariant() == "GET";
+            isFolder = false;
+            if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                return false;
+            }
+            if (TryFindFile(path, allowHidden))
+                return true;
+            if (lookForFolders && TryFindFolder(path, allowHidden))
+            {
+                isFolder = true;
+                return true;
+            }
+            return false;
+        }
+
+        public static string GetLocalFileName(PathString path, string[] sources, string[] indexFiles,
+                                              bool allowHidden, out bool isFolder)
+        {
+            isFolder = false;
+            bool isFolderRequested = path.Value.EndsWith("/", StringComparison.Ordinal);
+            string pathStr = path.Value.NormalizePath();
+
+            if (isFolderRequested)
+            {
+                if (indexFiles == null || indexFiles.Length == 0)
+                    return null;
+
+                foreach (var source in sources)
+                {
+                    foreach (var indexFile in indexFiles)
+                    {
+                        string fullPath = string.IsNullOrEmpty(pathStr)
+                                              ? Path.Combine(source, indexFile)
+                                              : Path.Combine(source, pathStr, indexFile);
+                        if (TryResolvePath(fullPath, false, allowHidden, out isFolder))
+                            return fullPath;
+                    }
+                }
+
+                return null;
+            }
+            if (string.IsNullOrEmpty(pathStr))
+            {
+                if (sources.Length == 1 && TryResolvePath(sources[0], true, allowHidden, out isFolder))
+                {
+                    return sources[0];
+                }
+                return null;
+            }
+            foreach (string fullPath in sources.Select(source => Path.Combine(source, pathStr)))
+            {
+                if (TryResolvePath(fullPath, true, allowHidden, out isFolder))
+                    return fullPath;
+            }
+            return null;
         }
 
         #endregion

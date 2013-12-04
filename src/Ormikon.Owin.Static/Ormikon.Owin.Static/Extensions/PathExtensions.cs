@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Microsoft.Owin;
-using System;
+﻿using System;
 using System.IO;
 
 namespace Ormikon.Owin.Static.Extensions
@@ -23,91 +21,9 @@ namespace Ormikon.Owin.Static.Extensions
             return Path.GetFullPath(localPath).NormalizePath();
         }
 
-        private static bool IsUnixHidden(string name)
+        public static bool IsUnixHidden(this string name)
         {
             return name.IndexOf(Path.DirectorySeparatorChar + ".", StringComparison.Ordinal) >= 0;
-        }
-
-        private static bool TryFindFile(string fileName, bool allowHidden)
-        {
-            if (string.IsNullOrEmpty(fileName))
-                return false;
-            try
-            {
-                if (File.Exists(fileName))
-                {
-                    if (allowHidden)
-                        return true;
-                    return (File.GetAttributes(fileName) & FileAttributes.Hidden) != FileAttributes.Hidden &&
-                           !IsUnixHidden(fileName);
-                }
-                return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        private static bool TryFindFolder(string folderName, bool allowHidden)
-        {
-            if (string.IsNullOrEmpty(folderName))
-                return false;
-            try
-            {
-                if (Directory.Exists(folderName))
-                {
-                    if (allowHidden)
-                        return true;
-                    return (new DirectoryInfo(folderName).Attributes & FileAttributes.Hidden) != FileAttributes.Hidden &&
-                           !IsUnixHidden(folderName);
-                }
-                return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public static string GetLocalFileName(this PathString path, string[] sources, string indexFile, bool allowHidden, out bool isFolder)
-        {
-            isFolder = false;
-            bool isFolderRequested = path.Value.EndsWith("/", StringComparison.Ordinal);
-            string pathStr = path.Value.NormalizePath();
-            if (isFolderRequested)
-            {
-                if (string.IsNullOrEmpty(indexFile))
-                    return null;
-                pathStr = string.IsNullOrEmpty(pathStr) ? indexFile : Path.Combine(pathStr, indexFile);
-            }
-            if (string.IsNullOrEmpty(pathStr))
-            {
-                if (sources.Length == 1)
-                {
-                    if (TryFindFile(sources[0], allowHidden))
-                        return sources[0];
-                    if (TryFindFolder(sources[0], allowHidden))
-                    {
-                        isFolder = true;
-                        return sources[0];
-                    }
-                }
-                return null;
-            }
-            if (pathStr.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
-            {
-                return null;
-            }
-            string result =
-                sources.Select(t => Path.Combine(t, pathStr)).FirstOrDefault(p => TryFindFile(p, allowHidden));
-            if (result == null && !isFolderRequested)
-            {
-                result = sources.Select(t => Path.Combine(t, pathStr))
-                                .FirstOrDefault(p => TryFindFolder(p, allowHidden));
-                isFolder = result != null;
-            }
-            return result;
         }
     }
 }
