@@ -51,6 +51,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyResourcesMiddleware.cs" />
+    <Compile Include="CachedResponse.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Extensions\HttpHeaderExtensions.cs" />
+    <Compile Include="Extensions\OwinExtensions.cs" />
+    <Compile Include="IResponseHeaders.cs" />
+    <Compile Include="Location.cs" />
+    <Compile Include="Wrappers\IOwinContext.cs" />
+    <Compile Include="Wrappers\IOwinRequest.cs" />
+    <Compile Include="Wrappers\IOwinResponse.cs" />
+    <Compile Include="Wrappers\OwinContext.cs" />
+    <Compile Include="StaticResponse.cs" />
     <Compile Include="Config\MapElement.cs" />
     <Compile Include="Config\MapElementCollection.cs" />
     <Compile Include="Config\Settings.cs" />
@@ -64,6 +75,9 @@
     <Compile Include="StaticSettings.cs" />
     <Compile Include="Extensions\PathExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Wrappers\OwinMiddleware.cs" />
+    <Compile Include="Wrappers\OwinRequest.cs" />
+    <Compile Include="Wrappers\OwinResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

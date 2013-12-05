@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Owin;
 
 namespace Ormikon.Owin.Static
 {
     internal class AssemblyResourcesMiddleware : StaticMiddlewareBase
     {
-        public AssemblyResourcesMiddleware(OwinMiddleware next, StaticSettings settings) : base(next, settings)
+        public AssemblyResourcesMiddleware(Func<IDictionary<string, object>, Task> next, Assembly assembly, string resource)
+            : base(next, true, StaticSettings.DefaultCache, DateTimeOffset.MinValue, 0)
         {
         }
 
-        protected override string ResolveResource(PathString path, out bool isFolder)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Stream GetResourceStream(string path)
+        protected override StaticResponse GetResponse(Location location)
         {
             throw new NotImplementedException();
         }

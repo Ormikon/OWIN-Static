@@ -1,80 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
-using Microsoft.Owin;
 using Ormikon.Owin.Static.Extensions;
+using Ormikon.Owin.Static.Wrappers;
 
 namespace Ormikon.Owin.Static
 {
     internal abstract class StaticMiddlewareBase : OwinMiddleware
     {
-        private static readonly char[] indexFileSeparator = new[] { ';' };
-
-        private readonly string[] sources;
         private readonly bool cached;
         private readonly ObjectCache cache;
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
-        private readonly string[] indexFiles;
-        private readonly bool redirectIfFolder;
-        private readonly FileFilter include;
-        private readonly FileFilter exclude;
-        private readonly bool allowHidden;
 
-        protected StaticMiddlewareBase(OwinMiddleware next, StaticSettings settings) :
-            base(next)
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache, DateTimeOffset expires, int maxAge)
+            : base(next)
         {
-            if (settings == null)
-                throw new ArgumentNullException("settings");
-            sources = settings.Sources;
-            if (sources == null || sources.Length == 0)
-                throw new ArgumentException("Sources count should be one or more.", "settings");
-            sources = NormalizeSources(sources);
-            cached = settings.Cached;
-            cache = settings.Cache;
-            expires = settings.Expires;
-            maxAge = settings.MaxAge;
-            indexFiles = ParseIndexFileString(settings.DefaultFile);
-            redirectIfFolder = settings.RedirectIfFolderFound;
-            include = new FileFilter(settings.Include);
-            exclude = new FileFilter(settings.Exclude);
-            allowHidden = settings.AllowHidden;
+            this.cached = cached;
+            this.cache = cache;
+            this.expires = expires;
+            this.maxAge = maxAge;
         }
 
-        public override Task Invoke(IOwinContext context)
+        protected override Task Invoke(IOwinContext context)
         {
-            return IsMethodAllowed(context)
-                       ? ProcessStaticIfFound(context) ?? Next.Invoke(context)
-                       : Next.Invoke(context);
+            return IsMethodAllowed(context.Request.Method)
+                       ? ProcessStaticIfFound(context) ?? Next(context)
+                       : Next(context);
         }
 
         #region abstract methods
 
-        protected abstract string ResolveResource(PathString path, out bool isFolder);
-
-        protected abstract Stream GetResourceStream(string path);
+        protected abstract StaticResponse GetResponse(Location location);
 
         #endregion
 
         #region private methods
-
-        private static string[] NormalizeSources(IEnumerable<string> sources)
-        {
-            return sources.Select(s => s.NormalizePath().GetFullPathForLocalPath()).ToArray();
-        }
-
-        private static string[] ParseIndexFileString(string indexFile)
-        {
-            if (string.IsNullOrWhiteSpace(indexFile))
-                return null;
-            string[] files = indexFile.Split(indexFileSeparator, StringSplitOptions.RemoveEmptyEntries)
-                                      .Where(f => !string.IsNullOrWhiteSpace(f))
-                                      .ToArray();
-            return files.Length == 0 ? null : files;
-        }
 
         private static Task SendStreamAsync(Stream from, Stream to)
         {
@@ -83,18 +46,8 @@ namespace Ormikon.Owin.Static
                 task =>
                 {
                     from.Close();
-                    if (task.Exception != null)
-                        throw new AggregateException(task.Exception);
+                    task.Wait();
                 });
-        }
-
-        private static Task RedirectToFolder(IOwinContext ctx)
-        {
-            string newLocation = ctx.Request.PathBase.HasValue
-                                     ? ctx.Request.PathBase.Value + ctx.Request.Path.Value + "/"
-                                     : ctx.Request.Path.Value + "/";
-            ctx.Response.Redirect(newLocation);
-            return ctx.Response.WriteAsync("Redirecting to " + newLocation);
         }
 
         private DateTimeOffset GetCacheOffset()
@@ -106,120 +59,75 @@ namespace Ormikon.Owin.Static
             return DateTimeOffset.MaxValue;// never expires
         }
 
-        private byte[] CacheGet(string path)
+        private CachedResponse CacheGet(Location location)
         {
             var c = cache ?? StaticSettings.DefaultCache;
-            return c.Get(path) as byte[];
+            return c.Get(location.FullPath) as CachedResponse;
         }
 
-        private void CacheSet(string path, byte[] data)
+        private void CacheSet(string path, CachedResponse data)
         {
             var c = cache ?? StaticSettings.DefaultCache;
             c.Set(path, data, GetCacheOffset());
         }
 
-        private Task SendResourceAsync(string path, string requestPath, Stream responseStream)
+        private static void SetResponseHeaders(IResponseHeaders responseHeaders, IOwinResponse response)
         {
-            Stream s;
-            if (cached)
-            {
-                requestPath = requestPath ?? "";
-                byte[] cachedData;
-                if ((cachedData = CacheGet(requestPath)) != null)
-                {
-                    s = new MemoryStream(cachedData);
-                }
-                else
-                {
-                    s = GetResourceStream(path);
-                    var ms = new MemoryStream();
-                    return SendStreamAsync(s, ms)
-                        .ContinueWith(
-                        task =>
-                        {
-                            if (task.Exception == null)
-                            {
-                                CacheSet(path, ms.ToArray());
-                            }
-                            else
-                            {
-                                ms.Close();
-                                throw new AggregateException(task.Exception);
-                            }
-                            ms.Seek(0, SeekOrigin.Begin);
-                            ms.CopyTo(responseStream);
-                            ms.Close();
-                        });
-                }
-            }
-            else
-            {
-                s = GetResourceStream(path);
-            }
-            return SendStreamAsync(s, responseStream);
+            response.StatusCode = responseHeaders.Status;
+            responseHeaders.Headers.CopyTo(response.Headers);
         }
 
-        private static void AddMaxAgeHeader(int maxAge, IOwinResponse response)
+        private static Task SendCachedResponse(CachedResponse cachedResponse, IOwinResponse response, bool bodyRequested)
         {
-            if (maxAge > 0)
-                response.Headers["Cache-Control"] = "public, max-age=" + maxAge;
+            SetResponseHeaders(cachedResponse, response);
+            return bodyRequested
+                       ? SendStreamAsync(cachedResponse.CreateBodyStream(), response.Body)
+                       : Task.FromResult<object>(null);
+        }
+
+        private Task SendStaticResponse(StaticResponse staticResponse, IOwinResponse response, bool bodyRequested, Location location)
+        {
+            if (cached)
+            {
+                return CachedResponse.CreateAsync(staticResponse)
+                                     .ContinueWith(
+                                         task =>
+                                             {
+                                                 task.Wait();
+                                                 CacheSet(location.FullPath, task.Result);
+                                                 SendCachedResponse(task.Result, response, bodyRequested).Wait();
+                                             });
+            }
+            SetResponseHeaders(staticResponse, response);
+            return bodyRequested
+                       ? SendStreamAsync(response.Body, response.Body)
+                       : Task.FromResult<object>(null);
         }
 
         private Task ProcessStaticIfFound(IOwinContext ctx)
         {
-            bool isFolder;
-            string resourcePath = ResolveResource(ctx.Request.Path, out isFolder);
-            
-            if (string.IsNullOrEmpty(resourcePath))
-                return null;
-
-            if ((include.IsActive() && !include.Contains(resourcePath)) ||
-                (exclude.IsActive() && exclude.Contains(resourcePath)))
-                return null;
-
-            if (isFolder)
+            bool bodyRequested = IsBodyRequested(ctx.Request.Method);
+            var location = ctx.Request.Location;
+            if (cached)
             {
-                return redirectIfFolder ? RedirectToFolder(ctx) : null;
+                var response = CacheGet(location);
+                if (response != null)
+                    return SendCachedResponse(response, ctx.Response, bodyRequested);
             }
 
-            ctx.Response.ContentType = resourcePath.GetContentType();
-            if (expires > DateTimeOffset.MinValue)
-                ctx.Response.Expires = expires;
-            AddMaxAgeHeader(maxAge, ctx.Response);
-
-            return IsBodyRequested(ctx)
-                       ? SendResourceAsync(resourcePath, ctx.Request.Path.Value, ctx.Response.Body)
-                       : Task.FromResult((object) null);
+            var staticResponse = GetResponse(location);
+            return staticResponse == null ? null : SendStaticResponse(staticResponse, ctx.Response, bodyRequested, location);
         }
 
-        private static bool IsMethodAllowed(IOwinContext ctx)
+        private static bool IsMethodAllowed(string method)
         {
-            string method = ctx.Request.Method.ToUpperInvariant();
-            return method == "GET" || method == "HEAD";
+            return string.Compare(method, Constants.Http.Methods.Get, StringComparison.OrdinalIgnoreCase) == 0
+                   || string.Compare(method, Constants.Http.Methods.Head, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
-        private static bool IsBodyRequested(IOwinContext ctx)
+        private static bool IsBodyRequested(string method)
         {
-            return ctx.Request.Method.ToUpperInvariant() == "GET";
-        }
-
-        #endregion
-
-        #region config properties
-
-        protected string[] Sources
-        {
-            get { return sources; }
-        }
-
-        protected string[] IndexFiles
-        {
-            get { return indexFiles; }
-        }
-
-        protected bool AllowHidden
-        {
-            get { return allowHidden; }
+            return string.Compare(method, Constants.Http.Methods.Get, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         #endregion

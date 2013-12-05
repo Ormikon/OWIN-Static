@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Owin;
+using System.Threading.Tasks;
 using Ormikon.Owin.Static.Extensions;
 using System.IO;
 
@@ -8,21 +9,79 @@ namespace Ormikon.Owin.Static
 {
     internal class StaticMiddleware : StaticMiddlewareBase
     {
-        public StaticMiddleware(OwinMiddleware next, StaticSettings settings) : base(next, settings)
+        private static readonly char[] indexFileSeparator = new[] { ';' };
+
+        private readonly string[] sources;
+        private readonly string[] indexFiles;
+        private readonly bool redirectIfFolder;
+        private readonly FileFilter include;
+        private readonly FileFilter exclude;
+        private readonly bool allowHidden;
+        private readonly DateTimeOffset expires;
+        private readonly int maxAge;
+
+        public StaticMiddleware(Func<IDictionary<string, object>, Task> next, StaticSettings settings)
+            : base(next, settings.Cached, settings.Cache, settings.Expires, settings.MaxAge)
         {
+            if (settings == null)
+                throw new ArgumentNullException("settings");
+            sources = settings.Sources;
+            if (sources == null || sources.Length == 0)
+                throw new ArgumentException("Sources count should be one or more.", "settings");
+            sources = NormalizeSources(sources);
+            indexFiles = ParseIndexFileString(settings.DefaultFile);
+            redirectIfFolder = settings.RedirectIfFolderFound;
+            include = new FileFilter(settings.Include);
+            exclude = new FileFilter(settings.Exclude);
+            allowHidden = settings.AllowHidden;
+            expires = settings.Expires;
+            maxAge = settings.MaxAge;
         }
 
-        protected override string ResolveResource(PathString path, out bool isFolder)
+        protected override StaticResponse GetResponse(Location location)
         {
-            return GetLocalFileName(path, Sources, IndexFiles, AllowHidden, out isFolder);
+            bool isFolder;
+            string localFileName = GetLocalFileName(location.Path, sources, indexFiles, allowHidden, out isFolder);
+            if (string.IsNullOrEmpty(localFileName))
+                return null;
+
+            if ((include.IsActive() && !include.Contains(localFileName)) ||
+                (exclude.IsActive() && exclude.Contains(localFileName)))
+                return null;
+
+            if (isFolder)
+                return redirectIfFolder ? new StaticResponse(GetFolderRedirectLocation(location)) : null;
+
+            return new StaticResponse(localFileName.GetContentType(), expires, maxAge,
+                                      GetFileStream(localFileName));
         }
 
-        protected override Stream GetResourceStream(string path)
+        #region private methods
+
+        private static Stream GetFileStream(string path)
         {
             return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
 
-        #region private methods
+        private static string GetFolderRedirectLocation(Location location)
+        {
+            return location.FullPath + "/";
+        }
+
+        private static string[] NormalizeSources(IEnumerable<string> sources)
+        {
+            return sources.Select(s => s.NormalizePath().GetFullPathForLocalPath()).ToArray();
+        }
+
+        private static string[] ParseIndexFileString(string indexFile)
+        {
+            if (string.IsNullOrWhiteSpace(indexFile))
+                return null;
+            string[] files = indexFile.Split(indexFileSeparator, StringSplitOptions.RemoveEmptyEntries)
+                                      .Where(f => !string.IsNullOrWhiteSpace(f))
+                                      .ToArray();
+            return files.Length == 0 ? null : files;
+        }
 
         private static bool TryFindFile(string fileName, bool allowHidden)
         {
@@ -83,12 +142,12 @@ namespace Ormikon.Owin.Static
             return false;
         }
 
-        public static string GetLocalFileName(PathString path, string[] sources, string[] indexFiles,
+        public static string GetLocalFileName(string path, string[] sources, string[] indexFiles,
                                               bool allowHidden, out bool isFolder)
         {
             isFolder = false;
-            bool isFolderRequested = path.Value.EndsWith("/", StringComparison.Ordinal);
-            string pathStr = path.Value.NormalizePath();
+            bool isFolderRequested = path.EndsWith("/", StringComparison.Ordinal);
+            string pathStr = path.NormalizePath();
 
             if (isFolderRequested)
             {
