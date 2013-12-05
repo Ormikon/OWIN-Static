@@ -9,12 +9,18 @@ namespace Ormikon.Owin.Static.Wrappers
         private readonly IDictionary<string, object> data;
         private readonly IOwinRequest request;
         private readonly IOwinResponse response;
+        private readonly IOwinSsl ssl;
+        private readonly IOwinHost host;
+        private readonly IOwinServer server;
 
         public OwinContext(IDictionary<string, object> data)
         {
             this.data = data;
             request = new OwinRequest(data);
             response = new OwinResponse(data);
+            ssl = new OwinSsl(data);
+            host = new OwinHost(data);
+            server = new OwinServer(data);
         }
 
         #region IOwinContext
@@ -37,6 +43,21 @@ namespace Ormikon.Owin.Static.Wrappers
         public IOwinResponse Response
         {
             get { return response; }
+        }
+
+        public IOwinSsl Ssl
+        {
+            get { return ssl; }
+        }
+
+        public IOwinHost Host
+        {
+            get { return host; }
+        }
+
+        public IOwinServer Server
+        {
+            get { return server; }
         }
 
         public IDictionary<string, object> Environment

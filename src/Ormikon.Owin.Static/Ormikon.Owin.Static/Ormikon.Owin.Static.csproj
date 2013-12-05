@@ -80,6 +80,12 @@
     <Compile Include="Wrappers\OwinMiddleware.cs" />
     <Compile Include="Wrappers\OwinRequest.cs" />
     <Compile Include="Wrappers\OwinResponse.cs" />
+    <Compile Include="Wrappers\IOwinServer.cs" />
+    <Compile Include="Wrappers\IOwinHost.cs" />
+    <Compile Include="Wrappers\OwinServer.cs" />
+    <Compile Include="Wrappers\IOwinSsl.cs" />
+    <Compile Include="Wrappers\OwinSsl.cs" />
+    <Compile Include="Wrappers\OwinHost.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

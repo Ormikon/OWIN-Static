@@ -13,6 +13,12 @@ namespace Ormikon.Owin.Static.Wrappers
 
         IOwinResponse Response { get; }
 
+        IOwinSsl Ssl { get; }
+
+        IOwinHost Host { get; }
+
+        IOwinServer Server { get; }
+
         IDictionary<string, object> Environment { get; }
     }
 }
