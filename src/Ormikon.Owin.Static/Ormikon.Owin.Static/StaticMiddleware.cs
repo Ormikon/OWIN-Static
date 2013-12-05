@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Extensions;
-using System.IO;
 
 namespace Ormikon.Owin.Static
 {

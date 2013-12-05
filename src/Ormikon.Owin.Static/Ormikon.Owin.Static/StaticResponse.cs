@@ -8,7 +8,7 @@ namespace Ormikon.Owin.Static
 {
     internal class StaticResponse : IResponseHeaders, IDisposable
     {
-        private readonly int status;
+        private readonly int statusCode;
         private readonly IDictionary<string, string[]> headers;
         private readonly Stream body;
 
@@ -28,9 +28,9 @@ namespace Ormikon.Owin.Static
         {
         }
 
-        public StaticResponse(int status, string contentType, DateTimeOffset expires, int maxAge, string location, Stream body)
+        public StaticResponse(int statusCode, string contentType, DateTimeOffset expires, int maxAge, string location, Stream body)
         {
-            this.status = status;
+            this.statusCode = statusCode;
             headers = new Dictionary<string, string[]>();
             ContentType = contentType;
             Expires = expires;
@@ -86,9 +86,9 @@ namespace Ormikon.Owin.Static
                 body.Dispose();
         }
 
-        public int Status
+        public int StatusCode
         {
-            get { return status; }
+            get { return statusCode; }
         }
 
         public IDictionary<string, string[]> Headers

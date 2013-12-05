@@ -8,7 +8,7 @@ namespace Ormikon.Owin.Static
     internal class AssemblyResourcesMiddleware : StaticMiddlewareBase
     {
         public AssemblyResourcesMiddleware(Func<IDictionary<string, object>, Task> next, Assembly assembly, string resource)
-            : base(next, true, StaticSettings.DefaultCache, DateTimeOffset.MinValue, 0)
+            : base(next, true)
         {
         }
 

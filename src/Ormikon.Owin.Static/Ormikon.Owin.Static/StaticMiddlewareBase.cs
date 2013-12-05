@@ -15,6 +15,21 @@ namespace Ormikon.Owin.Static
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
 
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next)
+            : this(next, false, null, DateTimeOffset.MinValue, 0)
+        {
+        }
+
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached)
+            : this(next, cached, null, DateTimeOffset.MinValue, 0)
+        {
+        }
+
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache)
+            : this(next, cached, cache, DateTimeOffset.MinValue, 0)
+        {
+        }
+
         protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache, DateTimeOffset expires, int maxAge)
             : base(next)
         {
@@ -73,7 +88,7 @@ namespace Ormikon.Owin.Static
 
         private static void SetResponseHeaders(IResponseHeaders responseHeaders, IOwinResponse response)
         {
-            response.StatusCode = responseHeaders.Status;
+            response.StatusCode = responseHeaders.StatusCode;
             responseHeaders.Headers.CopyTo(response.Headers);
         }
 

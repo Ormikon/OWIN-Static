@@ -24,7 +24,7 @@ namespace Ormikon.Owin.Static
                                              task.Wait();
                                              var result = new CachedResponse
                                                               {
-                                                                  Status = staticResponse.Status,
+                                                                  StatusCode = staticResponse.StatusCode,
                                                                   Body = mem.ToArray()
                                                               };
                                              staticResponse.Headers.CopyTo(result.Headers);
@@ -37,7 +37,7 @@ namespace Ormikon.Owin.Static
             return new MemoryStream(Body);
         }
 
-        public int Status { get; set; }
+        public int StatusCode { get; set; }
 
         public IDictionary<string, string[]> Headers { get; private set; }
 

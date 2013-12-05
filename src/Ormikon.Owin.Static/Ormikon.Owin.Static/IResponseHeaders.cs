@@ -4,7 +4,7 @@ namespace Ormikon.Owin.Static
 {
     interface IResponseHeaders
     {
-        int Status { get; }
+        int StatusCode { get; }
 
         IDictionary<string, string[]> Headers { get; }
     }
