@@ -14,11 +14,18 @@ namespace Ormikon.Owin.Static.Extensions
                 .Replace('/', Path.DirectorySeparatorChar); // linux -> windows
         }
 
+        private static string NormalizePathEnd(this string path)
+        {
+            if (path == null)
+                throw new ArgumentNullException("path");
+            return path.TrimEnd('/', '\\');
+        }
+
         public static string GetFullPathForLocalPath(this string localPath)
         {
             if (string.IsNullOrEmpty(localPath))
-                return Directory.GetCurrentDirectory().NormalizePath();
-            return Path.GetFullPath(localPath).NormalizePath();
+                return Directory.GetCurrentDirectory().NormalizePathEnd();
+            return Path.GetFullPath(localPath).NormalizePathEnd();
         }
 
         public static bool IsUnixHidden(this string name)
