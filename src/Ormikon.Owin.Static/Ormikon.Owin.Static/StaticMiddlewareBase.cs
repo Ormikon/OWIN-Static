@@ -114,9 +114,10 @@ namespace Ormikon.Owin.Static
                                              });
             }
             SetResponseHeaders(staticResponse, response);
-            return bodyRequested
-                       ? SendStreamAsync(response.Body, response.Body)
-                       : Task.FromResult<object>(null);
+            if (bodyRequested)
+                return SendStreamAsync(staticResponse.Body, response.Body);
+            staticResponse.Body.Close();
+            return Task.FromResult<object>(null);
         }
 
         private Task ProcessStaticIfFound(IOwinContext ctx)
