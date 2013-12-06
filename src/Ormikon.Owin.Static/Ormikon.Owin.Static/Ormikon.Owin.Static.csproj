@@ -54,9 +54,11 @@
     <Compile Include="CachedResponse.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Extensions\HttpHeaderExtensions.cs" />
+    <Compile Include="Extensions\MapExtensions.cs" />
     <Compile Include="Extensions\OwinExtensions.cs" />
     <Compile Include="IResponseHeaders.cs" />
     <Compile Include="Location.cs" />
+    <Compile Include="Mapping\MapMiddleware.cs" />
     <Compile Include="Wrappers\IOwinContext.cs" />
     <Compile Include="Wrappers\IOwinRequest.cs" />
     <Compile Include="Wrappers\IOwinResponse.cs" />
