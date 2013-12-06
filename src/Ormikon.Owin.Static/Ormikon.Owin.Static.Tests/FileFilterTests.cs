@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Ormikon.Owin.Static.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class FileFilterTests
     {
-        [TestMethod]
+        [Test]
         public void ExactMatchFile()
         {
             var ff = new FileFilter("concrete-name.txt");
@@ -18,7 +18,7 @@ namespace Ormikon.Owin.Static.Tests
             Assert.IsFalse(ff.Contains("d:/concrete-namme.txt"));
         }
 
-        [TestMethod]
+        [Test]
         public void ExactMatchFileAndDir()
         {
             var ff = new FileFilter("concrete-dir/concrete-name.txt");
@@ -33,7 +33,7 @@ namespace Ormikon.Owin.Static.Tests
             Assert.IsFalse(ff.Contains("d:/concrete-dir/anotherdir/concrete-name.txt"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestQuestionMark()
         {
             var ff = new FileFilter("file-with-qm.t?t");
@@ -49,7 +49,7 @@ namespace Ormikon.Owin.Static.Tests
             Assert.IsFalse(ff.Contains("file-with-qm.tm"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestOneStar()
         {
             var ff = new FileFilter("*/*test.xml");
@@ -71,7 +71,7 @@ namespace Ormikon.Owin.Static.Tests
             Assert.IsFalse(ff.Contains("dir1file.txt"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestDoubleStar()
         {
             var ff = new FileFilter("/one/**/another.txt");
@@ -92,7 +92,7 @@ namespace Ormikon.Owin.Static.Tests
             Assert.IsTrue(ff.Contains("/one//fff/ggg/two/sss/bbbb/three.mht"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void InvalidChars()
         {
