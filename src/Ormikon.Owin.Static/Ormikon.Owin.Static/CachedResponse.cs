@@ -17,19 +17,21 @@ namespace Ormikon.Owin.Static
         public static Task<CachedResponse> CreateAsync(StaticResponse staticResponse)
         {
             var mem = new MemoryStream();
-            return staticResponse.Body.CopyToAsync(mem)
-                                 .ContinueWith(
-                                     task =>
-                                         {
-                                             task.Wait();
-                                             var result = new CachedResponse
-                                                              {
-                                                                  StatusCode = staticResponse.StatusCode,
-                                                                  Body = mem.ToArray()
-                                                              };
-                                             staticResponse.Headers.CopyTo(result.Headers);
-                                             return result;
-                                         }, TaskContinuationOptions.ExecuteSynchronously);
+            var stream = staticResponse.Body;
+            return stream.CopyToAsync(mem)
+                         .ContinueWith(
+                             task =>
+                                 {
+                                     stream.Close();
+                                     task.Wait();
+                                     var result = new CachedResponse
+                                                      {
+                                                          StatusCode = staticResponse.StatusCode,
+                                                          Body = mem.ToArray()
+                                                      };
+                                     staticResponse.Headers.CopyTo(result.Headers);
+                                     return result;
+                                 }, TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public Stream CreateBodyStream()

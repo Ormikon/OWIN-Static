@@ -11,6 +11,8 @@
     <AssemblyName>Example</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -71,7 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ormikon.Owin.Static\Ormikon.Owin.Static.csproj">
-      <Project>{6af8f210-e7bb-4513-85ce-48177ec2bc32}</Project>
+      <Project>{6AF8F210-E7BB-4513-85CE-48177EC2BC32}</Project>
       <Name>Ormikon.Owin.Static</Name>
     </ProjectReference>
   </ItemGroup>
