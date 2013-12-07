@@ -8,14 +8,32 @@ namespace Ormikon.Owin.Static
 {
     internal class StaticResponse : IResponseHeaders, IDisposable
     {
+        private const string PlainTextContentType = "text/plain; charset=UTF-8";
+
+        private static readonly string poweredBy;
+
         private readonly int statusCode;
         private readonly IDictionary<string, string[]> headers;
         private readonly Stream body;
 
-        public StaticResponse(string location)
-            : this(Constants.Http.StatusCodes.Redirection.Found, "text/plain", GetRedirectBody(location))
+        static StaticResponse()
         {
-            Location = location;
+            poweredBy = "Ormikon.Owin.Static " + typeof(StaticResponse).Assembly.GetName().Version;
+        }
+
+        public StaticResponse(int statusCode)
+            : this(statusCode, null)
+        {
+        }
+
+        public StaticResponse(string text)
+            : this(Constants.Http.StatusCodes.Successful.Ok, text)
+        {
+        }
+
+        public StaticResponse(int statusCode, string text)
+            : this(statusCode, PlainTextContentType, GetBodyFromString(text))
+        {
         }
 
         public StaticResponse(string contentType, Stream body)
@@ -28,14 +46,37 @@ namespace Ormikon.Owin.Static
             this.statusCode = statusCode;
             headers = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             ContentType = contentType;
+            headers.SetSingleValue(Constants.Http.Headers.PoweredBy, poweredBy);
             this.body = body;
         }
 
-        private static Stream GetRedirectBody(string location)
+        private static Stream GetBodyFromString(string text)
         {
-            var message = Encoding.UTF8.GetBytes("Redirecting to " + location);
+            if (string.IsNullOrEmpty(text))
+                return Stream.Null;
+            var message = Encoding.UTF8.GetBytes(text);
             return new MemoryStream(message);
         }
+
+        #region Response Builders
+
+        public static StaticResponse Redirect(string location)
+        {
+            return new StaticResponse(Constants.Http.StatusCodes.Redirection.Found, "Redirecting to " + location)
+            {
+                Location = location
+            };
+        }
+
+        public static StaticResponse MethodNotAllowed(params string[] allowedMethods)
+        {
+            return new StaticResponse(Constants.Http.StatusCodes.ClientError.MethodNotAllowed)
+            {
+                Allow = string.Join(",", allowedMethods)
+            };
+        }
+
+        #endregion
 
         #region Headers
 
@@ -86,6 +127,12 @@ namespace Ormikon.Owin.Static
         public IDictionary<string, string[]> Headers
         {
             get { return headers; }
+        }
+
+        public string Allow
+        {
+            get { return headers.GetSingleValue(Constants.Http.Headers.Allow); }
+            set { headers.SetSingleValue(Constants.Http.Headers.Allow, value); }
         }
 
         public long? ContentLength

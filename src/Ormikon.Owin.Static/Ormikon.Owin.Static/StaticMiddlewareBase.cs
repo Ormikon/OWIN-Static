@@ -42,8 +42,8 @@ namespace Ormikon.Owin.Static
         protected override Task Invoke(IOwinContext context)
         {
             return IsMethodAllowed(context.Request.Method)
-                       ? ProcessStaticIfFound(context) ?? Next(context)
-                       : Next(context);
+                    ? ProcessStaticIfFound(context) ?? Next(context)
+                    : Next(context);
         }
 
         #region abstract methods
@@ -92,47 +92,53 @@ namespace Ormikon.Owin.Static
             responseHeaders.Headers.CopyTo(response.Headers);
         }
 
-        private static Task SendCachedResponse(CachedResponse cachedResponse, IOwinResponse response, bool bodyRequested)
+        private static Task ProcessResponseStream(IResponseHeaders responseHeaders, Stream stream, IOwinContext ctx)
         {
-            SetResponseHeaders(cachedResponse, response);
-            return bodyRequested
-                       ? SendStreamAsync(cachedResponse.CreateBodyStream(), response.Body)
-                       : Task.FromResult<object>(null);
+            SetResponseHeaders(responseHeaders, ctx.Response);
+            if (IsBodyRequested(ctx.Request.Method))
+                return SendStreamAsync(stream, ctx.Response.Body);
+            stream.Close();
+            return Task.FromResult<object>(null);
         }
 
-        private Task SendStaticResponse(StaticResponse staticResponse, IOwinResponse response, bool bodyRequested, Location location)
+        private static Task SendResponse(CachedResponse cachedResponse, IOwinContext ctx)
+        {
+            return ProcessResponseStream(cachedResponse, cachedResponse.CreateBodyStream(), ctx);
+        }
+
+        private static Task SendResponse(StaticResponse staticResponse, IOwinContext ctx)
+        {
+            return ProcessResponseStream(staticResponse, staticResponse.Body, ctx);
+        }
+
+        private Task CacheResponseAndSend(StaticResponse staticResponse, IOwinContext ctx)
         {
             if (cached)
             {
                 return CachedResponse.CreateAsync(staticResponse)
-                                     .ContinueWith(
-                                         task =>
-                                             {
-                                                 task.Wait();
-                                                 CacheSet(location.FullPath, task.Result);
-                                                 SendCachedResponse(task.Result, response, bodyRequested).Wait();
-                                             });
+                        .ContinueWith(
+                            task =>
+                            {
+                                task.Wait();
+                                CacheSet(ctx.Request.Location.FullPath, task.Result);
+                                SendResponse(task.Result, ctx).Wait();
+                            });
             }
-            SetResponseHeaders(staticResponse, response);
-            if (bodyRequested)
-                return SendStreamAsync(staticResponse.Body, response.Body);
-            staticResponse.Body.Close();
-            return Task.FromResult<object>(null);
+            return SendResponse(staticResponse, ctx);
         }
 
         private Task ProcessStaticIfFound(IOwinContext ctx)
         {
-            bool bodyRequested = IsBodyRequested(ctx.Request.Method);
             var location = ctx.Request.Location;
             if (cached)
             {
                 var response = CacheGet(location);
                 if (response != null)
-                    return SendCachedResponse(response, ctx.Response, bodyRequested);
+                    return SendResponse(response, ctx);
             }
 
             var staticResponse = GetResponse(location);
-            return staticResponse == null ? null : SendStaticResponse(staticResponse, ctx.Response, bodyRequested, location);
+            return staticResponse == null ? null : CacheResponseAndSend(staticResponse, ctx);
         }
 
         private static bool IsMethodAllowed(string method)

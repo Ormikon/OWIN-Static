@@ -50,7 +50,7 @@ namespace Ormikon.Owin.Static
                 return null;
 
             if (info is DirectoryInfo)
-                return redirectIfFolder ? new StaticResponse(GetFolderRedirectLocation(location)) : null;
+                return redirectIfFolder ? StaticResponse.Redirect(GetFolderRedirectLocation(location)) : null;
 
             var result = new StaticResponse(info.FullName.GetContentType(), GetFileStream(info.FullName));
             if (expires != DateTimeOffset.MinValue)

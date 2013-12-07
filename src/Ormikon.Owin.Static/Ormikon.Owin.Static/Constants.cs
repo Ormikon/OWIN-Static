@@ -27,6 +27,7 @@ namespace Ormikon.Owin.Static
                 public const string AcceptEncoding = "Accept-Encoding";
                 public const string AcceptRanges = "Accept-Ranges";
                 public const string Age = "Age";
+                public const string Allow = "Allow";
                 public const string CacheControl = "Cache-Control";
                 public const string ContentEncoding = "Content-Encoding";
                 public const string ContentLength = "Content-Length";
@@ -44,6 +45,7 @@ namespace Ormikon.Owin.Static
                 public const string Range = "Range";
                 public const string Upgrade = "Upgrade";
                 public const string Vary = "Vary";
+                public const string PoweredBy = "X-Powered-By";
             }
 
             public class StatusCodes
