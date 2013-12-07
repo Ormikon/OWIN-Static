@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Extensions;
+using Ormikon.Owin.Static.Filters;
 
 namespace Ormikon.Owin.Static
 {

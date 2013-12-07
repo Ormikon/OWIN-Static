@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Ormikon.Owin.Static.Filters;
 
 namespace Ormikon.Owin.Static.Tests
 {
@@ -93,6 +94,7 @@ namespace Ormikon.Owin.Static.Tests
         }
 
         [Test]
+        [Ignore("Different for linux")]
         [ExpectedException(typeof(ArgumentException))]
         public void InvalidChars()
         {

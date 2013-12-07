@@ -71,7 +71,6 @@
     <Compile Include="Config\Settings.cs" />
     <Compile Include="Extensions\ContentTypeExtensions.cs" />
     <Compile Include="Extensions\MaxAgeExtensions.cs" />
-    <Compile Include="FileFilter.cs" />
     <Compile Include="Config\Section.cs" />
     <Compile Include="Extensions\StaticExtensions.cs" />
     <Compile Include="StaticMiddleware.cs" />
@@ -88,6 +87,10 @@
     <Compile Include="Wrappers\IOwinSsl.cs" />
     <Compile Include="Wrappers\OwinSsl.cs" />
     <Compile Include="Wrappers\OwinHost.cs" />
+    <Compile Include="Filters\IFilter.cs" />
+    <Compile Include="Filters\FileFilter.cs" />
+    <Compile Include="Filters\ContentTypeFilter.cs" />
+    <Compile Include="Filters\FilterBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -101,4 +104,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Filters\" />
+  </ItemGroup>
 </Project>
