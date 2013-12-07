@@ -51,10 +51,7 @@ namespace Ormikon.Owin.Static.Extensions
         {
             if (string.IsNullOrEmpty(rfc1123))
                 return null;
-            DateTimeOffset dto;
-            if (DateTimeOffset.TryParseExact(rfc1123, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out dto))
-                return dto;
-            return null;
+            return DateTimeOffset.ParseExact(rfc1123, "R", CultureInfo.InvariantCulture);
         }
 
         public static DateTimeOffset? GetDateTimeOffset(this IDictionary<string, string[]> headers, string header)
@@ -74,6 +71,17 @@ namespace Ormikon.Owin.Static.Extensions
         }
 
         public static void SetIntValue(this IDictionary<string, string[]> headers, string header, int? value)
+        {
+            headers.SetSingleValue(header, value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : null);
+        }
+
+        public static long? GetLongValue(this IDictionary<string, string[]> headers, string header)
+        {
+            string val = headers.GetSingleValue(header);
+            return string.IsNullOrEmpty(val) ? null : new long?(long.Parse(val));
+        }
+
+        public static void SetLongValue(this IDictionary<string, string[]> headers, string header, long? value)
         {
             headers.SetSingleValue(header, value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : null);
         }

@@ -37,6 +37,8 @@ namespace Ormikon.Owin.Static
 
         private static void PreprocessHeaders(StaticResponse staticResponse, int contentLength)
         {
+            if (staticResponse.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
+                return;
             staticResponse.ContentLength = contentLength;
             if (!staticResponse.LastModified.HasValue)
                 staticResponse.LastModified = DateTimeOffset.Now;
@@ -57,11 +59,6 @@ namespace Ormikon.Owin.Static
         public int StatusCode { get; set; }
 
         public IDictionary<string, string[]> Headers { get; private set; }
-
-        public string ETag
-        {
-            get { return Headers.GetSingleValue(Constants.Http.Headers.ETag); }
-        }
 
         public byte[] Body { get; set; }
     }

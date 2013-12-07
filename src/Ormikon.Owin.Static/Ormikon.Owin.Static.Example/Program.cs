@@ -13,10 +13,12 @@ namespace Ormikon.Owin.Static.Example
             {
                 Console.WriteLine("OWIN Web application started on {0}", url);
                 Console.Write("Press any key to exit...");
-                var cki = Console.ReadKey();
                 #if DEBUG //mono debug
+                var cki = Console.ReadKey();
 				if (cki.KeyChar == '\0')
                     while(true){}//if debug in mono
+                #else
+                Console.ReadKey();
                 #endif
             }
         }

@@ -13,29 +13,21 @@ namespace Ormikon.Owin.Static
         private readonly Stream body;
 
         public StaticResponse(string location)
-            : this(Constants.Http.StatusCodes.Redirection.Found, "text/plain", DateTimeOffset.MinValue,
-            0, location, GetRedirectBody(location))
+            : this(Constants.Http.StatusCodes.Redirection.Found, "text/plain", GetRedirectBody(location))
         {
+            Location = location;
         }
 
         public StaticResponse(string contentType, Stream body)
-            : this(contentType, DateTimeOffset.MinValue, 0, body)
+            : this(Constants.Http.StatusCodes.Successful.Ok, contentType, body)
         {
         }
 
-        public StaticResponse(string contentType, DateTimeOffset expires, int maxAge, Stream body)
-            : this(Constants.Http.StatusCodes.Successful.Ok, contentType, expires, maxAge, null, body)
-        {
-        }
-
-        public StaticResponse(int statusCode, string contentType, DateTimeOffset expires, int maxAge, string location, Stream body)
+        public StaticResponse(int statusCode, string contentType, Stream body)
         {
             this.statusCode = statusCode;
             headers = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             ContentType = contentType;
-            Expires = expires;
-            MaxAge = maxAge;
-            Location = location;
             this.body = body;
         }
 
@@ -96,10 +88,10 @@ namespace Ormikon.Owin.Static
             get { return headers; }
         }
 
-        public int? ContentLength
+        public long? ContentLength
         {
-            get { return headers.GetIntValue(Constants.Http.Headers.ContentLength); }
-            set { headers.SetIntValue(Constants.Http.Headers.ContentLength, value); }
+            get { return headers.GetLongValue(Constants.Http.Headers.ContentLength); }
+            set { headers.SetLongValue(Constants.Http.Headers.ContentLength, value); }
         }
 
         public string ContentType

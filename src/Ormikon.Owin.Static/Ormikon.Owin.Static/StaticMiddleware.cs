@@ -16,6 +16,7 @@ namespace Ormikon.Owin.Static
         private readonly bool redirectIfFolder;
         private readonly FileFilter include;
         private readonly FileFilter exclude;
+        private readonly FileFilter unixHidden;
         private readonly bool allowHidden;
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
@@ -33,6 +34,7 @@ namespace Ormikon.Owin.Static
             redirectIfFolder = settings.RedirectIfFolderFound;
             include = new FileFilter(settings.Include);
             exclude = new FileFilter(settings.Exclude);
+            unixHidden = new FileFilter(allowHidden ? null : @"**\.*");
             allowHidden = settings.AllowHidden;
             expires = settings.Expires;
             maxAge = settings.MaxAge;
@@ -40,23 +42,39 @@ namespace Ormikon.Owin.Static
 
         protected override StaticResponse GetResponse(Location location)
         {
-            bool isFolder;
-            string localFileName = GetLocalFileName(location.Path, sources, indexFiles, allowHidden, out isFolder);
-            if (string.IsNullOrEmpty(localFileName))
+            if (!TestFilters(location))
                 return null;
 
-            if ((include.IsActive() && !include.Contains(localFileName)) ||
-                (exclude.IsActive() && exclude.Contains(localFileName)))
+            var info = GetLocalFileInfo(location.Path, sources, indexFiles, allowHidden);
+            if (info == null)
                 return null;
 
-            if (isFolder)
+            if (info is DirectoryInfo)
                 return redirectIfFolder ? new StaticResponse(GetFolderRedirectLocation(location)) : null;
 
-            return new StaticResponse(localFileName.GetContentType(), expires, maxAge,
-                                      GetFileStream(localFileName));
+            var result = new StaticResponse(info.FullName.GetContentType(), GetFileStream(info.FullName));
+            if (expires != DateTimeOffset.MinValue)
+                result.Expires = expires;
+            if (maxAge != 0)
+                result.MaxAge = maxAge;
+            var fileInfo = info as FileInfo;
+            if (fileInfo != null)
+            {
+                result.LastModified = fileInfo.LastWriteTimeUtc;
+                result.ContentLength = fileInfo.Length;
+            }
+
+            return result;
         }
 
         #region private methods
+
+        private bool TestFilters(Location location)
+        {
+            return !((unixHidden.IsActive() && unixHidden.Contains(location.Path))
+                || (include.IsActive() && !include.Contains(location.Path))
+                || (exclude.IsActive() && exclude.Contains(location.Path)));
+        }
 
         private static Stream GetFileStream(string path)
         {
@@ -83,69 +101,70 @@ namespace Ormikon.Owin.Static
             return files.Length == 0 ? null : files;
         }
 
-        private static bool TryFindFile(string fileName, bool allowHidden)
+        private static FileSystemInfo GetFileInfo(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
-                return false;
+                return null;
             try
             {
-                if (File.Exists(fileName))
-                {
-                    if (allowHidden)
-                        return true;
-                    return (File.GetAttributes(fileName) & FileAttributes.Hidden) != FileAttributes.Hidden &&
-                           !fileName.IsUnixHidden();
-                }
-                return false;
+                return new FileInfo(fileName);
             }
             catch (Exception)
             {
-                return false;
+                return null;
             }
         }
 
-        private static bool TryFindFolder(string folderName, bool allowHidden)
+        private static FileSystemInfo GetFolderInfo(string folderName)
         {
             if (string.IsNullOrEmpty(folderName))
-                return false;
+                return null;
             try
             {
-                if (Directory.Exists(folderName))
-                {
-                    if (allowHidden)
-                        return true;
-                    return (new DirectoryInfo(folderName).Attributes & FileAttributes.Hidden) != FileAttributes.Hidden &&
-                           !folderName.IsUnixHidden();
-                }
-                return false;
+                return new DirectoryInfo(folderName);
             }
             catch (Exception)
             {
-                return false;
+                return null;
             }
         }
 
-        private static bool TryResolvePath(string path, bool lookForFolders, bool allowHidden, out bool isFolder)
+        private static bool IsHidden(FileSystemInfo info)
         {
-            isFolder = false;
+            return (info.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
+        }
+
+        private static FileSystemInfo TryResolvePath(string path, bool lookForFolders, bool allowHidden)
+        {
             if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
             {
-                return false;
+                return null;
             }
-            if (TryFindFile(path, allowHidden))
-                return true;
-            if (lookForFolders && TryFindFolder(path, allowHidden))
+            var info = GetFileInfo(path);
+            if (info != null && info.Exists)
             {
-                isFolder = true;
-                return true;
+                if (allowHidden)
+                    return info;
+                if (!IsHidden(info))
+                    return info;
             }
-            return false;
+            if (lookForFolders)
+            {
+                info = GetFolderInfo(path);
+                if (info != null && info.Exists)
+                {
+                    if (allowHidden)
+                        return info;
+                    if (!IsHidden(info))
+                        return info;
+                }
+            }
+            return null;
         }
 
-        public static string GetLocalFileName(string path, string[] sources, string[] indexFiles,
-                                              bool allowHidden, out bool isFolder)
+        public static FileSystemInfo GetLocalFileInfo(string path, string[] sources, string[] indexFiles,
+                                                      bool allowHidden)
         {
-            isFolder = false;
             bool isFolderRequested = path.EndsWith("/", StringComparison.Ordinal);
             string pathStr = path.NormalizePath();
 
@@ -161,26 +180,23 @@ namespace Ormikon.Owin.Static
                         string fullPath = string.IsNullOrEmpty(pathStr)
                                               ? Path.Combine(source, indexFile)
                                               : Path.Combine(source, pathStr, indexFile);
-                        if (TryResolvePath(fullPath, false, allowHidden, out isFolder))
-                            return fullPath;
+                        var info = TryResolvePath(fullPath, false, allowHidden);
+                        if (info != null)
+                            return info;
                     }
                 }
 
                 return null;
             }
-            if (string.IsNullOrEmpty(pathStr))
+
+            bool isPathEmpty = string.IsNullOrEmpty(pathStr);
+            foreach (string fullPath in sources.Select(src => isPathEmpty ? src : Path.Combine(src, pathStr)))
             {
-                if (sources.Length == 1 && TryResolvePath(sources[0], true, allowHidden, out isFolder))
-                {
-                    return sources[0];
-                }
-                return null;
+                var info = TryResolvePath(fullPath, true, allowHidden);
+                if (info != null)
+                    return info;
             }
-            foreach (string fullPath in sources.Select(source => Path.Combine(source, pathStr)))
-            {
-                if (TryResolvePath(fullPath, true, allowHidden, out isFolder))
-                    return fullPath;
-            }
+
             return null;
         }
 
