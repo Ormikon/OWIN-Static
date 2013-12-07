@@ -29,9 +29,24 @@ namespace Ormikon.Owin.Static
                                                           StatusCode = staticResponse.StatusCode,
                                                           Body = mem.ToArray()
                                                       };
+                                     PreprocessHeaders(staticResponse, result.Body.Length);
                                      staticResponse.Headers.CopyTo(result.Headers);
                                      return result;
                                  }, TaskContinuationOptions.ExecuteSynchronously);
+        }
+
+        private static void PreprocessHeaders(StaticResponse staticResponse, int contentLength)
+        {
+            staticResponse.ContentLength = contentLength;
+            if (!staticResponse.LastModified.HasValue)
+                staticResponse.LastModified = DateTimeOffset.Now;
+            if (!staticResponse.Date.HasValue)
+                staticResponse.Date = DateTimeOffset.Now;
+            if (staticResponse.ETag == null)
+                staticResponse.ETag = Guid.NewGuid().ToString("N");
+            int? maxAge = staticResponse.MaxAge;
+            if (maxAge.HasValue && !staticResponse.Expires.HasValue)
+                staticResponse.Expires = DateTimeOffset.Now.AddSeconds(maxAge.Value);
         }
 
         public Stream CreateBodyStream()
@@ -42,6 +57,11 @@ namespace Ormikon.Owin.Static
         public int StatusCode { get; set; }
 
         public IDictionary<string, string[]> Headers { get; private set; }
+
+        public string ETag
+        {
+            get { return Headers.GetSingleValue(Constants.Http.Headers.ETag); }
+        }
 
         public byte[] Body { get; set; }
     }

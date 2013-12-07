@@ -18,41 +18,44 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4CEFC715-9004-428D-8008-624BB5B40723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4CEFC715-9004-428D-8008-624BB5B40723}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CEFC715-9004-428D-8008-624BB5B40723}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CEFC715-9004-428D-8008-624BB5B40723}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Ormikon.Owin.Static.Example\Ormikon.Owin.Static.Example.csproj
 		Policies = $0
-		$0.TextStylePolicy = $4
+		$0.TextStylePolicy = $1
 		$1.FileWidth = 120
+		$1.TabsToSpaces = False
 		$1.inheritsSet = VisualStudio
 		$1.inheritsScope = text/plain
-		$1.scope = text/x-csharp
-		$0.CSharpFormattingPolicy = $2
-		$2.AfterDelegateDeclarationParameterComma = True
-		$2.inheritsSet = Mono
-		$2.inheritsScope = text/x-csharp
+		$0.TextStylePolicy = $2
+		$2.inheritsSet = null
 		$2.scope = text/x-csharp
-		$0.DotNetNamingPolicy = $3
-		$3.DirectoryNamespaceAssociation = None
-		$3.ResourceNamePolicy = FileFormatDefault
+		$0.CSharpFormattingPolicy = $3
+		$3.AfterDelegateDeclarationParameterComma = True
+		$3.inheritsSet = Mono
+		$3.inheritsScope = text/x-csharp
+		$3.scope = text/x-csharp
+		$0.TextStylePolicy = $4
 		$4.FileWidth = 120
 		$4.inheritsSet = VisualStudio
 		$4.inheritsScope = text/plain
 		$4.scope = text/plain
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

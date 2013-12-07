@@ -42,24 +42,9 @@ namespace Ormikon.Owin.Static.Extensions
             }
         }
 
-        private static string ToRfc1123DateString(this DateTime? dateTime)
-        {
-            return dateTime.HasValue ? dateTime.Value.ToString("R") : null;
-        }
-
         private static string ToRfc1123DateString(this DateTimeOffset? dateTimeOffset)
         {
             return dateTimeOffset.HasValue ? dateTimeOffset.Value.ToString("R") : null;
-        }
-
-        private static DateTime? Rfc1123StringToDateTime(this string rfc1123)
-        {
-            if (string.IsNullOrEmpty(rfc1123))
-                return null;
-            DateTime dt;
-            if (DateTime.TryParseExact(rfc1123, "R", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                return dt;
-            return null;
         }
 
         private static DateTimeOffset? Rfc1123StringToDateTimeOffset(this string rfc1123)
@@ -72,16 +57,6 @@ namespace Ormikon.Owin.Static.Extensions
             return null;
         }
 
-        public static DateTime? GetDateTime(this IDictionary<string, string[]> headers, string header)
-        {
-            return headers.GetSingleValue(header).Rfc1123StringToDateTime();
-        }
-
-        public static void SetDateTime(this IDictionary<string, string[]> headers, string header, DateTime? value)
-        {
-            headers.SetSingleValue(header, value.ToRfc1123DateString());
-        }
-
         public static DateTimeOffset? GetDateTimeOffset(this IDictionary<string, string[]> headers, string header)
         {
             return headers.GetSingleValue(header).Rfc1123StringToDateTimeOffset();
@@ -90,6 +65,17 @@ namespace Ormikon.Owin.Static.Extensions
         public static void SetDateTimeOffset(this IDictionary<string, string[]> headers, string header, DateTimeOffset? value)
         {
             headers.SetSingleValue(header, value.ToRfc1123DateString());
+        }
+
+        public static int? GetIntValue(this IDictionary<string, string[]> headers, string header)
+        {
+            string val = headers.GetSingleValue(header);
+            return string.IsNullOrEmpty(val) ? null : new int?(int.Parse(val));
+        }
+
+        public static void SetIntValue(this IDictionary<string, string[]> headers, string header, int? value)
+        {
+            headers.SetSingleValue(header, value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : null);
         }
     }
 }

@@ -33,6 +33,7 @@ namespace Ormikon.Owin.Static
                 public const string ContentRange = "Content-Range";
                 public const string ContentType = "Content-Type";
                 public const string Date = "Date";
+                public const string ETag = "ETag";
                 public const string Expect = "Expect";
                 public const string Expires = "Expires";
                 public const string IfModifiedSince = "If-Modified-Since";

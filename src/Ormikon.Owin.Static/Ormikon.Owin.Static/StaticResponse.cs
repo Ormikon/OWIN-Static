@@ -31,7 +31,7 @@ namespace Ormikon.Owin.Static
         public StaticResponse(int statusCode, string contentType, DateTimeOffset expires, int maxAge, string location, Stream body)
         {
             this.statusCode = statusCode;
-            headers = new Dictionary<string, string[]>();
+            headers = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             ContentType = contentType;
             Expires = expires;
             MaxAge = maxAge;
@@ -75,7 +75,7 @@ namespace Ormikon.Owin.Static
 
         private static string AddMaxAgeInCacheControl(int? maxAge)
         {
-            return maxAge.HasValue && maxAge.Value != 0 ? "public, max-age=" + maxAge.Value : null;
+            return maxAge.HasValue && maxAge.Value != 0 ? "max-age=" + maxAge.Value : null;
         }
 
         #endregion
@@ -96,16 +96,34 @@ namespace Ormikon.Owin.Static
             get { return headers; }
         }
 
+        public int? ContentLength
+        {
+            get { return headers.GetIntValue(Constants.Http.Headers.ContentLength); }
+            set { headers.SetIntValue(Constants.Http.Headers.ContentLength, value); }
+        }
+
         public string ContentType
         {
             get { return headers.GetSingleValue(Constants.Http.Headers.ContentType); }
             set { headers.SetSingleValue(Constants.Http.Headers.ContentType, value); }
         }
 
-        public DateTime? Date
+        public DateTimeOffset? Date
         {
-            get { return headers.GetDateTime(Constants.Http.Headers.Date); }
-            set { headers.SetDateTime(Constants.Http.Headers.Date, value); }
+            get { return headers.GetDateTimeOffset(Constants.Http.Headers.Date); }
+            set { headers.SetDateTimeOffset(Constants.Http.Headers.Date, value); }
+        }
+
+        public string ETag
+        {
+            get { return headers.GetSingleValue(Constants.Http.Headers.ETag); }
+            set { headers.SetSingleValue(Constants.Http.Headers.ETag, value); }
+        }
+
+        public DateTimeOffset? LastModified
+        {
+            get { return headers.GetDateTimeOffset(Constants.Http.Headers.LastModified); }
+            set { headers.SetDateTimeOffset(Constants.Http.Headers.LastModified, value); }
         }
 
         public DateTimeOffset? Expires
