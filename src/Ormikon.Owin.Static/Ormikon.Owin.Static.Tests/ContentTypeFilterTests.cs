@@ -12,6 +12,7 @@ namespace Ormikon.Owin.Static.Tests
         {
             var filter = new ContentTypeFilter("text/html");
             Assert.IsTrue(filter.Contains("text/html"));
+            Assert.IsTrue(filter.Contains("text/html; charset=UTF-8"));
             Assert.IsFalse(filter.Contains("text/htm"));
             Assert.IsFalse(filter.Contains("ext/html"));
             Assert.IsFalse(filter.Contains("texthtml"));
@@ -53,6 +54,11 @@ namespace Ormikon.Owin.Static.Tests
             Assert.IsTrue(filter.Contains("tex/html"));
             Assert.IsFalse(filter.Contains("text/htmk"));
             Assert.IsFalse(filter.Contains("txt/hkml"));
+            filter = new ContentTypeFilter("text/*");
+            Assert.IsTrue(filter.Contains("text/html"));
+            Assert.IsTrue(filter.Contains("text/html; charset=UTF-8"));
+            Assert.IsTrue(filter.Contains("text/html ; charset=UTF-8"));
+            Assert.IsTrue(filter.Contains("text/html; charset=UTF/-8"));
         }
     }
 }

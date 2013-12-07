@@ -37,7 +37,7 @@ namespace Ormikon.Owin.Static.Filters
                                                   return @"\.";
                                               });
             regexBuilder.Append(filter);
-            regexBuilder.Append(")");
+            regexBuilder.Append("(;.*?)?)");
         }
 
         #endregion
