@@ -91,6 +91,15 @@
     <Compile Include="Filters\FileFilter.cs" />
     <Compile Include="Filters\ContentTypeFilter.cs" />
     <Compile Include="Filters\FilterBase.cs" />
+    <Compile Include="Wrappers\Headers\IHttpHeader.cs" />
+    <Compile Include="Wrappers\Headers\IHttpHeaders.cs" />
+    <Compile Include="Wrappers\Headers\IHttpResponseHeaders.cs" />
+    <Compile Include="Wrappers\Headers\IHttpRequestHeaders.cs" />
+    <Compile Include="Wrappers\Headers\HttpHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpStringHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpDateHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpLongHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpHeaders.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -106,5 +115,6 @@
   -->
   <ItemGroup>
     <Folder Include="Filters\" />
+    <Folder Include="Wrappers\Headers\" />
   </ItemGroup>
 </Project>
