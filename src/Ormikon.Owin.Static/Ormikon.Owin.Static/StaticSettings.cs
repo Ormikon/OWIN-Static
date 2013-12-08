@@ -10,7 +10,8 @@ namespace Ormikon.Owin.Static
     public class StaticSettings
     {
         private const string StaticMemoryCacheConfigurationName = "StaticMemoryCache";
-        internal const string DefaultFileValue = "index.html;index.htm;start.html;start.htm";
+        internal const string DefaultFileValue = "index.html;index.htm;start.html;start.htm;default.html;default.htm";
+        internal const string DefaultCompressedTypesFilter = "text/*;application/*javascript;application/*json*";
         private static readonly char[] sourceSeparators = new [] { ';' };
 
         private static readonly ObjectCache defaultMemoryCache = new MemoryCache(StaticMemoryCacheConfigurationName);
