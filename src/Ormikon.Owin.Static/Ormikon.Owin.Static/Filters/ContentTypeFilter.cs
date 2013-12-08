@@ -7,7 +7,7 @@ namespace Ormikon.Owin.Static.Filters
     internal class ContentTypeFilter : FilterBase
     {
         private static readonly Regex multyStars = new Regex(@"\*{2,}", RegexOptions.Compiled);
-        private static readonly Regex searchGroups = new Regex(@"(\/)|(\*)|(\?)|(\.)", RegexOptions.Compiled);
+        private static readonly Regex searchGroups = new Regex(@"(\/)|(\*)|(\?)|(\.)|(\+)", RegexOptions.Compiled);
 
         public ContentTypeFilter(string filters)
             : base(filters)
@@ -31,13 +31,15 @@ namespace Ormikon.Owin.Static.Filters
                                                   if (match.Groups[1].Success)
                                                       return @"\/";
                                                   if (match.Groups[2].Success)
-                                                      return @"[^\/]*?";
+                                                      return @".*";
                                                   if (match.Groups[3].Success)
                                                       return ".";
-                                                  return @"\.";
+                                                  if (match.Groups[4].Success)
+                                                      return @"\.";
+                                                  return @"\+";
                                               });
             regexBuilder.Append(filter);
-            regexBuilder.Append("(;.*?)?)");
+            regexBuilder.Append("(;.*){0,1})");
         }
 
         #endregion

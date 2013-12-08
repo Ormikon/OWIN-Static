@@ -60,6 +60,19 @@ namespace Ormikon.Owin.Static.Tests
             Assert.IsTrue(filter.Contains("text/html ; charset=UTF-8"));
             Assert.IsTrue(filter.Contains("text/html; charset=UTF/-8"));
         }
+
+        [Test]
+        public void TestDefaultFilter()
+        {
+            var filter = new ContentTypeFilter(StaticSettings.DefaultCompressedTypesFilter);
+            Assert.IsTrue(filter.Contains("text/xml"));
+            Assert.IsTrue(filter.Contains("text/html"));
+            Assert.IsTrue(filter.Contains("text/plain"));
+            Assert.IsTrue(filter.Contains("application/xml"));
+            Assert.IsTrue(filter.Contains("application/json"));
+            Assert.IsFalse(filter.Contains("nontext/nonxml"));
+            Assert.IsFalse(filter.Contains("application/binary"));
+        }
     }
 }
 

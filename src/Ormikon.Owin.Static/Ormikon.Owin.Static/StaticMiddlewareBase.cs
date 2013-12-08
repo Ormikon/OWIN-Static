@@ -5,6 +5,8 @@ using System.Runtime.Caching;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Extensions;
 using Ormikon.Owin.Static.Wrappers;
+using Ormikon.Owin.Static.Filters;
+using System.IO.Compression;
 
 namespace Ormikon.Owin.Static
 {
@@ -12,6 +14,7 @@ namespace Ormikon.Owin.Static
     {
         private readonly bool cached;
         private readonly ObjectCache cache;
+        private readonly IFilter compressedContentFilter;
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
 
@@ -30,13 +33,27 @@ namespace Ormikon.Owin.Static
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache, DateTimeOffset expires, int maxAge)
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+            string compressedContentFilter)
+            : this(next, cached, cache, DateTimeOffset.MinValue, 0, compressedContentFilter)
+        {
+        }
+
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+            DateTimeOffset expires, int maxAge)
+            : this(next, cached, cache, expires, maxAge, StaticSettings.DefaultCompressedTypesFilter)
+        {
+        }
+
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+            DateTimeOffset expires, int maxAge, string compressedContentFilter)
             : base(next)
         {
             this.cached = cached;
             this.cache = cache;
             this.expires = expires;
             this.maxAge = maxAge;
+            this.compressedContentFilter = new ContentTypeFilter(compressedContentFilter);
         }
 
         protected override Task Invoke(IOwinContext context)
@@ -62,7 +79,8 @@ namespace Ormikon.Owin.Static
                 {
                     from.Close();
                     task.Wait();
-                });
+                    to.Close();
+                }, TaskContinuationOptions.ExecuteSynchronously);
         }
 
         private DateTimeOffset GetCacheOffset()
@@ -92,21 +110,56 @@ namespace Ormikon.Owin.Static
             responseHeaders.Headers.CopyTo(response.Headers);
         }
 
-        private static Task ProcessResponseStream(IResponseHeaders responseHeaders, Stream stream, IOwinContext ctx)
+        private bool CanResponseBeCompressed(IResponseHeaders responseHeaders, IOwinContext ctx, out string encoding)
         {
+            encoding = null;
+            if (!compressedContentFilter.IsActive() || responseHeaders.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
+                return false;
+            encoding = "deflate";
+            string contentType = responseHeaders.Headers.GetSingleValue(Constants.Http.Headers.ContentType);
+            return compressedContentFilter.Contains(contentType);
+        }
+
+        private void PrepareResponseToCompression(IResponseHeaders responseHeaders, string encoding)
+        {
+            responseHeaders.Headers.SetSingleValue(Constants.Http.Headers.ContentLength, null);
+            responseHeaders.Headers.SetSingleValue(Constants.Http.Headers.ContentEncoding, encoding);
+        }
+
+        private Stream WrapIntoCompressedStream(Stream stream, string encoding)
+        {
+            if (encoding == null)
+                return stream;
+            if (encoding == "gzip")
+            {
+                return new GZipStream(stream, CompressionMode.Compress, false);
+            }
+            if (encoding == "deflate")
+            {
+                return new DeflateStream(stream, CompressionMode.Compress, false);
+            }
+            return stream;
+        }
+
+        private Task ProcessResponseStream(IResponseHeaders responseHeaders, Stream stream, IOwinContext ctx)
+        {
+            string encoding;
+            bool compress = CanResponseBeCompressed(responseHeaders, ctx, out encoding);
+            if (compress)
+                PrepareResponseToCompression(responseHeaders, encoding);
             SetResponseHeaders(responseHeaders, ctx.Response);
             if (IsBodyRequested(ctx.Request.Method))
-                return SendStreamAsync(stream, ctx.Response.Body);
+                return SendStreamAsync(stream, WrapIntoCompressedStream(ctx.Response.Body, encoding));
             stream.Close();
             return Task.FromResult<object>(null);
         }
 
-        private static Task SendResponse(CachedResponse cachedResponse, IOwinContext ctx)
+        private Task SendResponse(CachedResponse cachedResponse, IOwinContext ctx)
         {
             return ProcessResponseStream(cachedResponse, cachedResponse.CreateBodyStream(), ctx);
         }
 
-        private static Task SendResponse(StaticResponse staticResponse, IOwinContext ctx)
+        private Task SendResponse(StaticResponse staticResponse, IOwinContext ctx)
         {
             return ProcessResponseStream(staticResponse, staticResponse.Body, ctx);
         }

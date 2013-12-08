@@ -15,15 +15,16 @@ namespace Ormikon.Owin.Static
         private readonly string[] sources;
         private readonly string[] indexFiles;
         private readonly bool redirectIfFolder;
-        private readonly FileFilter include;
-        private readonly FileFilter exclude;
-        private readonly FileFilter unixHidden;
+        private readonly IFilter include;
+        private readonly IFilter exclude;
+        private readonly IFilter unixHidden;
         private readonly bool allowHidden;
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
 
         public StaticMiddleware(Func<IDictionary<string, object>, Task> next, StaticSettings settings)
-            : base(next, settings.Cached, settings.Cache, settings.Expires, settings.MaxAge)
+            : base(next, settings.Cached, settings.Cache, settings.Expires, settings.MaxAge,
+                settings.CompressedContentTypes)
         {
             if (settings == null)
                 throw new ArgumentNullException("settings");

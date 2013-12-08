@@ -11,7 +11,8 @@ namespace Ormikon.Owin.Static
     {
         private const string StaticMemoryCacheConfigurationName = "StaticMemoryCache";
         internal const string DefaultFileValue = "index.html;index.htm;start.html;start.htm;default.html;default.htm";
-        internal const string DefaultCompressedTypesFilter = "text/*;application/*javascript;application/*json*";
+        internal const string DefaultCompressedTypesFilter = "text/*;*/xml;application/*javascript;application/*json*"
+            + ";application/*+xml;image/*+xml";
         private static readonly char[] sourceSeparators = new [] { ';' };
 
         private static readonly ObjectCache defaultMemoryCache = new MemoryCache(StaticMemoryCacheConfigurationName);
@@ -24,6 +25,7 @@ namespace Ormikon.Owin.Static
             Expires = DateTimeOffset.MinValue;
             RedirectIfFolderFound = true;
             DefaultFile = DefaultFileValue;
+            CompressedContentTypes = DefaultCompressedTypesFilter;
         }
 
         /// <summary>
@@ -128,6 +130,12 @@ namespace Ormikon.Owin.Static
         /// The file pattern for the files that should be excluded from the collection
         /// </summary>
         public string Exclude { get; set; }
+
+        /// <summary>
+        /// The pattern for content types that can be comressed in the response
+        /// </summary>
+        /// <value>The compressed content types in filter like representation.</value>
+        public string CompressedContentTypes { get; set; }
 
         /// <summary>
         /// Is hidden files and directories allowed
