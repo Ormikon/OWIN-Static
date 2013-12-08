@@ -100,6 +100,9 @@
     <Compile Include="Wrappers\Headers\HttpDateHeader.cs" />
     <Compile Include="Wrappers\Headers\HttpLongHeader.cs" />
     <Compile Include="Wrappers\Headers\HttpHeaders.cs" />
+    <Compile Include="Wrappers\Headers\HttpAcceptHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpEnumHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpCacheControlHeader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

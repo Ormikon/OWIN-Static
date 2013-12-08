@@ -6,7 +6,7 @@ namespace Ormikon.Owin.Static.Headers
     internal interface IHttpHeaders : IDictionary<string, string[]>, ICloneable
     {
         void CopyTo(IDictionary<string, string[]> headers);
-        IHttpHeaders Clone();
+        new IHttpHeaders Clone();
     }
 }
 
