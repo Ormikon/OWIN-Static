@@ -11,9 +11,9 @@ namespace Ormikon.Owin.Static.Filters
         private static readonly Regex slashes = new Regex(@"[\\,\/]+", RegexOptions.Compiled);
         private static readonly Regex multyStars1 = new Regex(@"(?<=\/|^)\*{3,}(?=\/|$)", RegexOptions.Compiled);
         private static readonly Regex multyStars2 = new Regex(@"((?<!\/)\*{2,})|(\*{2,}(?!\/|$))", RegexOptions.Compiled);
-        private static readonly Regex searchGroups = new Regex(@"(\/\*\*\/?)|(\*)|(\?)|(\.)", RegexOptions.Compiled);
+        private static readonly Regex searchGroups = new Regex(@"(\/\*\*\/?)|(\*)|(\?)|(\.)|(\+)|(\^)|(\$)", RegexOptions.Compiled);
 
-        private readonly char[] invalidChars = Path.GetInvalidPathChars().Except(new[] { '*' }).ToArray();
+        private readonly char[] invalidChars = Path.GetInvalidPathChars().Except(new[] { '*', '?' }).ToArray();
 
         public FileFilter(string filters)
             : base(filters)
@@ -50,7 +50,13 @@ namespace Ormikon.Owin.Static.Filters
                                                       return @"[^\/]*?";
                                                   if (match.Groups[3].Success)
                                                       return ".";
-                                                  return @"\.";
+                                                  if (match.Groups[4].Success)
+                                                      return @"\.";
+                                                  if (match.Groups[5].Success)
+                                                      return @"\+";
+                                                  if (match.Groups[6].Success)
+                                                      return @"\^";
+                                                  return @"\$";
                                               });
             regexBuilder.Append(filter);
             regexBuilder.Append(")");// group end
