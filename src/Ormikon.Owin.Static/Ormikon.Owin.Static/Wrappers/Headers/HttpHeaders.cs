@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 
-namespace Ormikon.Owin.Static.Headers
+namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal abstract class HttpHeaders : IHttpHeaders
     {

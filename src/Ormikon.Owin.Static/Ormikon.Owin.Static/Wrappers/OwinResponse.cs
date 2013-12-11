@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Ormikon.Owin.Static.Extensions;
+using Ormikon.Owin.Static.Wrappers.Headers;
 
 namespace Ormikon.Owin.Static.Wrappers
 {
     internal class OwinResponse : IOwinResponse
     {
         private readonly IDictionary<string, object> data;
+        private readonly IHttpResponseHeaders responseHeaders;
 
         public OwinResponse(IDictionary<string, object> data)
         {
             this.data = data;
+            responseHeaders = new HttpResponseHeaders(data.Get<IDictionary<string, string[]>>(Constants.Owin.Response.Headers));
         }
 
         public Stream Body
@@ -18,9 +21,9 @@ namespace Ormikon.Owin.Static.Wrappers
             get { return data.Get<Stream>(Constants.Owin.Response.Body); }
         }
 
-        public IDictionary<string, string[]> Headers
+        public IHttpResponseHeaders Headers
         {
-            get { return data.Get<IDictionary<string, string[]>>(Constants.Owin.Response.Headers); }
+            get { return responseHeaders; }
         }
 
         public int StatusCode

@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Ormikon.Owin.Static.Extensions;
+using Ormikon.Owin.Static.Wrappers.Headers;
 
 namespace Ormikon.Owin.Static.Wrappers
 {
     internal class OwinRequest : IOwinRequest
     {
         private readonly IDictionary<string, object> data;
+        private readonly IHttpRequestHeaders requestHeaders;
 
         public OwinRequest(IDictionary<string, object> data)
         {
             this.data = data;
+            requestHeaders = new HttpRequestHeaders(data.Get<IDictionary<string, string[]>>(Constants.Owin.Request.Headers));
         }
 
         public Stream Body
@@ -18,9 +21,9 @@ namespace Ormikon.Owin.Static.Wrappers
             get { return data.Get<Stream>(Constants.Owin.Request.Body); }
         }
 
-        public IDictionary<string, string[]> Headers
+        public IHttpRequestHeaders Headers
         {
-            get { return data.Get<IDictionary<string, string[]>>(Constants.Owin.Request.Headers); }
+            get { return requestHeaders; }
         }
 
         public string Method

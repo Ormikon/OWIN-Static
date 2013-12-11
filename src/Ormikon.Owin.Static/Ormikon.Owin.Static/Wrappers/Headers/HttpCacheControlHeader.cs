@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Ormikon.Owin.Static.Headers
+namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpCacheControlHeader : HttpEnumHeader
     {
@@ -13,7 +13,7 @@ namespace Ormikon.Owin.Static.Headers
 
         protected int? GetMaxAge()
         {
-            foreach(var val in EnumValues)
+            foreach(var val in GetEnumValues())
             {
                 if (val.IndexOf("max-age") >= 0)
                 {
@@ -32,7 +32,7 @@ namespace Ormikon.Owin.Static.Headers
 
         protected void SetMaxAge(int? maxAge)
         {
-            var enumValues = new List<string>(EnumValues);
+            var enumValues = new List<string>(GetEnumValues());
             bool found = false;
             for (int i = 0; i < enumValues.Count; i++)
             {
@@ -54,11 +54,11 @@ namespace Ormikon.Owin.Static.Headers
             if (!found && maxAge.HasValue)
             {
                 enumValues.Add("max-age=" + maxAge.Value.ToString(CultureInfo.InvariantCulture));
-                SetSingleValue(string.Join(SplitString, enumValues));
+                SetEnumValues(enumValues);
             }
             else if (found && !maxAge.HasValue)
             {
-                SetSingleValue(string.Join(SplitString, enumValues));
+                SetEnumValues(enumValues);
             }
         }
 

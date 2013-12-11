@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace Ormikon.Owin.Static.Headers
+namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal abstract class HttpHeader : IHttpHeader
     {
@@ -20,12 +21,20 @@ namespace Ormikon.Owin.Static.Headers
             this.code = code;
         }
 
+        public override string ToString()
+        {
+            var value= GetSingleValue();
+            if (value == null)
+                return "";
+            return code + ": " + value;
+        }
+
         #region Helpers
 
         protected string GetSingleValue()
         {
             var values = Values;
-            return values == null || values.Length == 0 ? null : values[0];
+            return values == null || values.Length == 0 ? null : string.Join(",", values);
         }
 
         protected void SetSingleValue(string value)
@@ -44,6 +53,14 @@ namespace Ormikon.Owin.Static.Headers
         {
             if (headers.ContainsKey(code))
                 headers.Remove(code);
+        }
+
+        public bool Available
+        {
+            get
+            {
+                return headers.ContainsKey(code);
+            }
         }
 
         public string[] Values

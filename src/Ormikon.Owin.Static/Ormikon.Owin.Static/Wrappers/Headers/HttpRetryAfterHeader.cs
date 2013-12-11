@@ -1,13 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
-    internal class HttpLongHeader : HttpHeader
+    internal class HttpRetryAfterHeader : HttpDateHeader
     {
-        public HttpLongHeader(IDictionary<string, string[]> headers, string code)
-            : base(headers, code)
+        public HttpRetryAfterHeader(IDictionary<string, string[]> headers)
+            : base(headers, Constants.Http.Headers.RetryAfter)
         {
         }
 
@@ -22,11 +25,15 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
             SetSingleValue(value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : null);
         }
 
-        public long? Value
+        public bool IsDate
+        {
+            get { return Value.HasValue; }
+        }
+
+        public long? Seconds
         {
             get { return GetLongValue(); }
             set { SetLongValue(value); }
         }
     }
 }
-

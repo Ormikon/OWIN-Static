@@ -61,6 +61,14 @@
     <Compile Include="IResponseHeaders.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="Mapping\MapMiddleware.cs" />
+    <Compile Include="ResponseSender\IResponseSender.cs" />
+    <Compile Include="Wrappers\Headers\HttpContentRangeHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpIfRangeHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpPropertyHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpRangeHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpRequestHeaders.cs" />
+    <Compile Include="Wrappers\Headers\HttpResponseHeaders.cs" />
+    <Compile Include="Wrappers\Headers\HttpRetryAfterHeader.cs" />
     <Compile Include="Wrappers\IOwinContext.cs" />
     <Compile Include="Wrappers\IOwinRequest.cs" />
     <Compile Include="Wrappers\IOwinResponse.cs" />
@@ -116,8 +124,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Filters\" />
-    <Folder Include="Wrappers\Headers\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

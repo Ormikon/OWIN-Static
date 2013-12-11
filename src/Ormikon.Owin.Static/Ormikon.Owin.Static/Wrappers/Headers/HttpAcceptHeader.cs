@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace Ormikon.Owin.Static.Headers
+namespace Ormikon.Owin.Static.Wrappers.Headers
 {
-    internal class HttpAcceptHeader : HttpStringHeader
+    internal class HttpAcceptHeader : HttpPropertyHeader
     {
         private const string SplitString = ",";
         private static readonly char[] splitChar = new [] { ',' };
@@ -17,14 +17,12 @@ namespace Ormikon.Owin.Static.Headers
 
         protected HttpAcceptHeaderValue[] GetAcceptValues()
         {
-            string stringValue = GetSingleValue();
-            if (string.IsNullOrEmpty(stringValue))
-            {
-                return new HttpAcceptHeaderValue[0];
-            }
-            return stringValue.Split(splitChar, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(av => new HttpAcceptHeaderValue(av))
-                    .ToArray();
+            return GetEnumValues().Select(v => new HttpAcceptHeaderValue(v)).ToArray();
+        }
+
+        protected void SetAcceptValues(ICollection<HttpAcceptHeaderValue> values)
+        {
+            SetEnumValues(values == null ? null : values.Select(av => av.ToString()).ToList());
         }
 
         public void AddAcceptValue(string acceptValue)
@@ -50,68 +48,37 @@ namespace Ormikon.Owin.Static.Headers
         }
     }
 
-    internal class HttpAcceptHeaderValue
+    internal class HttpAcceptHeaderValue : HttpPropertyHeaderValue
     {
-        private readonly string acceptValue;
-        private readonly float qualityFactor;
+        private const string QualityFactorProp = "q";
 
-        public HttpAcceptHeaderValue (string acceptValue)
+        public HttpAcceptHeaderValue(string acceptValue)
+            : base (acceptValue)
         {
-            if (acceptValue == null)
-                throw new ArgumentNullException("acceptValue");
-            if (acceptValue.Length == 0)
-                throw new ArgumentException("Accept header value cannot be empty", "acceptValue");
-            this.acceptValue = TryExtractQualityFactor(acceptValue, out qualityFactor);
         }
 
         public HttpAcceptHeaderValue(string acceptValue, float qualityFactor)
+            : this(acceptValue)
         {
-            if (acceptValue == null)
-                throw new ArgumentNullException("acceptValue");
-            acceptValue = acceptValue.Trim();
-            if (acceptValue.Length == 0)
-                throw new ArgumentException("Accept header value cannot be empty", "acceptValue");
-            this.acceptValue = acceptValue;
-            this.qualityFactor = qualityFactor;
-        }
-
-        public static string TryExtractQualityFactor(string acceptValue, out float qualityFactor)
-        {
-            qualityFactor = 1;
-            if (acceptValue.IndexOf(';') > 0)
-            {
-                var parts = acceptValue.Split(';');
-                if (parts.Length == 2)
-                {
-                    var qualityParts = parts[1].Split('=');
-                    if (qualityParts.Length == 2 && qualityParts[0].Trim().ToLowerInvariant() == "q")
-                    {
-                        float parsedQuality;
-                        if (float.TryParse(qualityParts[1].Trim(), out parsedQuality))
-                        {
-                            qualityFactor = parsedQuality;
-                            return parts[0].Trim();
-                        }
-                    }
-                }
-            }
-            return acceptValue.Trim();
-        }
-
-        public override string ToString ()
-        {
-            return qualityFactor == 1 ? acceptValue
-                    : string.Format(CultureInfo.InvariantCulture, "{0};q={1}", acceptValue, qualityFactor);
-        }
-
-        public string Value
-        {
-            get { return acceptValue; }
+            QualityFactor = qualityFactor;
         }
 
         public float QualityFactor
         {
-            get { return qualityFactor; }
+            get
+            {
+                string strValue = this[QualityFactorProp];
+                if (string.IsNullOrEmpty(strValue))
+                    return 1;
+                float result;
+                if (float.TryParse(strValue, out result))
+                    return result;
+                return 1;
+            }
+            set
+            {
+                this[QualityFactorProp] = value.ToString(CultureInfo.InvariantCulture);
+            }
         }
     }
 }
