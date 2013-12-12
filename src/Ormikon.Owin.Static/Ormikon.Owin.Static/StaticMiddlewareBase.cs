@@ -115,9 +115,13 @@ namespace Ormikon.Owin.Static
             encoding = null;
             if (!compressedContentFilter.IsActive() || responseHeaders.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
                 return false;
-            encoding = "deflate";
             string contentType = responseHeaders.Headers.GetSingleValue(Constants.Http.Headers.ContentType);
-            return compressedContentFilter.Contains(contentType);
+            if (compressedContentFilter.Contains(contentType))
+            {
+                encoding = "gzip";
+                return true;
+            }
+            return false;
         }
 
         private void PrepareResponseToCompression(IResponseHeaders responseHeaders, string encoding)

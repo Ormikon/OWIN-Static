@@ -15,8 +15,15 @@ namespace Ormikon.Owin.Static.Wrappers
 
         public Task Invoke(IDictionary<string, object> environment)
         {
-            var context = new OwinContext(environment);
-            return Invoke(context);
+            try
+            {
+                var context = new OwinContext(environment);
+                return Invoke(context);
+            }
+            catch(Exception exception)
+            {
+                return Task.FromResult(exception);
+            }
         }
 
         protected virtual Task Invoke(IOwinContext context)

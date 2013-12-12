@@ -6,6 +6,8 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal abstract class HttpHeader : IHttpHeader
     {
+        protected const string SplitString = ",";
+
         private readonly IDictionary<string, string[]> headers;
         private readonly string code;
 
@@ -23,10 +25,10 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         public override string ToString()
         {
-            var value= GetSingleValue();
-            if (value == null)
+            var values = Values;
+            if (values == null)
                 return "";
-            return code + ": " + value;
+            return code + ": " + string.Join(SplitString, values);
         }
 
         #region Helpers
@@ -34,7 +36,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         protected string GetSingleValue()
         {
             var values = Values;
-            return values == null || values.Length == 0 ? null : string.Join(",", values);
+            return values == null || values.Length == 0 ? null : values[0];
         }
 
         protected void SetSingleValue(string value)

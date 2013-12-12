@@ -6,24 +6,45 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpEnumHeader : HttpStringHeader
     {
-        private const string SplitString = ",";
-        private static readonly char[] splitChar = new [] { ',' };
+        private const char SplitChar = ',';
 
         public HttpEnumHeader(IDictionary<string, string[]> headers, string code)
             : base(headers, code)
         {
         }
 
+        private static void SplitValues(string value, ICollection<string> enumValues)
+        {
+            int startIndex = 0;
+            int separatorIdx;
+            while ((separatorIdx = value.IndexOf(SplitChar, startIndex)) >= 0)
+            {
+                if (startIndex != separatorIdx)
+                    enumValues.Add(value.Substring(startIndex, separatorIdx - startIndex));
+                startIndex = separatorIdx + 1;
+            }
+            string split = startIndex == 0 ? value : value.Substring(startIndex);
+            if (split.Length > 0)
+                enumValues.Add(split);
+        }
+
+        private List<string> GetEnumValuesList()
+        {
+            string[] values = Values;
+            if (values == null || values.Length == 0)
+                return new List<string>(0);
+            var enumValues = new List<string>();
+            for (int i = 0; i < values.Length; i++)
+            {
+                SplitValues(values[i], enumValues);
+            }
+
+            return enumValues;
+        }
+
         protected string[] GetEnumValues()
         {
-            string stringValue = GetSingleValue();
-            if (string.IsNullOrEmpty(stringValue))
-            {
-                return new string[0];
-            }
-            return stringValue.Split(splitChar, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(ev => ev.Trim())
-                    .ToArray();
+            return GetEnumValuesList().ToArray();
         }
 
         protected void SetEnumValues(ICollection<string> values)
@@ -35,14 +56,18 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
             if (string.IsNullOrEmpty(enumValue))
                 return;
-            var values = new List<string>(GetEnumValues());
+            var values = GetEnumValuesList();
             values.Add(enumValue);
             SetEnumValues(values);
         }
 
         public void RemoveEnumValue(string enumValue)
         {
-            SetEnumValues(GetEnumValues().Except(new[] { enumValue }, StringComparer.OrdinalIgnoreCase).ToList());
+            if (string.IsNullOrEmpty(enumValue))
+                return;
+            var values = GetEnumValuesList();
+            if (values.Remove(enumValue))
+                SetEnumValues(values);
         }
 
         public string[] EnumValues

@@ -13,6 +13,11 @@
             fullPath = this.pathBase + this.path;
         }
 
+        public override string ToString ()
+        {
+            return fullPath;
+        }
+
         public string Path
         {
             get { return path; }
