@@ -1,5 +1,4 @@
 ﻿using Ormikon.Owin.Static.Wrappers.Headers;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Ormikon.Owin.Static.Wrappers

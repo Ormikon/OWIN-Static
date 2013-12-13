@@ -3,7 +3,7 @@ using System.Net;
 using System.Collections.Generic;
 using Ormikon.Owin.Static.Extensions;
 
-namespace Ormikon.Owin.Static
+namespace Ormikon.Owin.Static.Wrappers
 {
     internal class OwinServer : IOwinServer
     {

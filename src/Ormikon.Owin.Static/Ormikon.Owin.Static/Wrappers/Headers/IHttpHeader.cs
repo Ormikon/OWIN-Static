@@ -1,5 +1,3 @@
-using System;
-
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal interface IHttpHeader

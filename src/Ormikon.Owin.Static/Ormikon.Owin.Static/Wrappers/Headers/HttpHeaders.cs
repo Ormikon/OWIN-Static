@@ -6,16 +6,16 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal abstract class HttpHeaders : IHttpHeaders
     {
-        private readonly IDictionary<string, string[]> headers;
+        private readonly IDictionary<string, string[]> internalHeaders;
 
         protected HttpHeaders ()
             : this (new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase))
         {
         }
 
-        protected HttpHeaders(IDictionary<string, string[]> headers)
+        protected HttpHeaders(IDictionary<string, string[]> internalHeaders)
         {
-            this.headers = headers;
+            this.internalHeaders = internalHeaders;
         }
 
         #region abstract members
@@ -28,7 +28,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         public void CopyTo(IDictionary<string, string[]> headers)
         {
-            foreach(var kv in this.headers)
+            foreach(var kv in internalHeaders)
             {
                 headers[kv.Key] = kv.Value;
             }
@@ -56,33 +56,33 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         public void Add(string key, string[] value)
         {
-            headers.Add(key, value);
+            internalHeaders.Add(key, value);
         }
 
         public bool ContainsKey(string key)
         {
-            return headers.ContainsKey(key);
+            return internalHeaders.ContainsKey(key);
         }
 
         public bool Remove(string key)
         {
-            return headers.Remove(key);
+            return internalHeaders.Remove(key);
         }
 
         public bool TryGetValue(string key, out string[] value)
         {
-            return headers.TryGetValue(key, out value);
+            return internalHeaders.TryGetValue(key, out value);
         }
 
         public string[] this[string index]
         {
             get
             {
-                return headers[index];
+                return internalHeaders[index];
             }
             set
             {
-                headers[index] = value;
+                internalHeaders[index] = value;
             }
         }
 
@@ -90,7 +90,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
             get
             {
-                return headers.Keys;
+                return internalHeaders.Keys;
             }
         }
 
@@ -98,7 +98,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
             get
             {
-                return headers.Values;
+                return internalHeaders.Values;
             }
         }
 
@@ -108,34 +108,34 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         public void Add(KeyValuePair<string, string[]> item)
         {
-            headers.Add(item);
+            internalHeaders.Add(item);
         }
 
         public void Clear()
         {
-            headers.Clear();
+            internalHeaders.Clear();
         }
 
         public bool Contains(KeyValuePair<string, string[]> item)
         {
-            return headers.Contains(item);
+            return internalHeaders.Contains(item);
         }
 
         public void CopyTo(KeyValuePair<string, string[]>[] array, int arrayIndex)
         {
-            headers.CopyTo(array, arrayIndex);
+            internalHeaders.CopyTo(array, arrayIndex);
         }
 
         public bool Remove(KeyValuePair<string, string[]> item)
         {
-            return headers.Remove(item);
+            return internalHeaders.Remove(item);
         }
 
         public int Count
         {
             get
             {
-                return headers.Count;
+                return internalHeaders.Count;
             }
         }
 
@@ -143,7 +143,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
             get
             {
-                return headers.IsReadOnly;
+                return internalHeaders.IsReadOnly;
             }
         }
 
@@ -153,7 +153,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         public IEnumerator<KeyValuePair<string, string[]>> GetEnumerator()
         {
-            return headers.GetEnumerator();
+            return internalHeaders.GetEnumerator();
         }
 
         #endregion
@@ -162,7 +162,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)headers).GetEnumerator();
+            return ((IEnumerable)internalHeaders).GetEnumerator();
         }
 
         #endregion

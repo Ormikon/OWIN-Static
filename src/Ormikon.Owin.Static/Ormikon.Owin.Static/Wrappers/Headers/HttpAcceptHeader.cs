@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -7,9 +6,6 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpAcceptHeader : HttpPropertyHeader
     {
-        private const string SplitString = ",";
-        private static readonly char[] splitChar = new [] { ',' };
-
         public HttpAcceptHeader(IDictionary<string, string[]> headers, string code)
             : base(headers, code)
         {
@@ -37,8 +33,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         public void AddAcceptValue(HttpAcceptHeaderValue acceptValue)
         {
-            var values = new List<HttpAcceptHeaderValue>(GetAcceptValues());
-            values.Add(acceptValue);
+            var values = new List<HttpAcceptHeaderValue>(GetAcceptValues()) {acceptValue};
             SetSingleValue(string.Join(SplitString, values.Select(v => v.ToString())));
         }
 
@@ -71,9 +66,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
                 if (string.IsNullOrEmpty(strValue))
                     return 1;
                 float result;
-                if (float.TryParse(strValue, out result))
-                    return result;
-                return 1;
+                return float.TryParse(strValue, NumberStyles.Any, CultureInfo.InvariantCulture, out result) ? result : 1;
             }
             set
             {

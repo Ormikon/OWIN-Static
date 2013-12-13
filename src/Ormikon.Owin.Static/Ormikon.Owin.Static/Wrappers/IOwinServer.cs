@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Collections.Generic;
 
-namespace Ormikon.Owin.Static
+namespace Ormikon.Owin.Static.Wrappers
 {
     internal interface IOwinServer
     {

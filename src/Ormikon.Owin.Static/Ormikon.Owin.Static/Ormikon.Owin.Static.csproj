@@ -63,12 +63,14 @@
     <Compile Include="Mapping\MapMiddleware.cs" />
     <Compile Include="ResponseSender\IResponseSender.cs" />
     <Compile Include="Wrappers\Headers\HttpContentRangeHeader.cs" />
+    <Compile Include="Wrappers\Headers\HttpGeneralHeaders.cs" />
     <Compile Include="Wrappers\Headers\HttpIfRangeHeader.cs" />
     <Compile Include="Wrappers\Headers\HttpPropertyHeader.cs" />
     <Compile Include="Wrappers\Headers\HttpRangeHeader.cs" />
     <Compile Include="Wrappers\Headers\HttpRequestHeaders.cs" />
     <Compile Include="Wrappers\Headers\HttpResponseHeaders.cs" />
     <Compile Include="Wrappers\Headers\HttpRetryAfterHeader.cs" />
+    <Compile Include="Wrappers\Headers\IHttpGeneralHeaders.cs" />
     <Compile Include="Wrappers\IOwinContext.cs" />
     <Compile Include="Wrappers\IOwinRequest.cs" />
     <Compile Include="Wrappers\IOwinResponse.cs" />

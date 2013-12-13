@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Ormikon.Owin.Static
+namespace Ormikon.Owin.Static.Wrappers
 {
     internal interface IOwinHost
     {

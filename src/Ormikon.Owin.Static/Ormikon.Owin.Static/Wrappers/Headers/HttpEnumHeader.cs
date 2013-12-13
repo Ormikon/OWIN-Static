@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {

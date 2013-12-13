@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Ormikon.Owin.Static.Extensions;
 
-namespace Ormikon.Owin.Static
+namespace Ormikon.Owin.Static.Wrappers
 {
     internal class OwinHost : IOwinHost
     {
