@@ -1,4 +1,4 @@
-﻿namespace Ormikon.Owin.Static
+﻿namespace Ormikon.Owin.Static.Wrappers
 {
     internal class Location
     {

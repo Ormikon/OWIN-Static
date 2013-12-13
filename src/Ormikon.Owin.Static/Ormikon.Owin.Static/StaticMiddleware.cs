@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Extensions;
 using Ormikon.Owin.Static.Filters;
+using Ormikon.Owin.Static.Responses;
+using Ormikon.Owin.Static.Wrappers;
 
 namespace Ormikon.Owin.Static
 {
@@ -56,14 +58,14 @@ namespace Ormikon.Owin.Static
 
             var result = new StaticResponse(info.FullName.GetContentType(), GetFileStream(info.FullName));
             if (expires != DateTimeOffset.MinValue)
-                result.Expires = expires;
+                result.Headers.Expires.Value = expires;
             if (maxAge != 0)
-                result.MaxAge = maxAge;
+                result.Headers.CacheControl.MaxAge = maxAge;
             var fileInfo = info as FileInfo;
             if (fileInfo != null)
             {
-                result.LastModified = fileInfo.LastWriteTimeUtc;
-                result.ContentLength = fileInfo.Length;
+                result.Headers.LastModified.Value = fileInfo.LastWriteTimeUtc;
+                result.Headers.ContentLength.Value = fileInfo.Length;
             }
 
             return result;

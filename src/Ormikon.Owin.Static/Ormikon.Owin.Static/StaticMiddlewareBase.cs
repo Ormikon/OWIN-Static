@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
-using Ormikon.Owin.Static.Extensions;
+using Ormikon.Owin.Static.Responses;
 using Ormikon.Owin.Static.Wrappers;
 using Ormikon.Owin.Static.Filters;
 using System.IO.Compression;
@@ -104,19 +104,23 @@ namespace Ormikon.Owin.Static
             c.Set(path, data, GetCacheOffset());
         }
 
-        private static void SetResponseHeaders(IResponseHeaders responseHeaders, IOwinResponse response)
+        private static void SetResponseHeaders(IStaticResponse staticResponse, IOwinResponse response)
         {
-            response.StatusCode = responseHeaders.StatusCode;
-            responseHeaders.Headers.CopyTo(response.Headers);
+            response.StatusCode = staticResponse.StatusCode;
+            if (!string.IsNullOrEmpty(staticResponse.ReasonPhrase))
+                response.ReasonPhrase = staticResponse.ReasonPhrase;
+            staticResponse.Headers.CopyTo(response.Headers);
         }
 
-        private bool CanResponseBeCompressed(IResponseHeaders responseHeaders, IOwinContext ctx, out string encoding)
+        private bool CanResponseBeCompressed(IStaticResponse responseHeaders, IOwinContext ctx, out string encoding)
         {
             encoding = null;
             if (!compressedContentFilter.IsActive() || responseHeaders.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
                 return false;
-            string contentType = responseHeaders.Headers.GetSingleValue(Constants.Http.Headers.ContentType);
-            if (compressedContentFilter.Contains(contentType))
+            var propValues = responseHeaders.Headers.ContentType.PropertyValues;
+            if (propValues.Length == 0)
+                return false;
+            if (compressedContentFilter.Contains(propValues[0].Value))
             {
                 encoding = "gzip";
                 return true;
@@ -124,13 +128,13 @@ namespace Ormikon.Owin.Static
             return false;
         }
 
-        private void PrepareResponseToCompression(IResponseHeaders responseHeaders, string encoding)
+        private static void PrepareResponseToCompression(IStaticResponse response, string encoding)
         {
-            responseHeaders.Headers.SetSingleValue(Constants.Http.Headers.ContentLength, null);
-            responseHeaders.Headers.SetSingleValue(Constants.Http.Headers.ContentEncoding, encoding);
+            response.Headers.ContentLength.Clear();
+            response.Headers.ContentEncoding.Value = encoding;
         }
 
-        private Stream WrapIntoCompressedStream(Stream stream, string encoding)
+        private static Stream WrapIntoCompressedStream(Stream stream, string encoding)
         {
             if (encoding == null)
                 return stream;
@@ -145,7 +149,7 @@ namespace Ormikon.Owin.Static
             return stream;
         }
 
-        private Task ProcessResponseStream(IResponseHeaders responseHeaders, Stream stream, IOwinContext ctx)
+        private Task ProcessResponseStream(IStaticResponse responseHeaders, Stream stream, IOwinContext ctx)
         {
             string encoding;
             bool compress = CanResponseBeCompressed(responseHeaders, ctx, out encoding);

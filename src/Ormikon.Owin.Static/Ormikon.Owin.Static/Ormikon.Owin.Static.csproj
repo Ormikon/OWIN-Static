@@ -53,13 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyResourcesMiddleware.cs" />
-    <Compile Include="CachedResponse.cs" />
+    <Compile Include="Responses\CachedResponse.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Extensions\HttpHeaderExtensions.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
     <Compile Include="Extensions\OwinExtensions.cs" />
-    <Compile Include="IResponseHeaders.cs" />
-    <Compile Include="Location.cs" />
+    <Compile Include="Responses\IStaticResponse.cs" />
+    <Compile Include="Wrappers\Location.cs" />
     <Compile Include="Mapping\MapMiddleware.cs" />
     <Compile Include="ResponseSender\IResponseSender.cs" />
     <Compile Include="Wrappers\Headers\HttpContentRangeHeader.cs" />
@@ -75,7 +74,7 @@
     <Compile Include="Wrappers\IOwinRequest.cs" />
     <Compile Include="Wrappers\IOwinResponse.cs" />
     <Compile Include="Wrappers\OwinContext.cs" />
-    <Compile Include="StaticResponse.cs" />
+    <Compile Include="Responses\StaticResponse.cs" />
     <Compile Include="Config\MapElement.cs" />
     <Compile Include="Config\MapElementCollection.cs" />
     <Compile Include="Config\Settings.cs" />

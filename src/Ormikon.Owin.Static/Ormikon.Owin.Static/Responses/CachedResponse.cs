@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Ormikon.Owin.Static.Extensions;
+using Ormikon.Owin.Static.Wrappers.Headers;
 
-namespace Ormikon.Owin.Static
+namespace Ormikon.Owin.Static.Responses
 {
     [Serializable]
-    internal class CachedResponse : IResponseHeaders
+    internal class CachedResponse : IStaticResponse
     {
         public CachedResponse()
         {
-            Headers = new Dictionary<string, string[]>();
+            Headers = new HttpResponseHeaders();
         }
 
         public static Task<CachedResponse> CreateAsync(StaticResponse staticResponse)
@@ -29,26 +28,26 @@ namespace Ormikon.Owin.Static
                                                           StatusCode = staticResponse.StatusCode,
                                                           Body = mem.ToArray()
                                                       };
-                                     PreprocessHeaders(staticResponse, result.Body.Length);
                                      staticResponse.Headers.CopyTo(result.Headers);
+                                     PostProcessHeaders(result, result.Body.Length);
                                      return result;
                                  }, TaskContinuationOptions.ExecuteSynchronously);
         }
 
-        private static void PreprocessHeaders(StaticResponse staticResponse, int contentLength)
+        private static void PostProcessHeaders(IStaticResponse response, int contentLength)
         {
-            if (staticResponse.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
+            if (response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
                 return;
-            staticResponse.ContentLength = contentLength;
-            if (!staticResponse.LastModified.HasValue)
-                staticResponse.LastModified = DateTimeOffset.Now;
-            if (!staticResponse.Date.HasValue)
-                staticResponse.Date = DateTimeOffset.Now;
-            if (staticResponse.ETag == null)
-                staticResponse.ETag = Guid.NewGuid().ToString("N");
-            int? maxAge = staticResponse.MaxAge;
-            if (maxAge.HasValue && !staticResponse.Expires.HasValue)
-                staticResponse.Expires = DateTimeOffset.Now.AddSeconds(maxAge.Value);
+            response.Headers.ContentLength.Value = contentLength;
+            if (!response.Headers.LastModified.Available)
+                response.Headers.LastModified.Value = DateTimeOffset.Now;
+            if (!response.Headers.Date.Available)
+                response.Headers.Date.Value = DateTimeOffset.Now;
+            if (!response.Headers.ETag.Available)
+                response.Headers.ETag.Value = Guid.NewGuid().ToString("N");
+            int? maxAge = response.Headers.CacheControl.MaxAge;
+            if (maxAge.HasValue && !response.Headers.Expires.Available)
+                response.Headers.Expires.Value = DateTimeOffset.Now.AddSeconds(maxAge.Value);
         }
 
         public Stream CreateBodyStream()
@@ -58,7 +57,9 @@ namespace Ormikon.Owin.Static
 
         public int StatusCode { get; set; }
 
-        public IDictionary<string, string[]> Headers { get; private set; }
+        public string ReasonPhrase { get; set; }
+
+        public IHttpResponseHeaders Headers { get; private set; }
 
         public byte[] Body { get; set; }
     }
