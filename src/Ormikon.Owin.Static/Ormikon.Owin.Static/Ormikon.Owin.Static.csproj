@@ -112,6 +112,7 @@
     <Compile Include="Wrappers\Headers\HttpAcceptHeader.cs" />
     <Compile Include="Wrappers\Headers\HttpEnumHeader.cs" />
     <Compile Include="Wrappers\Headers\HttpCacheControlHeader.cs" />
+    <Compile Include="ResponseSender\ResponseSenderBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

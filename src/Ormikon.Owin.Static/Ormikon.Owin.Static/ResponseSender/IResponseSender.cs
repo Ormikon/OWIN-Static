@@ -7,6 +7,6 @@ namespace Ormikon.Owin.Static.ResponseSender
 {
     interface IResponseSender
     {
-        Task SendAsync(IStaticResponse response, Stream responseStream, IOwinResponse owinResponse);
+        Task SendAsync(IStaticResponse response, Stream responseStream, IOwinContext ctx);
     }
 }

@@ -149,13 +149,18 @@ namespace Ormikon.Owin.Static
             return stream;
         }
 
-        private Task ProcessResponseStream(IStaticResponse responseHeaders, Stream stream, IOwinContext ctx)
+        private Task ProcessResponseStream(IStaticResponse response, Stream stream, IOwinContext ctx)
         {
+            if (response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
+            {
+                SetResponseHeaders(response, ctx.Response);
+                return SendStreamAsync(stream, ctx.Response.Body);
+            }
             string encoding;
-            bool compress = CanResponseBeCompressed(responseHeaders, ctx, out encoding);
+            bool compress = CanResponseBeCompressed(response, ctx, out encoding);
             if (compress)
-                PrepareResponseToCompression(responseHeaders, encoding);
-            SetResponseHeaders(responseHeaders, ctx.Response);
+                PrepareResponseToCompression(response, encoding);
+            SetResponseHeaders(response, ctx.Response);
             if (IsBodyRequested(ctx.Request.Method))
                 return SendStreamAsync(stream, WrapIntoCompressedStream(ctx.Response.Body, encoding));
             stream.Close();
@@ -182,8 +187,9 @@ namespace Ormikon.Owin.Static
                             {
                                 task.Wait();
                                 CacheSet(ctx.Request.Location.FullPath, task.Result);
-                                SendResponse(task.Result, ctx).Wait();
-                            });
+                                return SendResponse(task.Result, ctx);
+                            }, TaskContinuationOptions.ExecuteSynchronously)
+                        .Unwrap();
             }
             return SendResponse(staticResponse, ctx);
         }

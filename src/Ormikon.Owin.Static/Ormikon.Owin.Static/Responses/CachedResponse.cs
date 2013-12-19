@@ -52,7 +52,7 @@ namespace Ormikon.Owin.Static.Responses
 
         public Stream CreateBodyStream()
         {
-            return new MemoryStream(Body);
+            return new MemoryStream(Body, false);
         }
 
         public int StatusCode { get; set; }
