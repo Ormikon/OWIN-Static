@@ -172,7 +172,7 @@ namespace Ormikon.Owin.Static.ResponseSender
 
             if (!IfMatch(ctx, respETag))
             {
-                return rangePresent ? SendNotModified(response, responseStream, ctx) : SendPreconditionFailed(response, responseStream, ctx);
+                return SendPreconditionFailed(response, responseStream, ctx);
             }
 
             return null;
