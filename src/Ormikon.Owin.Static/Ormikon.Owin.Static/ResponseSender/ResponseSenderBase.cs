@@ -8,11 +8,15 @@ namespace Ormikon.Owin.Static.ResponseSender
 {
     internal abstract class ResponseSenderBase : IResponseSender
     {
-        private const int CopyBufferSize = 32768;
-
-        public ResponseSenderBase()
+        private enum PreconditionResult
         {
+            Continue,
+            NotModified,
+            PrecondutionFailed
         }
+
+
+        private const int CopyBufferSize = 32768;
 
         protected static Task SendStreamAsync(Stream from, Stream to)
         {
@@ -122,17 +126,15 @@ namespace Ormikon.Owin.Static.ResponseSender
             return Task.FromResult<object>(null);
         }
 
-        private static Task SendPreconditionFailed(IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        private static Task SendPreconditionResult(PreconditionResult result, IStaticResponse response, Stream responseStream, IOwinContext ctx)
         {
-            return SendCacheStatus(response, responseStream, ctx, Constants.Http.StatusCodes.ClientError.PreconditionFailed);
+            var cacheStatus = result == PreconditionResult.PrecondutionFailed
+                                  ? Constants.Http.StatusCodes.ClientError.PreconditionFailed
+                                  : Constants.Http.StatusCodes.Redirection.NotModified;
+            return SendCacheStatus(response, responseStream, ctx, cacheStatus);
         }
 
-        private static Task SendNotModified(IStaticResponse response, Stream responseStream, IOwinContext ctx)
-        {
-            return SendCacheStatus(response, responseStream, ctx, Constants.Http.StatusCodes.Redirection.NotModified);
-        }
-
-        private static bool IfMatch(IOwinContext ctx, string respETag)
+        private static PreconditionResult IfMatch(IOwinContext ctx, string respETag)
         {
             var ifMatch = ctx.Request.Headers.IfMatch;
             if (ifMatch.Available)
@@ -140,11 +142,11 @@ namespace Ormikon.Owin.Static.ResponseSender
                 var eTags = ifMatch.EnumValues;
                 if (eTags == null || eTags.Length == 0)
                 {
-                    return false;
+                    return PreconditionResult.PrecondutionFailed;
                 }
                 if (string.IsNullOrEmpty(respETag))
                 {
-                    return false;
+                    return PreconditionResult.PrecondutionFailed;
                 }
                 bool tagFound = false;
                 foreach(var eTag in eTags)
@@ -157,22 +159,97 @@ namespace Ormikon.Owin.Static.ResponseSender
                 }
                 if (!tagFound)
                 {
-                    return false;
+                    return PreconditionResult.PrecondutionFailed;
                 }
             }
 
-            return true;
+            return PreconditionResult.Continue;
+        }
+
+        private static PreconditionResult IfNoneMatch(IOwinContext ctx, string respETag)
+        {
+            var ifNoneMatch = ctx.Request.Headers.IfNoneMatch;
+            if (ifNoneMatch.Available)
+            {
+                var eTags = ifNoneMatch.EnumValues;
+                if (eTags == null || eTags.Length == 0)
+                {
+                    return PreconditionResult.PrecondutionFailed;
+                }
+                bool tagFound = false;
+                foreach (var eTag in eTags)
+                {
+                    if (string.CompareOrdinal(eTag, "*") == 0 || string.CompareOrdinal(eTag, respETag) == 0)
+                    {
+                        tagFound = true;
+                        break;
+                    }
+                }
+                if (tagFound)
+                    return PreconditionResult.NotModified;
+            }
+
+            return PreconditionResult.Continue;
+        }
+
+        private static PreconditionResult IfModifiedSince(IOwinContext ctx, DateTimeOffset lastModified)
+        {
+            if (ctx.Request.Headers.IfNoneMatch.Available)
+                return PreconditionResult.Continue;
+            var dateCheck = ctx.Request.Headers.IfModifiedSince.Value;
+            if (dateCheck.HasValue)
+            {
+                if (dateCheck >= lastModified)
+                    return PreconditionResult.NotModified;
+            }
+
+            return PreconditionResult.Continue;
+        }
+
+        private static PreconditionResult IfUnmodifiedSince(IOwinContext ctx, DateTimeOffset lastModified)
+        {
+            var dateCheck = ctx.Request.Headers.IfModifiedSince.Value;
+            if (dateCheck.HasValue)
+            {
+                if (dateCheck < lastModified)
+                    return PreconditionResult.PrecondutionFailed;
+            }
+
+            return PreconditionResult.Continue;
         }
 
         private static Task ProcessCacheHeaders(IStaticResponse response, Stream responseStream, IOwinContext ctx)
         {
-            var respETag = response.Headers.ETag.Value;
-            var lastModified = response.Headers.LastModified.Value;
-            var rangePresent = ctx.Request.Headers.Range.Available;
+            PreconditionResult preconditionResult;
 
-            if (!IfMatch(ctx, respETag))
+            var respETag = response.Headers.ETag.Value;
+            if (!string.IsNullOrEmpty(respETag))
             {
-                return SendPreconditionFailed(response, responseStream, ctx);
+                preconditionResult = IfMatch(ctx, respETag);
+                if (preconditionResult != PreconditionResult.Continue)
+                {
+                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                }
+                preconditionResult = IfNoneMatch(ctx, respETag);
+                if (preconditionResult != PreconditionResult.Continue)
+                {
+                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                }
+            }
+
+            var lastModified = response.Headers.LastModified.Value;
+            if (lastModified.HasValue)
+            {
+                preconditionResult = IfModifiedSince(ctx, lastModified.Value);
+                if (preconditionResult != PreconditionResult.Continue)
+                {
+                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                }
+                preconditionResult = IfUnmodifiedSince(ctx, lastModified.Value);
+                if (preconditionResult != PreconditionResult.Continue)
+                {
+                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                }
             }
 
             return null;
