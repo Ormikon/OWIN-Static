@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyResourcesMiddleware.cs" />
+    <Compile Include="ResponseSender\RangedResponseSender.cs" />
     <Compile Include="Responses\CachedResponse.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
