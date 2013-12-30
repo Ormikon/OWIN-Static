@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
@@ -26,9 +27,13 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         #region IHttpHeaders implementation
 
-        public void CopyTo(IDictionary<string, string[]> headers)
+        public void CopyTo(IDictionary<string, string[]> headers, params string[] except)
         {
-            foreach(var kv in internalHeaders)
+            var copiedHeaders = except == null || except.Length == 0
+                                    ? internalHeaders
+                                    : internalHeaders.Where(
+                                        h => !except.Contains(h.Key, StringComparer.OrdinalIgnoreCase));
+            foreach(var kv in copiedHeaders)
             {
                 headers[kv.Key] = kv.Value;
             }

@@ -3,6 +3,7 @@ using Ormikon.Owin.Static.Responses;
 using System.IO;
 using Ormikon.Owin.Static.Wrappers;
 using System.Threading.Tasks;
+using Ormikon.Owin.Static.Wrappers.Headers;
 
 namespace Ormikon.Owin.Static.ResponseSender
 {
@@ -105,12 +106,29 @@ namespace Ormikon.Owin.Static.ResponseSender
                     .Unwrap();
         }
 
-        protected static void SetResponseHeaders(IStaticResponse staticResponse, IOwinResponse response)
+        protected static void SetResponseHeaders(int statusCode, string reasonPhrase, IHttpHeaders headers,
+                                                 IOwinResponse response, params string[] except)
         {
-            response.StatusCode = staticResponse.StatusCode;
-            if (!string.IsNullOrEmpty(staticResponse.ReasonPhrase))
-                response.ReasonPhrase = staticResponse.ReasonPhrase;
-            staticResponse.Headers.CopyTo(response.Headers);
+            response.StatusCode = statusCode;
+            if (!string.IsNullOrEmpty(reasonPhrase))
+                response.ReasonPhrase = reasonPhrase;
+            headers.CopyTo(response.Headers, except);
+        }
+
+        protected static void SetResponseHeaders(int statusCode, IHttpHeaders headers, IOwinResponse response, params string[] except)
+        {
+            SetResponseHeaders(statusCode, null, headers, response, except);
+        }
+
+        protected static void SetResponseHeaders(IStaticResponse staticResponse, IOwinResponse response, params string[] except)
+        {
+            SetResponseHeaders(staticResponse.StatusCode, staticResponse.ReasonPhrase, staticResponse.Headers, response, except);
+        }
+
+        protected static Task SendFullResponse(IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        {
+            SetResponseHeaders(response, ctx.Response);
+            return SendStreamAsync(responseStream, ctx.Response.Body);
         }
 
         protected static bool IsBodyRequested(string method)
@@ -121,8 +139,7 @@ namespace Ormikon.Owin.Static.ResponseSender
         private static Task SendCacheStatus(IStaticResponse response, Stream responseStream, IOwinContext ctx, int statusCode)
         {
             responseStream.Close();
-            SetResponseHeaders(response, ctx.Response);
-            ctx.Response.StatusCode = statusCode;
+            SetResponseHeaders(statusCode, response.Headers, ctx.Response, Constants.Http.Headers.ContentLength);
             return Task.FromResult<object>(null);
         }
 
@@ -263,8 +280,7 @@ namespace Ormikon.Owin.Static.ResponseSender
         {
             if (response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
             {
-                SetResponseHeaders(response, ctx.Response);
-                return SendStreamAsync(responseStream, ctx.Response.Body);
+                return SendFullResponse(response, responseStream, ctx);
             }
             return ProcessCacheHeaders(response, responseStream, ctx) ?? SendAsyncInternal(response, responseStream, ctx);
         }

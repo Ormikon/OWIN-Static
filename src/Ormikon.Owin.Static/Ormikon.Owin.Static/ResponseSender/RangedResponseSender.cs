@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Responses;
 using Ormikon.Owin.Static.Wrappers;
@@ -20,12 +17,6 @@ namespace Ormikon.Owin.Static.ResponseSender
             var resp = StaticResponse.HttpStatus(Constants.Http.StatusCodes.ClientError.RequestedRangeNotSatisfiable);
             SetResponseHeaders(resp, ctx.Response);
             return Task.FromResult<object>(null);
-        }
-
-        private static Task SendFull(IStaticResponse response, Stream responseStream, IOwinContext ctx)
-        {
-            SetResponseHeaders(response, ctx.Response);
-            return SendStreamAsync(responseStream, ctx.Response.Body);
         }
 
         private static long GetRangeLength(HttpRange range, long contentLength, out long start, out long end)
@@ -46,12 +37,24 @@ namespace Ormikon.Owin.Static.ResponseSender
             long? length = response.Headers.ContentLength.Value;
             if (!length.HasValue || length.Value == 0)
             {
-                SendFull(response, responseStream, ctx);
+                SendFullResponse(response, responseStream, ctx);
             }
-            SetResponseHeaders(response, ctx.Response);
-            ctx.Response.StatusCode = Constants.Http.StatusCodes.Successful.PartialContent;
 
-            throw new NotImplementedException();
+            long start, end;
+// ReSharper disable PossibleInvalidOperationException
+            long rangeLength = GetRangeLength(range, length.Value, out start, out end);
+// ReSharper restore PossibleInvalidOperationException
+            if (start < 0 || start >= length.Value || end >= length.Value || rangeLength <= 0)
+            {
+                return SendRequestedRangeNotSatisfable(ctx, responseStream);
+            }
+
+            SetResponseHeaders(Constants.Http.StatusCodes.Successful.PartialContent, response.Headers, ctx.Response,
+                               Constants.Http.Headers.ContentLength);
+            ctx.Response.Headers.ContentRange.Range = new HttpContentRange(start, end, length.Value);
+            ctx.Response.Headers.ContentLength.Value = rangeLength;
+
+            return SendStreamAsync(responseStream, ctx.Response.Body, start, rangeLength);
         }
 
         private static bool IfRange(HttpIfRangeHeader ifRange, string respETag, DateTimeOffset? lastModified)
@@ -77,7 +80,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             var rangeHeader = ctx.Request.Headers.Range;
             if (!rangeHeader.Available)
             {
-                return SendFull(response, responseStream, ctx);
+                return SendFullResponse(response, responseStream, ctx);
             }
             var range = rangeHeader.Range;
             if (!range.Valid)
@@ -87,7 +90,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             var ifRange = ctx.Request.Headers.IfRange;
             if (ifRange.Available && !IfRange(ifRange, response.Headers.ETag.Value, response.Headers.LastModified.Value))
             {
-                return SendFull(response, responseStream, ctx);
+                return SendFullResponse(response, responseStream, ctx);
             }
 
             return SendRange(range, response, responseStream, ctx);

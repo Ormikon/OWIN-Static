@@ -53,7 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyResourcesMiddleware.cs" />
+    <Compile Include="ResponseSender\CompressedResponseSender.cs" />
+    <Compile Include="ResponseSender\DeflatedResponseSender.cs" />
+    <Compile Include="ResponseSender\GZippedResponseSender.cs" />
+    <Compile Include="ResponseSender\IResponseSenderFactory.cs" />
     <Compile Include="ResponseSender\RangedResponseSender.cs" />
+    <Compile Include="ResponseSender\ResponseSenderFactory.cs" />
     <Compile Include="Responses\CachedResponse.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
