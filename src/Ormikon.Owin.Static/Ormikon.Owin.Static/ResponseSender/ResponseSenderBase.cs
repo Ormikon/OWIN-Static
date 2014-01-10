@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Ormikon.Owin.Static.Responses;
 using System.IO;
 using Ormikon.Owin.Static.Wrappers;
@@ -13,7 +14,7 @@ namespace Ormikon.Owin.Static.ResponseSender
         {
             Continue,
             NotModified,
-            PrecondutionFailed
+            PreconditionFailed
         }
 
 
@@ -32,7 +33,7 @@ namespace Ormikon.Owin.Static.ResponseSender
 
         private static Task ReadAsync(byte[] buffer, Stream stream, long length)
         {
-            int copyLength = (int)Math.Min(CopyBufferSize, length);
+            var copyLength = (int)Math.Min(CopyBufferSize, length);
             if (copyLength <= 0)
                 return Task.FromResult<object>(null);
             return stream.ReadAsync(buffer, 0, copyLength)
@@ -64,7 +65,7 @@ namespace Ormikon.Owin.Static.ResponseSender
 
         private static Task SendStreamAsync(byte[] buffer, Stream from, Stream to, long length)
         {
-            int copyLength = (int)Math.Min(CopyBufferSize, length);
+            var copyLength = (int)Math.Min(CopyBufferSize, length);
             if (copyLength <= 0)
                 return Task.FromResult<object>(null);
             return from.ReadAsync(buffer, 0, copyLength)
@@ -145,7 +146,7 @@ namespace Ormikon.Owin.Static.ResponseSender
 
         private static Task SendPreconditionResult(PreconditionResult result, IStaticResponse response, Stream responseStream, IOwinContext ctx)
         {
-            var cacheStatus = result == PreconditionResult.PrecondutionFailed
+            var cacheStatus = result == PreconditionResult.PreconditionFailed
                                   ? Constants.Http.StatusCodes.ClientError.PreconditionFailed
                                   : Constants.Http.StatusCodes.Redirection.NotModified;
             return SendCacheStatus(response, responseStream, ctx, cacheStatus);
@@ -159,24 +160,16 @@ namespace Ormikon.Owin.Static.ResponseSender
                 var eTags = ifMatch.EnumValues;
                 if (eTags == null || eTags.Length == 0)
                 {
-                    return PreconditionResult.PrecondutionFailed;
+                    return PreconditionResult.PreconditionFailed;
                 }
                 if (string.IsNullOrEmpty(respETag))
                 {
-                    return PreconditionResult.PrecondutionFailed;
+                    return PreconditionResult.PreconditionFailed;
                 }
-                bool tagFound = false;
-                foreach(var eTag in eTags)
-                {
-                    if (string.CompareOrdinal(eTag, "*") == 0 || string.CompareOrdinal(eTag, respETag) == 0)
-                    {
-                        tagFound = true;
-                        break;
-                    }
-                }
+                bool tagFound = eTags.Any(eTag => string.CompareOrdinal(eTag, "*") == 0 || string.CompareOrdinal(eTag, respETag) == 0);
                 if (!tagFound)
                 {
-                    return PreconditionResult.PrecondutionFailed;
+                    return PreconditionResult.PreconditionFailed;
                 }
             }
 
@@ -191,17 +184,9 @@ namespace Ormikon.Owin.Static.ResponseSender
                 var eTags = ifNoneMatch.EnumValues;
                 if (eTags == null || eTags.Length == 0)
                 {
-                    return PreconditionResult.PrecondutionFailed;
+                    return PreconditionResult.PreconditionFailed;
                 }
-                bool tagFound = false;
-                foreach (var eTag in eTags)
-                {
-                    if (string.CompareOrdinal(eTag, "*") == 0 || string.CompareOrdinal(eTag, respETag) == 0)
-                    {
-                        tagFound = true;
-                        break;
-                    }
-                }
+                bool tagFound = eTags.Any(eTag => string.CompareOrdinal(eTag, "*") == 0 || string.CompareOrdinal(eTag, respETag) == 0);
                 if (tagFound)
                     return PreconditionResult.NotModified;
             }
@@ -229,7 +214,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             if (dateCheck.HasValue)
             {
                 if (dateCheck < lastModified)
-                    return PreconditionResult.PrecondutionFailed;
+                    return PreconditionResult.PreconditionFailed;
             }
 
             return PreconditionResult.Continue;
@@ -276,13 +261,13 @@ namespace Ormikon.Owin.Static.ResponseSender
 
         #region IResponseSender implementation
 
-        public Task SendAsync(IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        public Task SendAsync(IStaticResponse response, Stream responseStream, IOwinContext context)
         {
             if (response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
             {
-                return SendFullResponse(response, responseStream, ctx);
+                return SendFullResponse(response, responseStream, context);
             }
-            return ProcessCacheHeaders(response, responseStream, ctx) ?? SendAsyncInternal(response, responseStream, ctx);
+            return ProcessCacheHeaders(response, responseStream, context) ?? SendAsyncInternal(response, responseStream, context);
         }
 
         #endregion

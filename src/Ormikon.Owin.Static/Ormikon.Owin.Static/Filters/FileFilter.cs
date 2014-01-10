@@ -9,8 +9,8 @@ namespace Ormikon.Owin.Static.Filters
     internal class FileFilter : FilterBase
     {
         private static readonly Regex slashes = new Regex(@"[\\,\/]+", RegexOptions.Compiled);
-        private static readonly Regex multyStars1 = new Regex(@"(?<=\/|^)\*{3,}(?=\/|$)", RegexOptions.Compiled);
-        private static readonly Regex multyStars2 = new Regex(@"((?<!\/)\*{2,})|(\*{2,}(?!\/|$))", RegexOptions.Compiled);
+        private static readonly Regex multiStars1 = new Regex(@"(?<=\/|^)\*{3,}(?=\/|$)", RegexOptions.Compiled);
+        private static readonly Regex multiStars2 = new Regex(@"((?<!\/)\*{2,})|(\*{2,}(?!\/|$))", RegexOptions.Compiled);
         private static readonly Regex searchGroups = new Regex(@"(\/\*\*\/?)|(\*)|(\?)|(\.)|(\+)|(\^)|(\$)", RegexOptions.Compiled);
 
         private readonly char[] invalidChars = Path.GetInvalidPathChars().Except(new[] { '*', '?' }).ToArray();
@@ -32,8 +32,8 @@ namespace Ormikon.Owin.Static.Filters
         private static string OptimizeFilter(string filter)
         {
             filter = slashes.Replace(filter, "/").Trim('/');
-            filter = multyStars1.Replace(filter, "**");
-            return multyStars2.Replace(filter, "*");
+            filter = multiStars1.Replace(filter, "**");
+            return multiStars2.Replace(filter, "*");
         }
 
         protected override void ConvertFilter(string filter, StringBuilder regexBuilder)

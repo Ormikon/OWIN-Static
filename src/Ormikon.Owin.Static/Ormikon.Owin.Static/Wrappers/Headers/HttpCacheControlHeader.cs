@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -14,7 +15,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
             foreach(var val in GetEnumValues())
             {
-                if (val.IndexOf("max-age") >= 0)
+                if (val.IndexOf("max-age", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     var splits = val.Split('=');
                     if (splits.Length == 2 && splits[0].Trim().ToLowerInvariant() == "max-age")
@@ -36,7 +37,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
             for (int i = 0; i < enumValues.Count; i++)
             {
                 string val = enumValues[i];
-                if (val.IndexOf("max-age") >= 0)
+                if (val.IndexOf("max-age", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     found = true;
                     if (maxAge.HasValue)

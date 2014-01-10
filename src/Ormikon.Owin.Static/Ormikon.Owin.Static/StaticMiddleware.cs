@@ -12,7 +12,7 @@ namespace Ormikon.Owin.Static
 {
     internal class StaticMiddleware : StaticMiddlewareBase
     {
-        private static readonly char[] indexFileSeparator = new[] { ';' };
+        private static readonly char[] indexFileSeparator = { ';' };
 
         private readonly string[] sources;
         private readonly string[] indexFiles;
@@ -194,7 +194,9 @@ namespace Ormikon.Owin.Static
             }
 
             bool isPathEmpty = string.IsNullOrEmpty(pathStr);
+// ReSharper disable AssignNullToNotNullAttribute
             foreach (string fullPath in sources.Select(src => isPathEmpty ? src : Path.Combine(src, pathStr)))
+// ReSharper restore AssignNullToNotNullAttribute
             {
                 var info = TryResolvePath(fullPath, true, allowHidden);
                 if (info != null)

@@ -15,7 +15,7 @@ namespace Ormikon.Owin.Static.Extensions
             var chain =
                 newBuilder.Build(typeof (Func<IDictionary<string, object>, Task>)) as
                 Func<IDictionary<string, object>, Task>;
-            return builder.Use(typeof(MapMiddleware), path, chain); ;
+            return builder.Use(typeof(MapMiddleware), path, chain);
         }
     }
 }

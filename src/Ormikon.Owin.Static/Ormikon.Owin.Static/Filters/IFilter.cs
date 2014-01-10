@@ -1,5 +1,3 @@
-using System;
-
 namespace Ormikon.Owin.Static.Filters
 {
     internal interface IFilter

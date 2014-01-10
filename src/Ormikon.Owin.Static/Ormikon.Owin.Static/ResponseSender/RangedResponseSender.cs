@@ -11,7 +11,7 @@ namespace Ormikon.Owin.Static.ResponseSender
     {
         private const string AllowedRange = "bytes";
 
-        private static Task SendRequestedRangeNotSatisfable(IOwinContext ctx, Stream responseStream)
+        private static Task SendRequestedRangeNotSatisfiable(IOwinContext ctx, Stream responseStream)
         {
             responseStream.Close();
             var resp = StaticResponse.HttpStatus(Constants.Http.StatusCodes.ClientError.RequestedRangeNotSatisfiable);
@@ -46,7 +46,7 @@ namespace Ormikon.Owin.Static.ResponseSender
 // ReSharper restore PossibleInvalidOperationException
             if (start < 0 || start >= length.Value || end >= length.Value || rangeLength <= 0)
             {
-                return SendRequestedRangeNotSatisfable(ctx, responseStream);
+                return SendRequestedRangeNotSatisfiable(ctx, responseStream);
             }
 
             SetResponseHeaders(Constants.Http.StatusCodes.Successful.PartialContent, response.Headers, ctx.Response,
@@ -85,7 +85,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             var range = rangeHeader.Range;
             if (!range.Valid)
             {
-                return SendRequestedRangeNotSatisfable(ctx, responseStream);
+                return SendRequestedRangeNotSatisfiable(ctx, responseStream);
             }
             var ifRange = ctx.Request.Headers.IfRange;
             if (ifRange.Available && !IfRange(ifRange, response.Headers.ETag.Value, response.Headers.LastModified.Value))

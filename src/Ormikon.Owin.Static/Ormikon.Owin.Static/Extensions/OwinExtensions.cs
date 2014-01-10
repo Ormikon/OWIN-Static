@@ -7,9 +7,7 @@ namespace Ormikon.Owin.Static.Extensions
         public static object Get(this IDictionary<string, object> owinData, string parameter)
         {
             object result;
-            if (owinData.TryGetValue(parameter, out result))
-                return result;
-            return null;
+            return owinData.TryGetValue(parameter, out result) ? result : null;
         }
 
         public static T Get<T>(this IDictionary<string, object> owinData, string parameter)

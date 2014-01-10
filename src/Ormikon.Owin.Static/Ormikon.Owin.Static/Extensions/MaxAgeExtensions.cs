@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Ormikon.Owin.Static.Extensions
 {
@@ -66,9 +65,10 @@ namespace Ormikon.Owin.Static.Extensions
                     {"twelve", 12}
                 };
 
-        private static readonly string[] tokens = new[] { "one", "two", "three", "four", "five", "six", "seven", "eight",
-            "nine", "ten", "eleven", "twelve", "years", "year", "y", "months", "month", "mths", "mth", "weeks", "week", "w",
-            "days", "day", "d", "hours", "hour", "h", "minutes", "minute", "mins", "min", "seconds", "second", "secs", "sec", "s" };
+        private static readonly string[] tokens =
+        { "one", "two", "three", "four", "five", "six", "seven", "eight",
+          "nine", "ten", "eleven", "twelve", "years", "year", "y", "months", "month", "mths", "mth", "weeks", "week", "w",
+          "days", "day", "d", "hours", "hour", "h", "minutes", "minute", "mins", "min", "seconds", "second", "secs", "sec", "s" };
 
         private static string GetDecimal(string token)
         {
@@ -117,7 +117,7 @@ namespace Ormikon.Owin.Static.Extensions
                     Periods period;
                     if (!periodTokens.TryGetValue(token, out period))
                     {
-                        throw new ArgumentException("Inavlid max-age token value: '" + token + "'", "maxAgeExpression");
+                        throw new ArgumentException("Invalid max-age token value: '" + token + "'", "maxAgeExpression");
                     }
                     maxAgeExpression = maxAgeExpression.Remove(0, token.Length);
                     int periodSeconds = 1;
@@ -162,7 +162,7 @@ namespace Ormikon.Owin.Static.Extensions
                             continue;
                         }
                     }
-                    throw new ArgumentException("Inavlid max-age token value: '" + maxAgeExpression + "'", "maxAgeExpression");
+                    throw new ArgumentException("Invalid max-age token value: '" + maxAgeExpression + "'", "maxAgeExpression");
                 }
             }
 

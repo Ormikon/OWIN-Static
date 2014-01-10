@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Ormikon.Owin.Static
+﻿namespace Ormikon.Owin.Static
 {
     internal static class Constants
     {
-        public class Http
+        public static class Http
         {
-            public class Methods
+            public static class Methods
             {
                 public const string Options = "OPTIONS";
                 public const string Get = "GET";
@@ -22,7 +16,7 @@ namespace Ormikon.Owin.Static
                 public const string Connect = "CONNECT";
             }
 
-            public class Headers
+            public static class Headers
             {
                 public const string Accept = "Accept";
                 public const string AcceptCharset = "Accept-Charset";
@@ -68,7 +62,9 @@ namespace Ormikon.Owin.Static
                 public const string Server = "Server";
                 public const string SetCookie = "Set-Cookie";
                 public const string Title = "Title";
+// ReSharper disable InconsistentNaming
                 public const string TE = "TE";
+// ReSharper restore InconsistentNaming
                 public const string Trailer = "Trailer";
                 public const string TransferEncoding = "Transfer-Encoding";
                 public const string Upgrade = "Upgrade";
@@ -80,15 +76,15 @@ namespace Ormikon.Owin.Static
                 public const string PoweredBy = "X-Powered-By";
             }
 
-            public class StatusCodes
+            public static class StatusCodes
             {
-                public class Informational
+                public static class Informational
                 {
                     public const int Continue = 100;
                     public const int SwitchingProtocols = 101;
                 }
 
-                public class Successful
+                public static class Successful
                 {
                     public const int Ok = 200;
                     public const int Created = 201;
@@ -99,7 +95,7 @@ namespace Ormikon.Owin.Static
                     public const int PartialContent = 206;
                 }
 
-                public class Redirection
+                public static class Redirection
                 {
                     public const int MultipleChoices = 300;
                     public const int MovedPermanently = 301;
@@ -110,7 +106,7 @@ namespace Ormikon.Owin.Static
                     public const int TemporaryRedirect = 307;
                 }
 
-                public class ClientError
+                public static class ClientError
                 {
                     public const int BadRequest = 400;
                     public const int Unauthorized = 401;
@@ -132,7 +128,7 @@ namespace Ormikon.Owin.Static
                     public const int ExpectationFailed = 417;
                 }
 
-                public class Error
+                public static class Error
                 {
                     public const int InternalServerError = 500;
                     public const int NotImplemented = 501;
@@ -144,17 +140,17 @@ namespace Ormikon.Owin.Static
             }
         }
 
-        public class Owin
+        public static class Owin
         {
             #region Owin itself
 
-            public const string OwinPrefix = "owin.";
+            private const string OwinPrefix = "owin.";
             public const string Version = OwinPrefix + "Version";
             public const string CallCancelled = OwinPrefix + "CallCancelled";
 
-            public class Request
+            public static class Request
             {
-                public const string Prefix = OwinPrefix + "Request";
+                private const string Prefix = OwinPrefix + "Request";
                 public const string Body = Prefix + "Body";
                 public const string Headers = Prefix + "Headers";
                 public const string Method = Prefix + "Method";
@@ -165,9 +161,9 @@ namespace Ormikon.Owin.Static
                 public const string Scheme = Prefix + "Scheme";
             }
 
-            public class Response
+            public static class Response
             {
-                public const string Prefix = OwinPrefix + "Response";
+                private const string Prefix = OwinPrefix + "Response";
                 public const string Body = Prefix + "Body";
                 public const string Headers = Prefix + "Headers";
                 public const string StatusCode = Prefix + "StatusCode";
@@ -177,17 +173,17 @@ namespace Ormikon.Owin.Static
 
             #endregion
 
-            public class Common
+            public static class Common
             {
-                public class Ssl
+                public static class Ssl
                 {
-                    public const string Prefix = "ssl.";
+                    private const string Prefix = "ssl.";
                     public const string ClientCertificate = Prefix + "ClientCertificate";
                 }
 
-                public class Server
+                public static class Server
                 {
-                    public const string Prefix = "server.";
+                    private const string Prefix = "server.";
                     public const string RemoteIpAddress = Prefix + "RemoteIpAddress";
                     public const string RemotePort = Prefix + "RemotePort";
                     public const string LocalIpAddress = Prefix + "LocalIpAddress";
@@ -197,43 +193,53 @@ namespace Ormikon.Owin.Static
                     public const string OnSendingHeaders = Prefix + "OnSendingHeaders";
                 }
 
-                public class Host
+                public static class Host
                 {
-                    public const string Prefix = "host.";
+                    private const string Prefix = "host.";
                     public const string TraceOutput = Prefix + "TraceOutput";
                     public const string Addresses = Prefix + "Addresses";
                 }
             }
 
-            public class SendFile
+            public static class SendFile
             {
-                public const string Prefix = "sendfile.";
+                private const string Prefix = "sendfile.";
+// ReSharper disable MemberHidesStaticFromOuterClass
                 public const string Version = Prefix + "Version";
+// ReSharper restore MemberHidesStaticFromOuterClass
                 public const string Support = Prefix + "Support";
                 public const string Concurrency = Prefix + "Concurrency";
                 public const string SendAsync = Prefix + "SendAsync";
             }
 
-            public class WebSocket
+            public static class WebSocket
             {
-                public const string Prefix = "websocket.";
+                private const string Prefix = "websocket.";
+// ReSharper disable MemberHidesStaticFromOuterClass
                 public const string Version = Prefix + "Version";
+// ReSharper restore MemberHidesStaticFromOuterClass
                 public const string Accept = Prefix + "Accept";
                 public const string SendAsync = Prefix + "SendAsync";
                 public const string ReceiveAsync = Prefix + "ReceiveAsync";
                 public const string CloseAsync = Prefix + "CloseAsync";
+// ReSharper disable MemberHidesStaticFromOuterClass
                 public const string CallCancelled = Prefix + "CallCancelled";
+// ReSharper restore MemberHidesStaticFromOuterClass
                 public const string ClientCloseStatus = Prefix + "ClientCloseStatus";
                 public const string ClientCloseDescription = Prefix + "ClientCloseDescription";
             }
 
-            public class Opaque
+            public static class Opaque
             {
-                public const string Prefix = "opaque.";
+                private const string Prefix = "opaque.";
+// ReSharper disable MemberHidesStaticFromOuterClass
                 public const string Version = Prefix + "Version";
+// ReSharper restore MemberHidesStaticFromOuterClass
                 public const string Upgrade = Prefix + "Upgrade";
                 public const string Stream = Prefix + "Stream";
+// ReSharper disable MemberHidesStaticFromOuterClass
                 public const string CallCancelled = Prefix + "CallCancelled";
+// ReSharper restore MemberHidesStaticFromOuterClass
             }
         }
     }

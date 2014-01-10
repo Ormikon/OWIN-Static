@@ -13,7 +13,7 @@ namespace Ormikon.Owin.Static
         internal const string DefaultFileValue = "index.html;index.htm;start.html;start.htm;default.html;default.htm";
         internal const string DefaultCompressedTypesFilter = "text/*;*/xml;application/*javascript;application/*json*"
             + ";application/*+xml;image/*+xml";
-        private static readonly char[] sourceSeparators = new [] { ';' };
+        private static readonly char[] sourceSeparators = { ';' };
 
         private static readonly ObjectCache defaultMemoryCache = new MemoryCache(StaticMemoryCacheConfigurationName);
         private static ObjectCache defaultCache = defaultMemoryCache;
@@ -90,7 +90,7 @@ namespace Ormikon.Owin.Static
         }
 
         /// <summary>
-        /// Max age value for the static content as expression. Suppoted numbers (one-twelve | 0-...) and periods
+        /// Max age value for the static content as expression. Supported numbers (one-twelve | 0-...) and periods
         /// (second(s) | sec(s) | minute(s) | min(s) | hour(s) | day(s) | week(s) | month(s) | year(s))
         /// <example>
         /// 1Day
@@ -132,7 +132,7 @@ namespace Ormikon.Owin.Static
         public string Exclude { get; set; }
 
         /// <summary>
-        /// The pattern for content types that can be comressed in the response
+        /// The pattern for content types that can be compressed in the response
         /// </summary>
         /// <value>The compressed content types in filter like representation.</value>
         public string CompressedContentTypes { get; set; }

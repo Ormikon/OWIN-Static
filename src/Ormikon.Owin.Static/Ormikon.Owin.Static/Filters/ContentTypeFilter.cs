@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -6,7 +5,7 @@ namespace Ormikon.Owin.Static.Filters
 {
     internal class ContentTypeFilter : FilterBase
     {
-        private static readonly Regex multyStars = new Regex(@"\*{2,}", RegexOptions.Compiled);
+        private static readonly Regex multiStars = new Regex(@"\*{2,}", RegexOptions.Compiled);
         private static readonly Regex searchGroups = new Regex(@"(\/)|(\*)|(\?)|(\.)|(\+)|(\^)|(\$)", RegexOptions.Compiled);
 
         public ContentTypeFilter(string filters)
@@ -16,7 +15,7 @@ namespace Ormikon.Owin.Static.Filters
 
         private static string OptimizeFilter(string filter)
         {
-            return multyStars.Replace(filter, "*");
+            return multiStars.Replace(filter, "*");
         }
 
         #region implemented abstract members of FilterBase

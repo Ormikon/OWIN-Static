@@ -19,7 +19,7 @@ namespace Ormikon.Owin.Static.Wrappers
         public IPAddress RemoteIpAddress {
             get
             {
-                string address = data.Get<string>(Constants.Owin.Common.Server.RemoteIpAddress);
+                var address = data.Get<string>(Constants.Owin.Common.Server.RemoteIpAddress);
                 return string.IsNullOrEmpty(address) ? null : IPAddress.Parse(address);
             }
         }
@@ -27,7 +27,7 @@ namespace Ormikon.Owin.Static.Wrappers
         public int RemotePort {
             get
             {
-                string port = data.Get<string>(Constants.Owin.Common.Server.RemotePort);
+                var port = data.Get<string>(Constants.Owin.Common.Server.RemotePort);
                 return string.IsNullOrEmpty(port) ? 0 : int.Parse(port);
             }
         }
@@ -35,7 +35,7 @@ namespace Ormikon.Owin.Static.Wrappers
         public IPAddress LocalIpAddress {
             get
             {
-                string address = data.Get<string>(Constants.Owin.Common.Server.LocalIpAddress);
+                var address = data.Get<string>(Constants.Owin.Common.Server.LocalIpAddress);
                 return string.IsNullOrEmpty(address) ? null : IPAddress.Parse(address);
             }
         }
@@ -43,7 +43,7 @@ namespace Ormikon.Owin.Static.Wrappers
         public int LocalPort {
             get
             {
-                string port = data.Get<string>(Constants.Owin.Common.Server.LocalPort);
+                var port = data.Get<string>(Constants.Owin.Common.Server.LocalPort);
                 return string.IsNullOrEmpty(port) ? 0 : int.Parse(port);
             }
         }

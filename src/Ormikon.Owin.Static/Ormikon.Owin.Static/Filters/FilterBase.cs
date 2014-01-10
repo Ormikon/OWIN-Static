@@ -7,7 +7,7 @@ namespace Ormikon.Owin.Static.Filters
 {
     internal abstract class FilterBase : IFilter
     {
-        private static readonly char[] filterSeparator = new[] { ';' };
+        private static readonly char[] filterSeparator = { ';' };
 
         private readonly Regex filterRegEx;
 
@@ -21,7 +21,7 @@ namespace Ormikon.Owin.Static.Filters
             if (filters == null)
                 return null;
             var fArray = filters
-                .Split(FilterSeperators, StringSplitOptions.RemoveEmptyEntries)
+                .Split(FilterSeparators, StringSplitOptions.RemoveEmptyEntries)
                 .Select(f => f.Trim())
                 .Where(f => f.Length > 0)
                 .ToArray();
@@ -59,7 +59,7 @@ namespace Ormikon.Owin.Static.Filters
 
         #endregion
 
-        protected virtual char[] FilterSeperators
+        protected virtual char[] FilterSeparators
         {
             get{ return filterSeparator; }
         }

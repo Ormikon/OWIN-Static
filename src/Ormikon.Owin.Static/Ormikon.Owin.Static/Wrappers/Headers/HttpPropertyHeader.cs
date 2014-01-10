@@ -26,16 +26,8 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
             if (string.IsNullOrEmpty(enumValue) || string.IsNullOrEmpty(propKey))
                 return;
-            HttpPropertyHeaderValue phv = null;
             var values = new List<HttpPropertyHeaderValue>(GetPropertyValues());
-            foreach (var val in values)
-            {
-                if (string.Compare(enumValue, val.Value, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    phv = val;
-                    break;
-                }
-            }
+            var phv = values.FirstOrDefault(val => string.Compare(enumValue, val.Value, StringComparison.OrdinalIgnoreCase) == 0);
             if (phv == null)
             {
                 phv = new HttpPropertyHeaderValue(enumValue);
@@ -56,16 +48,8 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
                 return;
             }
 
-            HttpPropertyHeaderValue phv = null;
             var values = new List<HttpPropertyHeaderValue>(GetPropertyValues());
-            foreach (var val in values)
-            {
-                if (string.Compare(enumValue, val.Value, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    phv = val;
-                    break;
-                }
-            }
+            var phv = values.FirstOrDefault(val => string.Compare(enumValue, val.Value, StringComparison.OrdinalIgnoreCase) == 0);
             if (phv != null)
             {
                 phv[propKey] = null;

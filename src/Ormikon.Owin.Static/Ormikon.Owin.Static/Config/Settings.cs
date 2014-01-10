@@ -24,11 +24,11 @@
         /// </summary>
         /// <param name="map"></param>
         public Settings(MapElement map) :
-            this(map.Path, CreateSettigsFromConfig(map))
+            this(map.Path, CreateSettingsFromConfig(map))
         {
         }
 
-        private static StaticSettings CreateSettigsFromConfig(MapElement map)
+        private static StaticSettings CreateSettingsFromConfig(MapElement map)
         {
             return new StaticSettings(map.Sources)
             {
