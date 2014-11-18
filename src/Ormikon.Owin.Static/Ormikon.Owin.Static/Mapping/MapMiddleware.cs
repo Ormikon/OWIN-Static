@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Wrappers;
 
@@ -28,14 +29,17 @@ namespace Ormikon.Owin.Static.Mapping
             {
                 context.Request.PathBase = location.PathBase + path;
                 context.Request.Path = location.Path.Substring(path.Length);
-                mappedMiddleware(context.Environment)
+                return mappedMiddleware(context.Environment)
                     .ContinueWith(
                         task =>
-                            {
-                                context.Request.Path = location.Path;
-                                context.Request.PathBase = location.PathBase;
-                                task.Wait();
-                            }, TaskContinuationOptions.ExecuteSynchronously);
+                        {
+                            context.Request.Path = location.Path;
+                            context.Request.PathBase = location.PathBase;
+                            task.Wait(context.CallCancelled);
+                            // If nothing found and no errors we will continue requests chain
+                            return context.Response.StatusCode == 404 ? Next(context) : task;
+                        }, TaskContinuationOptions.ExecuteSynchronously)
+                    .Unwrap();
             }
 
             return Next(context);

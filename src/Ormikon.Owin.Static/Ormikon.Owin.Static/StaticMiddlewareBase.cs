@@ -47,13 +47,26 @@ namespace Ormikon.Owin.Static
 
         protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
             DateTimeOffset expires, int maxAge, string compressedContentFilter)
+            : this(next, cached, cache, expires, maxAge, new ContentTypeFilter(compressedContentFilter))
+        {
+        }
+
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+            DateTimeOffset expires, int maxAge, IFilter compressedContentFilter)
+            : this(next, cached, cache, expires, maxAge,
+            new ResponseSenderFactory(compressedContentFilter))
+        {
+        }
+
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+            DateTimeOffset expires, int maxAge, IResponseSenderFactory responseSenderFactory)
             : base(next)
         {
             this.cached = cached;
             this.cache = cache;
             this.expires = expires;
             this.maxAge = maxAge;
-            responseSenderFactory = new ResponseSenderFactory(new ContentTypeFilter(compressedContentFilter));
+            this.responseSenderFactory = responseSenderFactory;
         }
 
         protected override Task Invoke(IOwinContext context)
@@ -112,11 +125,11 @@ namespace Ormikon.Owin.Static
         {
             if (cached)
             {
-                return CachedResponse.CreateAsync(staticResponse)
+                return CachedResponse.CreateAsync(staticResponse, ctx.CallCancelled)
                         .ContinueWith(
                             task =>
                             {
-                                task.Wait();
+                                task.Wait(ctx.CallCancelled);
                                 CacheSet(ctx.Request.Location.FullPath, task.Result);
                                 return SendResponse(task.Result, ctx);
                             }, TaskContinuationOptions.ExecuteSynchronously)

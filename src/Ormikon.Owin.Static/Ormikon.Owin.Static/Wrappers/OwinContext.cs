@@ -32,7 +32,7 @@ namespace Ormikon.Owin.Static.Wrappers
 
         public CancellationToken CallCancelled
         {
-            get { return data.Get<CancellationToken>(Constants.Owin.CallCancelled); }
+            get { return data.Get(Constants.Owin.CallCancelled, CancellationToken.None); }
         }
 
         public IOwinRequest Request

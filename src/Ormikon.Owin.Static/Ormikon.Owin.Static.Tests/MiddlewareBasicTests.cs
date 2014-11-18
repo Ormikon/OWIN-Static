@@ -20,14 +20,14 @@ namespace Ormikon.Owin.Static.Tests
         public void SetUp()
         {
             CreateContent();
-            try{
-            webApp = WebApp.Start(BaseAddress,
-                appBuilder =>
-                {
-                    appBuilder.UseStatic(ContentFolder);
-                });
+            try
+            {
+                webApp = WebApp.Start(BaseAddress,
+                    appBuilder => appBuilder.UseStatic(ContentFolder)
+                        .MapStatic("/nested1", ContentFolder)
+                        .MapStatic("/nested1/nested2", ContentFolder));
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 GC.KeepAlive(exception);
             }
@@ -81,6 +81,14 @@ namespace Ormikon.Owin.Static.Tests
             Assert.AreEqual(contentType, rm.Content.Headers.ContentType.MediaType);
             Assert.AreEqual(content, rm.Content.ReadAsStringAsync().Result);
         }
+
+        [TestCase(BaseAddress + "/nested1/script.js")]
+        [TestCase(BaseAddress + "/nested1/nested2/script.js")]
+        public void NestedPathsTest(string contentAddress)
+        {
+            var client = new HttpClient();
+            var rm = client.GetAsync(contentAddress).Result;
+            Assert.AreEqual(HttpStatusCode.OK, rm.StatusCode, "Unable to get resources from nested paths.");
+        }
     }
 }
-

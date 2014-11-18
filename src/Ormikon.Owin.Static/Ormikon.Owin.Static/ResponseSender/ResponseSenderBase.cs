@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using Ormikon.Owin.Static.Responses;
 using System.IO;
 using Ormikon.Owin.Static.Wrappers;
@@ -18,37 +19,37 @@ namespace Ormikon.Owin.Static.ResponseSender
         }
 
 
-        private const int CopyBufferSize = 32768;
+	    private const int CopyBufferSize = 32768;
 
-        protected static Task SendStreamAsync(Stream from, Stream to)
+        protected static Task SendStreamAsync(Stream from, Stream to, CancellationToken cancellationToken)
         {
-            return from.CopyToAsync(to, CopyBufferSize)
+            return from.CopyToAsync(to, CopyBufferSize, cancellationToken)
                     .ContinueWith(
                         task =>
                         {
                             from.Close();
-                            task.Wait();
+                            task.Wait(cancellationToken);
                         }, TaskContinuationOptions.ExecuteSynchronously);
         }
 
-        private static Task ReadAsync(byte[] buffer, Stream stream, long length)
+        private static Task ReadAsync(byte[] buffer, Stream stream, long length, CancellationToken cancellationToken)
         {
             var copyLength = (int)Math.Min(CopyBufferSize, length);
             if (copyLength <= 0)
                 return Task.FromResult<object>(null);
-            return stream.ReadAsync(buffer, 0, copyLength)
+            return stream.ReadAsync(buffer, 0, copyLength, cancellationToken)
                     .ContinueWith(
                         task =>
                         {
-                            task.Wait();
+                            task.Wait(cancellationToken);
                             if (task.Result <= 0 || task.Result < copyLength)
                                 return Task.FromResult<object>(null);
-                            return ReadAsync(buffer, stream, length - task.Result);
+                            return ReadAsync(buffer, stream, length - task.Result, cancellationToken);
                         }, TaskContinuationOptions.ExecuteSynchronously)
                     .Unwrap();
         }
 
-        private static Task SeekAsync(Stream stream, long length)
+        private static Task SeekAsync(Stream stream, long length, CancellationToken cancellationToken)
         {
             if (length == 0)
             {
@@ -60,34 +61,34 @@ namespace Ormikon.Owin.Static.ResponseSender
                 return Task.FromResult<object>(null);
             }
             var buffer = new byte[Math.Min(CopyBufferSize, length)];
-            return ReadAsync(buffer, stream, length);
+            return ReadAsync(buffer, stream, length, cancellationToken);
         }
 
-        private static Task SendStreamAsync(byte[] buffer, Stream from, Stream to, long length)
+        private static Task SendStreamAsync(byte[] buffer, Stream from, Stream to, long length, CancellationToken cancellationToken)
         {
             var copyLength = (int)Math.Min(CopyBufferSize, length);
             if (copyLength <= 0)
                 return Task.FromResult<object>(null);
-            return from.ReadAsync(buffer, 0, copyLength)
+            return from.ReadAsync(buffer, 0, copyLength, cancellationToken)
                     .ContinueWith(
                         task =>
                         {
-                            task.Wait();
+                            task.Wait(cancellationToken);
                             if (task.Result <= 0)
                                 return Task.FromResult<object>(null);
-                            return to.WriteAsync(buffer, 0, task.Result)
+                            return to.WriteAsync(buffer, 0, task.Result, cancellationToken)
                                     .ContinueWith(
                                         subTask =>
                                         {
-                                            subTask.Wait();
-                                            return SendStreamAsync(buffer, from, to, length - task.Result);
+                                            subTask.Wait(cancellationToken);
+                                            return SendStreamAsync(buffer, from, to, length - task.Result, cancellationToken);
                                         }, TaskContinuationOptions.ExecuteSynchronously)
                                     .Unwrap();
                         }, TaskContinuationOptions.ExecuteSynchronously)
                     .Unwrap();
         }
 
-        protected static Task SendStreamAsync(Stream from, Stream to, long start, long length)
+        protected static Task SendStreamAsync(Stream from, Stream to, long start, long length, CancellationToken cancellationToken)
         {
             if (length <= 0)
             {
@@ -96,14 +97,14 @@ namespace Ormikon.Owin.Static.ResponseSender
             }
             if (start < 0)
                 start = 0;
-            return SeekAsync(from, start)
+            return SeekAsync(from, start, cancellationToken)
                     .ContinueWith(
                         task =>
                         {
-                            task.Wait();
+                            task.Wait(cancellationToken);
                             var buffer = new byte[Math.Min(CopyBufferSize, length)];
-                            return SendStreamAsync(buffer, from, to, length);
-                        })
+                            return SendStreamAsync(buffer, from, to, length, cancellationToken);
+                        }, cancellationToken)
                     .Unwrap();
         }
 
@@ -129,7 +130,7 @@ namespace Ormikon.Owin.Static.ResponseSender
         protected static Task SendFullResponse(IStaticResponse response, Stream responseStream, IOwinContext ctx)
         {
             SetResponseHeaders(response, ctx.Response);
-            return SendStreamAsync(responseStream, ctx.Response.Body);
+            return SendStreamAsync(responseStream, ctx.Response.Body, ctx.CallCancelled);
         }
 
         protected static bool IsBodyRequested(string method)

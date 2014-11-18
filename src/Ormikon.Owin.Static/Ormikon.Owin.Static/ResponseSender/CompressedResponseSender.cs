@@ -24,19 +24,19 @@ namespace Ormikon.Owin.Static.ResponseSender
                 return Task.FromResult<object>(null);
 
             var compressedStream = WrapToCompressedStream(ctx.Response.Body);
-            return SendStreamAsync(responseStream, compressedStream)
+            return SendStreamAsync(responseStream, compressedStream, ctx.CallCancelled)
                 .ContinueWith(
                     task =>
                         {
-                            task.Wait();
-                            return compressedStream.FlushAsync();
+                            task.Wait(ctx.CallCancelled);
+                            return compressedStream.FlushAsync(ctx.CallCancelled);
                         }, TaskContinuationOptions.ExecuteSynchronously)
                 .Unwrap()
                 .ContinueWith(
                     task =>
                         {
                             compressedStream.Close();
-                            task.Wait();
+                            task.Wait(ctx.CallCancelled);
                         });
         }
 

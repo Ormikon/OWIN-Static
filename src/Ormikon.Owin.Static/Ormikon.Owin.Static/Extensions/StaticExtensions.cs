@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using Ormikon.Owin.Static;
 using Ormikon.Owin.Static.Config;
+using Ormikon.Owin.Static.Extensions;
 
 // ReSharper disable CheckNamespace
+
 namespace Owin
 // ReSharper restore CheckNamespace
 {
@@ -19,7 +21,7 @@ namespace Owin
         /// <returns>App builder</returns>
         public static IAppBuilder UseStatic(this IAppBuilder appBuilder, StaticSettings settings)
         {
-            return appBuilder.Use<StaticMiddleware>(settings);
+            return appBuilder.Use(typeof (StaticMiddleware), settings);
         }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace Owin
         public static IAppBuilder UseStatic(this IAppBuilder appBuilder, params string[] sources)
 // ReSharper restore MethodOverloadWithOptionalParameter
         {
-            return appBuilder.Use<StaticMiddleware>(new StaticSettings(sources));
+            return appBuilder.Use(typeof (StaticMiddleware), new StaticSettings(sources));
         }
 
         /// <summary>
@@ -87,11 +89,11 @@ namespace Owin
         private static IAppBuilder UseConfigValues(this IAppBuilder appBuilder, Section section)
         {
             return section.EnumerateSettings()
-                          .Aggregate(appBuilder,
-                                     (current, map) =>
-                                     map.HasPath
-                                         ? current.MapStatic(map.Path, map.Value)
-                                         : current.UseStatic(map.Value));
+                .Aggregate(appBuilder,
+                    (current, map) =>
+                        map.HasPath
+                            ? current.MapStatic(map.Path, map.Value)
+                            : current.UseStatic(map.Value));
         }
 
         /// <summary>
@@ -106,8 +108,8 @@ namespace Owin
                 return appBuilder;
 
             return string.IsNullOrEmpty(cs.MapPath)
-                       ? appBuilder.UseConfigValues(cs)
-                       : appBuilder.Map(cs.MapPath, app => app.UseConfigValues(cs));
+                ? appBuilder.UseConfigValues(cs)
+                : appBuilder.Map(cs.MapPath, app => app.UseConfigValues(cs));
         }
 
         /// <summary>

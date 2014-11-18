@@ -22,7 +22,9 @@ namespace Ormikon.Owin.Static.Wrappers
             }
             catch(Exception exception)
             {
-                return Task.FromResult(exception);
+                var tcs = new TaskCompletionSource<object>();
+                tcs.SetException(exception);
+                return tcs.Task;
             }
         }
 

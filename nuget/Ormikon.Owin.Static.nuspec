@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Ormikon.Owin.Static</id>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
     <title>OWIN Static</title>
     <authors>Ormikon</authors>
     <owners>Ormikon</owners>
@@ -16,12 +16,14 @@
     <summary>
       Ormikon.Owin.Static package.
     </summary>
-    <releaseNotes>Hidden files option. Microsoft ObjectCache as configurable cache object.</releaseNotes>
-    <copyright>Copyright Ormikon 2013</copyright>
+    <releaseNotes>
+        Hidden files option. Microsoft ObjectCache as configurable cache object. Pass through in the Map middleware.
+        OWIN Cancellation token for all the internal async operations. Removed dependency on Microsoft.Owin
+    </releaseNotes>
+    <copyright>Copyright Ormikon 2014</copyright>
     <tags>owin,katana,static,system.web</tags>
     <dependencies>
       <dependency id="Owin" version="1.0" />
-      <dependency id="Microsoft.Owin" version="2.0.1" />
     </dependencies>
   </metadata>
   <files>

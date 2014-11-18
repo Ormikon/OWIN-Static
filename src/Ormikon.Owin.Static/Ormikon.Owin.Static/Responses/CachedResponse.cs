@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Wrappers.Headers;
 
@@ -8,21 +9,23 @@ namespace Ormikon.Owin.Static.Responses
     [Serializable]
     internal class CachedResponse : IStaticResponse
     {
+        private const int CopyBufferSize = 32768;
+
         public CachedResponse()
         {
             Headers = new HttpResponseHeaders();
         }
 
-        public static Task<CachedResponse> CreateAsync(StaticResponse staticResponse)
+        public static Task<CachedResponse> CreateAsync(StaticResponse staticResponse, CancellationToken cancellationToken)
         {
             var mem = new MemoryStream();
             var stream = staticResponse.Body;
-            return stream.CopyToAsync(mem)
+            return stream.CopyToAsync(mem, CopyBufferSize, cancellationToken)
                          .ContinueWith(
                              task =>
                                  {
                                      stream.Close();
-                                     task.Wait();
+                                     task.Wait(cancellationToken);
                                      var result = new CachedResponse
                                                       {
                                                           StatusCode = staticResponse.StatusCode,

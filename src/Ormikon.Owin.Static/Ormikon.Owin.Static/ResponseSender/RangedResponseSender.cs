@@ -54,7 +54,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             ctx.Response.Headers.ContentRange.Range = new HttpContentRange(start, end, length.Value);
             ctx.Response.Headers.ContentLength.Value = rangeLength;
 
-            return SendStreamAsync(responseStream, ctx.Response.Body, start, rangeLength);
+            return SendStreamAsync(responseStream, ctx.Response.Body, start, rangeLength, ctx.CallCancelled);
         }
 
         private static bool IfRange(HttpIfRangeHeader ifRange, string respETag, DateTimeOffset? lastModified)
