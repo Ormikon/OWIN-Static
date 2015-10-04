@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Ormikon.Owin.Static.Config</id>
+    <version>0.3.2</version>
+    <title>OWIN Static Application Configuration</title>
+    <authors>Ormikon</authors>
+    <owners>Ormikon</owners>
+    <licenseUrl>https://github.com/Ormikon/OWIN-Static/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Ormikon/OWIN-Static</projectUrl>
+    <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      The package with sections for app/web.config file to configure middleware for processing static content.
+    </description>
+    <summary>
+      Ormikon.Owin.Static.Config package.
+    </summary>
+    <releaseNotes>
+        Extracted configuration from the main Ormikon.Owin.Static package.
+    </releaseNotes>
+    <copyright>Copyright Ormikon 2015</copyright>
+    <tags>owin,katana,static,system.web</tags>
+    <dependencies>
+      <dependency id="Ormikon.Owin.Static" version="0.3.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static.Config\bin\Release\Ormikon.Owin.Static.Config.dll" target="lib\net45" />
+    <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static.Config\bin\Release\Ormikon.Owin.Static.Config.pdb" target="lib\net45" />
+    <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static.Config\bin\Release\Ormikon.Owin.Static.Config.xml" target="lib\net45" />
+  </files>
+</package>

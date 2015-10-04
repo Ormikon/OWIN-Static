@@ -1,16 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ormikon.Owin.Static", "Ormikon.Owin.Static\Ormikon.Owin.Static.csproj", "{6AF8F210-E7BB-4513-85CE-48177EC2BC32}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ormikon.Owin.Static.Example", "Ormikon.Owin.Static.Example\Ormikon.Owin.Static.Example.csproj", "{5F7684D4-97B3-4298-895D-865D8D7F71F0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{A2682061-3C02-4C51-9DE4-8FA4914D67D1}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\nuget\Ormikon.Owin.Static.Config.nuspec = ..\..\nuget\Ormikon.Owin.Static.Config.nuspec
 		..\..\nuget\Ormikon.Owin.Static.nuspec = ..\..\nuget\Ormikon.Owin.Static.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ormikon.Owin.Static.Tests", "Ormikon.Owin.Static.Tests\Ormikon.Owin.Static.Tests.csproj", "{4CEFC715-9004-428D-8008-624BB5B40723}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ormikon.Owin.Static.Config", "Ormikon.Owin.Static.Config\Ormikon.Owin.Static.Config.csproj", "{19E9996B-C0CD-4A9D-8579-889C02D8ACB8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,30 +23,34 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4CEFC715-9004-428D-8008-624BB5B40723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4CEFC715-9004-428D-8008-624BB5B40723}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4CEFC715-9004-428D-8008-624BB5B40723}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4CEFC715-9004-428D-8008-624BB5B40723}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AF8F210-E7BB-4513-85CE-48177EC2BC32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F7684D4-97B3-4298-895D-865D8D7F71F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CEFC715-9004-428D-8008-624BB5B40723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CEFC715-9004-428D-8008-624BB5B40723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CEFC715-9004-428D-8008-624BB5B40723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CEFC715-9004-428D-8008-624BB5B40723}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19E9996B-C0CD-4A9D-8579-889C02D8ACB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19E9996B-C0CD-4A9D-8579-889C02D8ACB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19E9996B-C0CD-4A9D-8579-889C02D8ACB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19E9996B-C0CD-4A9D-8579-889C02D8ACB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Ormikon.Owin.Static.Example\Ormikon.Owin.Static.Example.csproj
 		Policies = $0
-		$0.TextStylePolicy = $1
+		$0.TextStylePolicy = $4
 		$1.FileWidth = 120
 		$1.TabsToSpaces = False
 		$1.inheritsSet = VisualStudio
 		$1.inheritsScope = text/plain
-		$0.TextStylePolicy = $2
 		$2.inheritsSet = null
 		$2.scope = text/x-csharp
 		$0.CSharpFormattingPolicy = $3
@@ -49,13 +58,9 @@ Global
 		$3.inheritsSet = Mono
 		$3.inheritsScope = text/x-csharp
 		$3.scope = text/x-csharp
-		$0.TextStylePolicy = $4
 		$4.FileWidth = 120
 		$4.inheritsSet = VisualStudio
 		$4.inheritsScope = text/plain
 		$4.scope = text/plain
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

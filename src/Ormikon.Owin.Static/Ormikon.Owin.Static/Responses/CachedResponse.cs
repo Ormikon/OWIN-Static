@@ -3,20 +3,29 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Wrappers.Headers;
+using System.Collections.Generic;
 
 namespace Ormikon.Owin.Static.Responses
 {
+    /// <summary>
+    /// Cached static entity response model.
+    /// </summary>
     [Serializable]
-    internal class CachedResponse : IStaticResponse
+    public class CachedResponse : IStaticResponse
     {
         private const int CopyBufferSize = 32768;
 
+        private readonly IHttpResponseHeaders headers;
+
+        /// <summary>
+        /// Creates an empty cached response object
+        /// </summary>
         public CachedResponse()
         {
-            Headers = new HttpResponseHeaders();
+            headers = new HttpResponseHeaders();
         }
 
-        public static Task<CachedResponse> CreateAsync(StaticResponse staticResponse, CancellationToken cancellationToken)
+        internal static Task<CachedResponse> CreateAsync(StaticResponse staticResponse, CancellationToken cancellationToken)
         {
             var mem = new MemoryStream();
             var stream = staticResponse.Body;
@@ -31,7 +40,7 @@ namespace Ormikon.Owin.Static.Responses
                                                           StatusCode = staticResponse.StatusCode,
                                                           Body = mem.ToArray()
                                                       };
-                                     staticResponse.Headers.CopyTo(result.Headers);
+                                     staticResponse.Headers.CopyTo(result.headers);
                                      PostProcessHeaders(result, result.Body.Length);
                                      return result;
                                  }, TaskContinuationOptions.ExecuteSynchronously);
@@ -53,17 +62,42 @@ namespace Ormikon.Owin.Static.Responses
                 response.Headers.Expires.Value = DateTimeOffset.Now.AddSeconds(maxAge.Value);
         }
 
-        public Stream CreateBodyStream()
+        internal Stream CreateBodyStream()
         {
             return new MemoryStream(Body, false);
         }
 
+        /// <summary>
+        /// HTTP Status code of the cached response
+        /// </summary>
         public int StatusCode { get; set; }
 
+        /// <summary>
+        /// HTTP Status reason of the cached response
+        /// </summary>
         public string ReasonPhrase { get; set; }
 
-        public IHttpResponseHeaders Headers { get; private set; }
+        IHttpResponseHeaders IStaticResponse.Headers {
+            get
+            {
+                return headers;
+            }
+        }
 
+        /// <summary>
+        /// HTTP Response headers collection
+        /// </summary>
+        public IDictionary<string, string[]> Headers
+        {
+            get
+            {
+                return headers;
+            }
+        }
+
+        /// <summary>
+        /// Response body data encoded
+        /// </summary>
         public byte[] Body { get; set; }
     }
 }

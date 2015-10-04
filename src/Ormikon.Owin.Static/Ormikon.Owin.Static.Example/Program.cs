@@ -15,7 +15,7 @@ namespace Ormikon.Owin.Static.Example
                 Console.Write("Press any key to exit...");
                 #if DEBUG //mono debug
                 var cki = Console.ReadKey();
-				if (cki.KeyChar == '\0')
+                if (cki.KeyChar == '\0')
                     while(true){}//if debug in mono
                 #else
                 Console.ReadKey();

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Ormikon.Owin.Static</id>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
     <title>OWIN Static</title>
     <authors>Ormikon</authors>
     <owners>Ormikon</owners>
@@ -19,8 +19,10 @@
     <releaseNotes>
         Hidden files option. Microsoft ObjectCache as configurable cache object. Pass through in the Map middleware.
         OWIN Cancellation token for all the internal async operations. Removed dependency on Microsoft.Owin
+        App.config sections moved to separate package. Caching was re-factored as a custom interface,
+        Microsoft.Runtime.Caching and System.Configuration references were removed.
     </releaseNotes>
-    <copyright>Copyright Ormikon 2014</copyright>
+    <copyright>Copyright Ormikon 2015</copyright>
     <tags>owin,katana,static,system.web</tags>
     <dependencies>
       <dependency id="Owin" version="1.0" />
@@ -29,5 +31,6 @@
   <files>
     <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static\bin\Release\Ormikon.Owin.Static.dll" target="lib\net45" />
     <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static\bin\Release\Ormikon.Owin.Static.pdb" target="lib\net45" />
+    <file src="..\src\Ormikon.Owin.Static\Ormikon.Owin.Static\bin\Release\Ormikon.Owin.Static.xml" target="lib\net45" />
   </files>
 </package>

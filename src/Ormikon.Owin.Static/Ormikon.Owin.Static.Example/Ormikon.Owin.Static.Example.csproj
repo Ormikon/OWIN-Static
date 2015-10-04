@@ -77,6 +77,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Ormikon.Owin.Static.Config\Ormikon.Owin.Static.Config.csproj">
+      <Project>{19e9996b-c0cd-4a9d-8579-889c02d8acb8}</Project>
+      <Name>Ormikon.Owin.Static.Config</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Ormikon.Owin.Static\Ormikon.Owin.Static.csproj">
       <Project>{6AF8F210-E7BB-4513-85CE-48177EC2BC32}</Project>
       <Name>Ormikon.Owin.Static</Name>

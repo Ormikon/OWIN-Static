@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Runtime.Caching;
 using Ormikon.Owin.Static.Extensions;
+using Ormikon.Owin.Static.Cache;
 
 namespace Ormikon.Owin.Static
 {
@@ -9,14 +9,13 @@ namespace Ormikon.Owin.Static
     /// </summary>
     public class StaticSettings
     {
-        private const string StaticMemoryCacheConfigurationName = "StaticMemoryCache";
-        internal const string DefaultFileValue = "index.html;index.htm;start.html;start.htm;default.html;default.htm";
-        internal const string DefaultCompressedTypesFilter = "text/*;*/xml;application/*javascript;application/*json*"
+        public const string DefaultFileValue = "index.html;index.htm;start.html;start.htm;default.html;default.htm";
+        public const string DefaultCompressedTypesFilter = "text/*;*/xml;application/*javascript;application/*json*"
             + ";application/*+xml;image/*+xml";
         private static readonly char[] sourceSeparators = { ';' };
 
-        private static readonly ObjectCache defaultMemoryCache = new MemoryCache(StaticMemoryCacheConfigurationName);
-        private static ObjectCache defaultCache = defaultMemoryCache;
+        public static readonly IStaticCache DefaultMemoryCache = new SimpleMemoryStaticCache();
+        private static IStaticCache defaultCache = DefaultMemoryCache;
 
         private int maxAge;
 
@@ -54,10 +53,10 @@ namespace Ormikon.Owin.Static
         /// <summary>
         /// Default memory cache that will used in the middleware if custom cache was not set.
         /// </summary>
-        public static ObjectCache DefaultCache
+        public static IStaticCache DefaultCache
         {
             get { return defaultCache; }
-            set { defaultCache = value ?? defaultMemoryCache; }
+            set { defaultCache = value ?? DefaultMemoryCache; }
         }
 
         /// <summary>
@@ -71,9 +70,9 @@ namespace Ormikon.Owin.Static
         public bool Cached { get; set; }
 
         /// <summary>
-        /// Cache implementation. MemoryCache will be used by default
+        /// Cache implementation. In Memory Cache will be used by default
         /// </summary>
-        public ObjectCache Cache { get; set; }
+        public IStaticCache Cache { get; set; }
 
         /// <summary>
         /// Expires header value for the static content

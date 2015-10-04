@@ -11,7 +11,7 @@ namespace Ormikon.Owin.Static.Example
 
         public void Configuration(IAppBuilder appBuilder)
         {
-            appBuilder.MapStatic("/content")
+            appBuilder.MapStaticConfig("/content")
                       //.UseStatic(ContentPath("Index.html"))
                       //.MapStatic("/css", ContentPath("css"))
                       //.MapStatic("/js", ContentPath("js"))

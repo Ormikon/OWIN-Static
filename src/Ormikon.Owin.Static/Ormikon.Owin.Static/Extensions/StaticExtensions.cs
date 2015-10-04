@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Ormikon.Owin.Static;
-using Ormikon.Owin.Static.Config;
+﻿using Ormikon.Owin.Static;
 using Ormikon.Owin.Static.Extensions;
 
 // ReSharper disable CheckNamespace
@@ -86,43 +84,24 @@ namespace Owin
             return appBuilder.Map(pathMatch, b => b.UseStatic(sources));
         }
 
-        private static IAppBuilder UseConfigValues(this IAppBuilder appBuilder, Section section)
-        {
-            return section.EnumerateSettings()
-                .Aggregate(appBuilder,
-                    (current, map) =>
-                        map.HasPath
-                            ? current.MapStatic(map.Path, map.Value)
-                            : current.UseStatic(map.Value));
-        }
-
         /// <summary>
-        /// Adds the StaticMiddleware to the pipeline with configuration from the configuration file (app.config)
+        /// Adds the StaticMiddleware to the pipeline with default configuration
         /// </summary>
         /// <param name="appBuilder">App builder</param>
         /// <returns>App builder</returns>
         public static IAppBuilder UseStatic(this IAppBuilder appBuilder)
         {
-            var cs = Section.Default;
-            if (cs == null)
-                return appBuilder;
-
-            return string.IsNullOrEmpty(cs.MapPath)
-                ? appBuilder.UseConfigValues(cs)
-                : appBuilder.Map(cs.MapPath, app => app.UseConfigValues(cs));
+            return appBuilder.UseStatic(".");
         }
 
         /// <summary>
-        /// Adds the StaticMiddleware to the pipeline with configuration from the configuration file (app.config)
+        /// Adds the StaticMiddleware to the pipeline with default configuration.
         /// </summary>
         /// <param name="appBuilder">App builder</param>
         /// <param name="pathMatch">Custom path</param>
         /// <returns>App builder</returns>
         public static IAppBuilder MapStatic(this IAppBuilder appBuilder, string pathMatch)
         {
-            var cs = Section.Default;
-            if (cs == null)
-                return appBuilder;
             return appBuilder.Map(pathMatch, app => app.UseStatic());
         }
     }

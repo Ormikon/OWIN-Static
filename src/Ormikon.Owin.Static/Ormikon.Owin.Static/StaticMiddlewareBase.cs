@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.ResponseSender;
 using Ormikon.Owin.Static.Responses;
 using Ormikon.Owin.Static.Wrappers;
 using Ormikon.Owin.Static.Filters;
+using Ormikon.Owin.Static.Cache;
 
 namespace Ormikon.Owin.Static
 {
     internal abstract class StaticMiddlewareBase : OwinMiddleware
     {
         private readonly bool cached;
-        private readonly ObjectCache cache;
+        private readonly IStaticCache cache;
         private readonly IResponseSenderFactory responseSenderFactory;
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
@@ -28,37 +28,37 @@ namespace Ormikon.Owin.Static
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache)
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache)
             : this(next, cached, cache, DateTimeOffset.MinValue, 0)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
             string compressedContentFilter)
             : this(next, cached, cache, DateTimeOffset.MinValue, 0, compressedContentFilter)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge)
             : this(next, cached, cache, expires, maxAge, StaticSettings.DefaultCompressedTypesFilter)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge, string compressedContentFilter)
             : this(next, cached, cache, expires, maxAge, new ContentTypeFilter(compressedContentFilter))
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge, IFilter compressedContentFilter)
             : this(next, cached, cache, expires, maxAge,
             new ResponseSenderFactory(compressedContentFilter))
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, ObjectCache cache,
+        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge, IResponseSenderFactory responseSenderFactory)
             : base(next)
         {
