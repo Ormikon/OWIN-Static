@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Ormikon.Owin.Static.ResponseSender;
 using Ormikon.Owin.Static.Responses;
 using Ormikon.Owin.Static.Wrappers;
@@ -10,7 +10,7 @@ using Ormikon.Owin.Static.Cache;
 
 namespace Ormikon.Owin.Static
 {
-    internal abstract class StaticMiddlewareBase : OwinMiddleware
+    internal abstract class StaticMiddlewareBase : BaseMiddleware
     {
         private readonly bool cached;
         private readonly IStaticCache cache;
@@ -18,47 +18,47 @@ namespace Ormikon.Owin.Static
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next)
+        protected StaticMiddlewareBase(RequestDelegate next)
             : this(next, false, null, DateTimeOffset.MinValue, 0)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached)
+        protected StaticMiddlewareBase(RequestDelegate next, bool cached)
             : this(next, cached, null, DateTimeOffset.MinValue, 0)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache)
+        protected StaticMiddlewareBase(RequestDelegate next, bool cached, IStaticCache cache)
             : this(next, cached, cache, DateTimeOffset.MinValue, 0)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
+        protected StaticMiddlewareBase(RequestDelegate next, bool cached, IStaticCache cache,
             string compressedContentFilter)
             : this(next, cached, cache, DateTimeOffset.MinValue, 0, compressedContentFilter)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
+        protected StaticMiddlewareBase(RequestDelegate next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge)
             : this(next, cached, cache, expires, maxAge, StaticSettings.DefaultCompressedTypesFilter)
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
+        protected StaticMiddlewareBase(RequestDelegate next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge, string compressedContentFilter)
             : this(next, cached, cache, expires, maxAge, new ContentTypeFilter(compressedContentFilter))
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
+        protected StaticMiddlewareBase(RequestDelegate next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge, IFilter compressedContentFilter)
             : this(next, cached, cache, expires, maxAge,
             new ResponseSenderFactory(compressedContentFilter))
         {
         }
 
-        protected StaticMiddlewareBase(Func<IDictionary<string, object>, Task> next, bool cached, IStaticCache cache,
+        protected StaticMiddlewareBase(RequestDelegate next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge, IResponseSenderFactory responseSenderFactory)
             : base(next)
         {
@@ -69,7 +69,7 @@ namespace Ormikon.Owin.Static
             this.responseSenderFactory = responseSenderFactory;
         }
 
-        protected override Task Invoke(IOwinContext context)
+        protected override Task Invoke(IWrappedContext context)
         {
             return IsMethodAllowed(context.Request.Method)
                     ? ProcessStaticIfFound(context) ?? Next(context)
@@ -96,7 +96,7 @@ namespace Ormikon.Owin.Static
         private CachedResponse CacheGet(Location location)
         {
             var c = cache ?? StaticSettings.DefaultCache;
-            return c.Get(location.FullPath) as CachedResponse;
+            return c.Get(location.FullPath);
         }
 
         private void CacheSet(string path, CachedResponse data)
@@ -105,23 +105,23 @@ namespace Ormikon.Owin.Static
             c.Set(path, data, GetCacheOffset());
         }
 
-        private Task ProcessResponseStream(IStaticResponse response, Stream stream, IOwinContext ctx)
+        private Task ProcessResponseStream(IStaticResponse response, Stream stream, IWrappedContext ctx)
         {
             var sender = responseSenderFactory.CreateSenderFor(response, ctx);
             return sender.SendAsync(response, stream, ctx);
         }
 
-        private Task SendResponse(CachedResponse cachedResponse, IOwinContext ctx)
+        private Task SendResponse(CachedResponse cachedResponse, IWrappedContext ctx)
         {
             return ProcessResponseStream(cachedResponse, cachedResponse.CreateBodyStream(), ctx);
         }
 
-        private Task SendResponse(StaticResponse staticResponse, IOwinContext ctx)
+        private Task SendResponse(StaticResponse staticResponse, IWrappedContext ctx)
         {
             return ProcessResponseStream(staticResponse, staticResponse.Body, ctx);
         }
 
-        private Task CacheResponseAndSend(StaticResponse staticResponse, IOwinContext ctx)
+        private Task CacheResponseAndSend(StaticResponse staticResponse, IWrappedContext ctx)
         {
             if (cached)
             {
@@ -138,7 +138,7 @@ namespace Ormikon.Owin.Static
             return SendResponse(staticResponse, ctx);
         }
 
-        private Task ProcessStaticIfFound(IOwinContext ctx)
+        private Task ProcessStaticIfFound(IWrappedContext ctx)
         {
             var location = ctx.Request.Location;
             if (cached)

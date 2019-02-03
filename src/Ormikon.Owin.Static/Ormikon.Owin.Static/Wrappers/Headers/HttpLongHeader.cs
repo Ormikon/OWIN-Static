@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpLongHeader : HttpHeader
     {
-        public HttpLongHeader(IDictionary<string, string[]> headers, string code)
+        public HttpLongHeader(IDictionary<string, StringValues> headers, string code)
             : base(headers, code)
         {
         }

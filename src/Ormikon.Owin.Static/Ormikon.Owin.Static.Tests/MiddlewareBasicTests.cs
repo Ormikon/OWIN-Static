@@ -1,31 +1,49 @@
 using System;
 using NUnit.Framework;
-using System.Collections.Generic;
 using System.IO;
-using Microsoft.Owin.Hosting;
-using Owin;
 using System.Net.Http;
 using System.Net;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Ormikon.Owin.Static.Tests
 {
     [TestFixture]
     public class MiddlewareBasicTests
     {
+        private class WebHostTestStartup
+        {
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            {
+                if (env.IsDevelopment())
+                {
+                    app.UseDeveloperExceptionPage();
+                }
+
+                app.UseStatic()
+                    .MapStatic("/nested1")
+                    .MapStatic("/nested1/nested2");
+            }
+        }
+
         private const string BaseAddress = "http://localhost:8099";
         private const string ContentFolder = "content";
-        private IDisposable webApp;
+        private IWebHost webApp;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             CreateContent();
             try
             {
-                webApp = WebApp.Start(BaseAddress,
-                    appBuilder => appBuilder.UseStatic(ContentFolder)
-                        .MapStatic("/nested1", ContentFolder)
-                        .MapStatic("/nested1/nested2", ContentFolder));
+                webApp = WebHost.CreateDefaultBuilder()
+                    .UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "content"))
+                    .UseUrls(BaseAddress)
+                    .UseStartup<WebHostTestStartup>()
+                    .Build();
+
+                webApp.StartAsync();
             }
             catch (Exception exception)
             {
@@ -33,7 +51,7 @@ namespace Ormikon.Owin.Static.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             if (webApp != null)

@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpStringHeader : HttpHeader
     {
-        public HttpStringHeader(IDictionary<string, string[]> headers, string code)
+        public HttpStringHeader(IDictionary<string, StringValues> headers, string code)
             : base(headers, code)
         {
         }

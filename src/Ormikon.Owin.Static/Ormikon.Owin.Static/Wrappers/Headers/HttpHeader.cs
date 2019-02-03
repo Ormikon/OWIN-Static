@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
@@ -7,10 +8,10 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
     {
         protected const string SplitString = ",";
 
-        private readonly IDictionary<string, string[]> headers;
+        private readonly IDictionary<string, StringValues> headers;
         private readonly string code;
 
-        protected HttpHeader(IDictionary<string, string[]> headers, string code)
+        protected HttpHeader(IDictionary<string, StringValues> headers, string code)
         {
             if (headers == null)
                 throw new ArgumentNullException("headers");
@@ -25,7 +26,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         public override string ToString()
         {
             var values = Values;
-            if (values == null)
+            if (values.Count == 0)
                 return "";
             return code + ": " + string.Join(SplitString, values);
         }
@@ -35,7 +36,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         protected string GetSingleValue()
         {
             var values = Values;
-            return values == null || values.Length == 0 ? null : values[0];
+            return values.Count == 0 ? null : values[0];
         }
 
         protected void SetSingleValue(string value)
@@ -43,7 +44,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
             if (value == null)
                 Clear();
             else
-                Values = new [] { value };
+                Values = value;
         }
 
         #endregion
@@ -64,18 +65,18 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
             }
         }
 
-        public string[] Values
+        public StringValues Values
         {
             get
             {
-                string[] result;
+                StringValues result;
                 if (headers.TryGetValue(code, out result))
                     return result;
-                return null;
+                return StringValues.Empty;
             }
             protected set
             {
-                if (value == null)
+                if (value.Count == 0)
                     Clear();
                 else
                     headers[code] = value;

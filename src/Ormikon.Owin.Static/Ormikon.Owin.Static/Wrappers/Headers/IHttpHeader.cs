@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Primitives;
+
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal interface IHttpHeader
@@ -6,7 +8,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         bool Available { get; }
 
-        string[] Values { get; }
+        StringValues Values { get; }
     }
 }
 

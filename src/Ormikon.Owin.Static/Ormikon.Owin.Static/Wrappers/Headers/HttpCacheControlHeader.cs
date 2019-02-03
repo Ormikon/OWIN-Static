@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpCacheControlHeader : HttpEnumHeader
     {
-        public HttpCacheControlHeader(IDictionary<string, string[]> headers)
+        public HttpCacheControlHeader(IDictionary<string, StringValues> headers)
             : base(headers, Constants.Http.Headers.CacheControl)
         {
         }

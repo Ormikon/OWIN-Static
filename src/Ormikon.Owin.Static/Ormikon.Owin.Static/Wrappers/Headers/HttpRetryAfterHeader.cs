@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpRetryAfterHeader : HttpDateHeader
     {
-        public HttpRetryAfterHeader(IDictionary<string, string[]> headers)
+        public HttpRetryAfterHeader(IDictionary<string, StringValues> headers)
             : base(headers, Constants.Http.Headers.RetryAfter)
         {
         }

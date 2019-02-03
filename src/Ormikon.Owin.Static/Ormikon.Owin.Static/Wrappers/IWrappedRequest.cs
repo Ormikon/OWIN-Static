@@ -1,9 +1,10 @@
 ﻿using Ormikon.Owin.Static.Wrappers.Headers;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Ormikon.Owin.Static.Wrappers
 {
-    internal interface IOwinRequest
+    internal interface IWrappedRequest
     {
         Stream Body { get; }
 
@@ -15,11 +16,11 @@ namespace Ormikon.Owin.Static.Wrappers
 
         string PathBase { get; set; }
 
-        Location Location { get; }
+        Location Location { get; set; }
 
         string Protocol { get; }
 
-        string QueryString { get; }
+        QueryString QueryString { get; }
 
         string Scheme { get; }
     }

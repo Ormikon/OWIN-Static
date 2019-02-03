@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpPropertyHeader : HttpEnumHeader
     {
-        public HttpPropertyHeader(IDictionary<string, string[]> headers, string code)
+        public HttpPropertyHeader(IDictionary<string, StringValues> headers, string code)
             : base(headers, code)
         {
         }

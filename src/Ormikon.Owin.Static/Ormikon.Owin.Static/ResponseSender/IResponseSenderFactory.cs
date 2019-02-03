@@ -5,6 +5,6 @@ namespace Ormikon.Owin.Static.ResponseSender
 {
     internal interface IResponseSenderFactory
     {
-        IResponseSender CreateSenderFor(IStaticResponse response, IOwinContext context);
+        IResponseSender CreateSenderFor(IStaticResponse response, IWrappedContext context);
     }
 }

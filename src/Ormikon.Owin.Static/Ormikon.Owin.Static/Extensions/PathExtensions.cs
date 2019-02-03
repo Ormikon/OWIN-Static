@@ -21,11 +21,17 @@ namespace Ormikon.Owin.Static.Extensions
             return path.TrimEnd('/', '\\');
         }
 
-        public static string GetFullPathForLocalPath(this string localPath)
+        public static string GetFullPathForLocalPath(this string localPath, string hostDir = null)
         {
             if (string.IsNullOrEmpty(localPath))
-                return Directory.GetCurrentDirectory().NormalizePathEnd();
-            return Path.GetFullPath(localPath).NormalizePathEnd();
+                return (string.IsNullOrEmpty(hostDir) ? Directory.GetCurrentDirectory() : hostDir).NormalizePathEnd();
+
+            if (string.IsNullOrEmpty(hostDir) || Path.IsPathRooted(localPath))
+            {
+                return Path.GetFullPath(localPath).NormalizePathEnd();
+            }
+
+            return Path.GetFullPath(Path.Combine(hostDir, localPath)).NormalizePathEnd();
         }
 
         public static bool IsUnixHidden(this string name)

@@ -2,19 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal abstract class HttpHeaders : IHttpHeaders
     {
-        private readonly IDictionary<string, string[]> internalHeaders;
+        private readonly IDictionary<string, StringValues> internalHeaders;
 
         protected HttpHeaders ()
-            : this (new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase))
+            : this (new Dictionary<string, StringValues>(StringComparer.OrdinalIgnoreCase))
         {
         }
 
-        protected HttpHeaders(IDictionary<string, string[]> internalHeaders)
+        protected HttpHeaders(IDictionary<string, StringValues> internalHeaders)
         {
             this.internalHeaders = internalHeaders;
         }
@@ -27,7 +28,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         #region IHttpHeaders implementation
 
-        public void CopyTo(IDictionary<string, string[]> headers, params string[] except)
+        public void CopyTo(IDictionary<string, StringValues> headers, params string[] except)
         {
             var copiedHeaders = except == null || except.Length == 0
                                     ? internalHeaders
@@ -59,7 +60,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         #region IDictionary implementation
 
-        public void Add(string key, string[] value)
+        public void Add(string key, StringValues value)
         {
             internalHeaders.Add(key, value);
         }
@@ -74,12 +75,12 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
             return internalHeaders.Remove(key);
         }
 
-        public bool TryGetValue(string key, out string[] value)
+        public bool TryGetValue(string key, out StringValues value)
         {
             return internalHeaders.TryGetValue(key, out value);
         }
 
-        public string[] this[string index]
+        public StringValues this[string index]
         {
             get
             {
@@ -99,7 +100,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
             }
         }
 
-        public ICollection<string[]> Values
+        public ICollection<StringValues> Values
         {
             get
             {
@@ -111,7 +112,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         #region ICollection implementation
 
-        public void Add(KeyValuePair<string, string[]> item)
+        public void Add(KeyValuePair<string, StringValues> item)
         {
             internalHeaders.Add(item);
         }
@@ -121,17 +122,17 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
             internalHeaders.Clear();
         }
 
-        public bool Contains(KeyValuePair<string, string[]> item)
+        public bool Contains(KeyValuePair<string, StringValues> item)
         {
             return internalHeaders.Contains(item);
         }
 
-        public void CopyTo(KeyValuePair<string, string[]>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<string, StringValues>[] array, int arrayIndex)
         {
             internalHeaders.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(KeyValuePair<string, string[]> item)
+        public bool Remove(KeyValuePair<string, StringValues> item)
         {
             return internalHeaders.Remove(item);
         }
@@ -156,7 +157,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         #region IEnumerable implementation
 
-        public IEnumerator<KeyValuePair<string, string[]>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, StringValues>> GetEnumerator()
         {
             return internalHeaders.GetEnumerator();
         }

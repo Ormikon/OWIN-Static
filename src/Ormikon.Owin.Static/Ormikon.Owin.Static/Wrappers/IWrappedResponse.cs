@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Ormikon.Owin.Static.Wrappers
 {
-    internal interface IOwinResponse
+    internal interface IWrappedResponse
     {
         Stream Body { get; }
 
@@ -12,7 +12,5 @@ namespace Ormikon.Owin.Static.Wrappers
         int StatusCode { get; set; }
 
         string ReasonPhrase { get; set; }
-
-        string Protocol { get; set; }
     }
 }

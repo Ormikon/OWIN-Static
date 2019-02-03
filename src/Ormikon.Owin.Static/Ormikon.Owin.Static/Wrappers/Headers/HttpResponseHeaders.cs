@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
@@ -21,7 +22,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
         }
 
-        public HttpResponseHeaders(IDictionary<string, string[]> internalHeaders)
+        public HttpResponseHeaders(IDictionary<string, StringValues> internalHeaders)
             : base(internalHeaders)
         {
         }

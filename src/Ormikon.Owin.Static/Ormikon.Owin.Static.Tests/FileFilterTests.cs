@@ -95,12 +95,14 @@ namespace Ormikon.Owin.Static.Tests
 
         [Test]
         [Ignore("Different for linux")]
-        [ExpectedException(typeof(ArgumentException))]
         public void InvalidChars()
         {
+            Assert.Throws<ArgumentException>(() =>
+            {
 // ReSharper disable ObjectCreationAsStatement
-            new FileFilter("inva>lid");
+                new FileFilter("inva>lid");
 // ReSharper restore ObjectCreationAsStatement
+            });
         }
     }
 }

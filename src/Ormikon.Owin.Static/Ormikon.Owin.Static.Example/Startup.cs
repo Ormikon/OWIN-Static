@@ -1,23 +1,27 @@
-﻿using Owin;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ormikon.Owin.Static.Example
 {
-    internal class Startup
+    public class Startup
     {
-        private string ContentPath(string path)
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public void ConfigureServices(IServiceCollection services)
         {
-            return "..\\..\\Content\\" + path;
         }
 
-        public void Configuration(IAppBuilder appBuilder)
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            appBuilder.MapStaticConfig("/content")
-                      //.UseStatic(ContentPath("Index.html"))
-                      //.MapStatic("/css", ContentPath("css"))
-                      //.MapStatic("/js", ContentPath("js"))
-                      //.MapStatic("/font-awesome", ContentPath("font-awesome"))
-                      .UseStatic(new StaticSettings("..\\..\\Content\\"){Cached = true})
-                      .UseErrorPage();
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.MapStatic("/content", new StaticSettings {Cached = true})
+                .UseStatic(new StaticSettings {Cached = true});
         }
     }
 }

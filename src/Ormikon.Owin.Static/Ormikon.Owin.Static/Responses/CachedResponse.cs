@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ormikon.Owin.Static.Wrappers.Headers;
 using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Responses
 {
@@ -87,7 +88,7 @@ namespace Ormikon.Owin.Static.Responses
         /// <summary>
         /// HTTP Response headers collection
         /// </summary>
-        public IDictionary<string, string[]> Headers
+        public IDictionary<string, StringValues> Headers
         {
             get
             {

@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 using Ormikon.Owin.Static.Extensions;
 using Ormikon.Owin.Static.Filters;
 using Ormikon.Owin.Static.Responses;
 using Ormikon.Owin.Static.Wrappers;
+
+// Make internals visible for the test assembly
+[assembly: InternalsVisibleTo("Ormikon.Owin.Static.Tests")]
 
 namespace Ormikon.Owin.Static
 {
@@ -24,16 +29,14 @@ namespace Ormikon.Owin.Static
         private readonly DateTimeOffset expires;
         private readonly int maxAge;
 
-        public StaticMiddleware(Func<IDictionary<string, object>, Task> next, StaticSettings settings)
+        public StaticMiddleware(RequestDelegate next, StaticSettings settings, IHostingEnvironment hostEnvironment)
             : base(next, settings.Cached, settings.Cache, settings.Expires, settings.MaxAge,
                 settings.CompressedContentTypes)
         {
-            if (settings == null)
-                throw new ArgumentNullException("settings");
-            sources = settings.Sources;
-            if (sources == null || sources.Length == 0)
+            sources = settings.Sources ?? new[] {"\\"};
+            if (sources.Length == 0)
                 throw new ArgumentException("Sources count should be one or more.", "settings");
-            sources = NormalizeSources(sources);
+            sources = NormalizeSources(sources, hostEnvironment.WebRootPath);
             indexFiles = ParseIndexFileString(settings.DefaultFile);
             redirectIfFolder = settings.RedirectIfFolderFound;
             include = new FileFilter(settings.Include);
@@ -90,9 +93,9 @@ namespace Ormikon.Owin.Static
             return location.FullPath + "/";
         }
 
-        private static string[] NormalizeSources(IEnumerable<string> sources)
+        private static string[] NormalizeSources(IEnumerable<string> sources, string webRoot)
         {
-            return sources.Select(s => s.NormalizePath().GetFullPathForLocalPath()).ToArray();
+            return sources.Select(s => s.NormalizePath().GetFullPathForLocalPath(webRoot)).ToArray();
         }
 
         private static string[] ParseIndexFileString(string indexFile)

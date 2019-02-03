@@ -1,40 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Ormikon.Owin.Static.Wrappers;
 
 namespace Ormikon.Owin.Static.Mapping
 {
-    internal class MapMiddleware : OwinMiddleware
+    internal class MapMiddleware : BaseMiddleware
     {
         private readonly string path;
-        private readonly Func<IDictionary<string, object>, Task> mappedMiddleware;
+        private readonly RequestDelegate chain;
 
-        public MapMiddleware(Func<IDictionary<string, object>, Task> next,
-            string path, Func<IDictionary<string, object>, Task> mappedMiddleware)
+        public MapMiddleware(RequestDelegate next, string path, RequestDelegate chain)
             : base(next)
         {
             path = path ?? "";
             if (path.EndsWith("/", StringComparison.Ordinal))
                 path = path.TrimEnd('/');
             this.path = path;
-            this.mappedMiddleware = mappedMiddleware;
+            this.chain = chain;
         }
 
-        protected override Task Invoke(IOwinContext context)
+        protected override Task Invoke(IWrappedContext context)
         {
             var location = context.Request.Location;
             if (PathMatches(location.Path))
             {
                 context.Request.PathBase = location.PathBase + path;
-                context.Request.Path = location.Path.Substring(path.Length);
-                return mappedMiddleware(context.Environment)
+                context.Request.Path = location.Path.Value.Substring(path.Length);
+                return chain(context.CoreContext)
                     .ContinueWith(
                         task =>
                         {
-                            context.Request.Path = location.Path;
-                            context.Request.PathBase = location.PathBase;
+                            context.Request.Location = location;
                             task.Wait(context.CallCancelled);
                             // If nothing found and no errors we will continue requests chain
                             return context.Response.StatusCode == 404 ? Next(context) : task;

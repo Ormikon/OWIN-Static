@@ -9,7 +9,7 @@ namespace Ormikon.Owin.Static.ResponseSender
     {
         protected abstract Stream WrapToCompressedStream(Stream outputStream);
 
-        protected override Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        protected override Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             long? length = response.Headers.ContentLength.Value;
             if (!length.HasValue || length.Value == 0)

@@ -11,7 +11,7 @@ namespace Ormikon.Owin.Static.ResponseSender
     {
         private const string AllowedRange = "bytes";
 
-        private static Task SendRequestedRangeNotSatisfiable(IOwinContext ctx, Stream responseStream)
+        private static Task SendRequestedRangeNotSatisfiable(IWrappedContext ctx, Stream responseStream)
         {
             responseStream.Close();
             var resp = StaticResponse.HttpStatus(Constants.Http.StatusCodes.ClientError.RequestedRangeNotSatisfiable);
@@ -32,12 +32,12 @@ namespace Ormikon.Owin.Static.ResponseSender
             return end - start + 1;
         }
 
-        private static Task SendRange(HttpRange range, IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        private static Task SendRange(HttpRange range, IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             long? length = response.Headers.ContentLength.Value;
             if (!length.HasValue || length.Value == 0)
             {
-                SendFullResponse(response, responseStream, ctx);
+                return SendFullResponse(response, responseStream, ctx);
             }
 
             long start, end;
@@ -74,7 +74,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             return string.CompareOrdinal(respETag, entity) == 0;
         }
 
-        protected override Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        protected override Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             ctx.Response.Headers.AcceptRanges.AddAcceptValue(AllowedRange);
             var rangeHeader = ctx.Request.Headers.Range;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
@@ -6,7 +7,7 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
     {
         private const char SplitChar = ',';
 
-        public HttpEnumHeader(IDictionary<string, string[]> headers, string code)
+        public HttpEnumHeader(IDictionary<string, StringValues> headers, string code)
             : base(headers, code)
         {
         }
@@ -28,11 +29,11 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
 
         private List<string> GetEnumValuesList()
         {
-            string[] values = Values;
-            if (values == null || values.Length == 0)
+            var values = Values;
+            if (values.Count == 0)
                 return new List<string>(0);
             var enumValues = new List<string>();
-            for (int i = 0; i < values.Length; i++)
+            for (int i = 0; i < values.Count; i++)
             {
                 SplitValues(values[i], enumValues);
             }

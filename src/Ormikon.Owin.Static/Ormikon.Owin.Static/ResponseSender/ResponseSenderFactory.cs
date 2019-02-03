@@ -15,7 +15,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             this.compressedContentFilter = compressedContentFilter;
         }
 
-        private static string GetClientCompressionMethod(IOwinContext context)
+        private static string GetClientCompressionMethod(IWrappedContext context)
         {
             var acceptedEncodingHeader = context.Request.Headers.AcceptEncoding;
             if (!acceptedEncodingHeader.Available)
@@ -46,7 +46,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             return false;
         }
 
-        public IResponseSender CreateSenderFor(IStaticResponse response, IOwinContext context)
+        public IResponseSender CreateSenderFor(IStaticResponse response, IWrappedContext context)
         {
             if (!CanResponseBeCompressed(response))
                 return new RangedResponseSender();

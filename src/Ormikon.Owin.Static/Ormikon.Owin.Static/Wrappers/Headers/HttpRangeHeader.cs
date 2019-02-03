@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpRangeHeader : HttpStringHeader
     {
-        public HttpRangeHeader(IDictionary<string, string[]> headers)
+        public HttpRangeHeader(IDictionary<string, StringValues> headers)
             : base(headers, Constants.Http.Headers.Range)
         {
         }

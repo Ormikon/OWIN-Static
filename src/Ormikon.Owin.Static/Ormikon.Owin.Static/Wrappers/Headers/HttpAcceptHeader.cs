@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
     internal class HttpAcceptHeader : HttpPropertyHeader
     {
-        public HttpAcceptHeader(IDictionary<string, string[]> headers, string code)
+        public HttpAcceptHeader(IDictionary<string, StringValues> headers, string code)
             : base(headers, code)
         {
         }

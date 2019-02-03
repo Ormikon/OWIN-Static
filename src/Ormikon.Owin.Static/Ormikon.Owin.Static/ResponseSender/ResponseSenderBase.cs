@@ -19,7 +19,7 @@ namespace Ormikon.Owin.Static.ResponseSender
         }
 
 
-	    private const int CopyBufferSize = 32768;
+        private const int CopyBufferSize = 32768;
 
         protected static Task SendStreamAsync(Stream from, Stream to, CancellationToken cancellationToken)
         {
@@ -109,7 +109,7 @@ namespace Ormikon.Owin.Static.ResponseSender
         }
 
         protected static void SetResponseHeaders(int statusCode, string reasonPhrase, IHttpHeaders headers,
-                                                 IOwinResponse response, params string[] except)
+                                                 IWrappedResponse response, params string[] except)
         {
             response.StatusCode = statusCode;
             if (!string.IsNullOrEmpty(reasonPhrase))
@@ -117,17 +117,17 @@ namespace Ormikon.Owin.Static.ResponseSender
             headers.CopyTo(response.Headers, except);
         }
 
-        protected static void SetResponseHeaders(int statusCode, IHttpHeaders headers, IOwinResponse response, params string[] except)
+        protected static void SetResponseHeaders(int statusCode, IHttpHeaders headers, IWrappedResponse response, params string[] except)
         {
             SetResponseHeaders(statusCode, null, headers, response, except);
         }
 
-        protected static void SetResponseHeaders(IStaticResponse staticResponse, IOwinResponse response, params string[] except)
+        protected static void SetResponseHeaders(IStaticResponse staticResponse, IWrappedResponse response, params string[] except)
         {
             SetResponseHeaders(staticResponse.StatusCode, staticResponse.ReasonPhrase, staticResponse.Headers, response, except);
         }
 
-        protected static Task SendFullResponse(IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        protected static Task SendFullResponse(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             SetResponseHeaders(response, ctx.Response);
             return SendStreamAsync(responseStream, ctx.Response.Body, ctx.CallCancelled);
@@ -138,14 +138,14 @@ namespace Ormikon.Owin.Static.ResponseSender
             return string.Compare(method, Constants.Http.Methods.Get, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
-        private static Task SendCacheStatus(IStaticResponse response, Stream responseStream, IOwinContext ctx, int statusCode)
+        private static Task SendCacheStatus(IStaticResponse response, Stream responseStream, IWrappedContext ctx, int statusCode)
         {
             responseStream.Close();
             SetResponseHeaders(statusCode, response.Headers, ctx.Response, Constants.Http.Headers.ContentLength);
             return Task.FromResult<object>(null);
         }
 
-        private static Task SendPreconditionResult(PreconditionResult result, IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        private static Task SendPreconditionResult(PreconditionResult result, IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             var cacheStatus = result == PreconditionResult.PreconditionFailed
                                   ? Constants.Http.StatusCodes.ClientError.PreconditionFailed
@@ -153,7 +153,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             return SendCacheStatus(response, responseStream, ctx, cacheStatus);
         }
 
-        private static PreconditionResult IfMatch(IOwinContext ctx, string respETag)
+        private static PreconditionResult IfMatch(IWrappedContext ctx, string respETag)
         {
             var ifMatch = ctx.Request.Headers.IfMatch;
             if (ifMatch.Available)
@@ -177,7 +177,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             return PreconditionResult.Continue;
         }
 
-        private static PreconditionResult IfNoneMatch(IOwinContext ctx, string respETag)
+        private static PreconditionResult IfNoneMatch(IWrappedContext ctx, string respETag)
         {
             var ifNoneMatch = ctx.Request.Headers.IfNoneMatch;
             if (ifNoneMatch.Available)
@@ -195,7 +195,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             return PreconditionResult.Continue;
         }
 
-        private static PreconditionResult IfModifiedSince(IOwinContext ctx, DateTimeOffset lastModified)
+        private static PreconditionResult IfModifiedSince(IWrappedContext ctx, DateTimeOffset lastModified)
         {
             if (ctx.Request.Headers.IfNoneMatch.Available)
                 return PreconditionResult.Continue;
@@ -209,7 +209,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             return PreconditionResult.Continue;
         }
 
-        private static PreconditionResult IfUnmodifiedSince(IOwinContext ctx, DateTimeOffset lastModified)
+        private static PreconditionResult IfUnmodifiedSince(IWrappedContext ctx, DateTimeOffset lastModified)
         {
             var dateCheck = ctx.Request.Headers.IfModifiedSince.Value;
             if (dateCheck.HasValue)
@@ -221,7 +221,7 @@ namespace Ormikon.Owin.Static.ResponseSender
             return PreconditionResult.Continue;
         }
 
-        private static Task ProcessCacheHeaders(IStaticResponse response, Stream responseStream, IOwinContext ctx)
+        private static Task ProcessCacheHeaders(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             PreconditionResult preconditionResult;
 
@@ -258,11 +258,11 @@ namespace Ormikon.Owin.Static.ResponseSender
             return null;
         }
 
-        protected abstract Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IOwinContext ctx);
+        protected abstract Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IWrappedContext ctx);
 
         #region IResponseSender implementation
 
-        public Task SendAsync(IStaticResponse response, Stream responseStream, IOwinContext context)
+        public Task SendAsync(IStaticResponse response, Stream responseStream, IWrappedContext context)
         {
             if (response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
             {

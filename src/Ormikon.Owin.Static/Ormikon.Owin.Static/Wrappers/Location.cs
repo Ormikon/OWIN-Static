@@ -1,16 +1,28 @@
-﻿namespace Ormikon.Owin.Static.Wrappers
-{
-    internal class Location
-    {
-        private readonly string path;
-        private readonly string pathBase;
-        private readonly string fullPath;
+﻿using Microsoft.AspNetCore.Http;
 
-        public Location(string path, string pathBase)
+namespace Ormikon.Owin.Static.Wrappers
+{
+    internal struct Location
+    {
+        private readonly PathString path;
+        private readonly PathString pathBase;
+        private readonly PathString fullPath;
+
+        public Location(HttpRequest request) : this(request.Path, request.PathBase)
         {
-            this.path = path ?? "";
-            this.pathBase = pathBase ?? "";
+        }
+
+        public Location(PathString path, PathString pathBase)
+        {
+            this.path = path;
+            this.pathBase = pathBase;
             fullPath = this.pathBase + this.path;
+        }
+
+        public void SetToRequest(HttpRequest request)
+        {
+            request.Path = path;
+            request.PathBase = pathBase;
         }
 
         public override string ToString ()
@@ -18,17 +30,17 @@
             return fullPath;
         }
 
-        public string Path
+        public PathString Path
         {
             get { return path; }
         }
 
-        public string PathBase
+        public PathString PathBase
         {
             get { return pathBase; }
         }
 
-        public string FullPath
+        public PathString FullPath
         {
             get { return fullPath; }
         }

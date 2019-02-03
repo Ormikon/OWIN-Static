@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
 
 namespace Ormikon.Owin.Static.Wrappers.Headers
 {
@@ -29,10 +30,10 @@ namespace Ormikon.Owin.Static.Wrappers.Headers
         {
         }
 
-        protected HttpGeneralHeaders(IDictionary<string, string[]> internalHeaders)
+        protected HttpGeneralHeaders(IDictionary<string, StringValues> internalHeaders)
             : base(internalHeaders)
         {
-            
+
         }
 
         public HttpCacheControlHeader CacheControl
