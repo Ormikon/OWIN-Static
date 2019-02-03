@@ -1,6 +1,9 @@
 ﻿using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Ormikon.Owin.Static;
 using Ormikon.Owin.Static.Mapping;
+using Ormikon.Owin.Static.Options;
 
 // ReSharper disable CheckNamespace
 
@@ -92,7 +95,7 @@ namespace Microsoft.AspNetCore.Builder
         /// <returns>Application builder</returns>
         public static IApplicationBuilder UseStatic(this IApplicationBuilder builder)
         {
-            return builder.UseStatic(".");
+            return builder.UseMiddleware<StaticOptionsMiddleware>();
         }
 
         /// <summary>
@@ -104,6 +107,39 @@ namespace Microsoft.AspNetCore.Builder
         public static IApplicationBuilder MapStatic(this IApplicationBuilder builder, string pathMatch)
         {
             return Map(builder, pathMatch, app => app.UseStatic());
+        }
+
+        /// <summary>
+        /// Configures Ormikon Static default middleware
+        /// </summary>
+        /// <param name="services">Services collection</param>
+        /// <param name="configuration">Configuration</param>
+        /// <returns>Services collection</returns>
+        public static IServiceCollection ConfigureStatic(this IServiceCollection services, IConfiguration configuration)
+        {
+            return services.Configure<StaticOptions>(configuration.GetSection("OrmikonStatic"));
+        }
+
+        /// <summary>
+        /// Configures Ormikon Static default middleware
+        /// </summary>
+        /// <param name="services">Services collection</param>
+        /// <param name="configurationSection">Configuration section</param>
+        /// <returns>Services collection</returns>
+        public static IServiceCollection ConfigureStatic(this IServiceCollection services, IConfigurationSection configurationSection)
+        {
+            return services.Configure<StaticOptions>(configurationSection);
+        }
+
+        /// <summary>
+        /// Configures Ormikon Static default middleware
+        /// </summary>
+        /// <param name="services">Services collection</param>
+        /// <param name="configureOptions">Action to configure default static options</param>
+        /// <returns>Services collection</returns>
+        public static IServiceCollection ConfigureStatic(this IServiceCollection services, Action<StaticOptions> configureOptions)
+        {
+            return services.Configure(configureOptions);
         }
 
         /// <summary>

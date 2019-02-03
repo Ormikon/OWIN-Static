@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace Ormikon.Owin.Static.Example
 {
@@ -12,6 +13,7 @@ namespace Ormikon.Owin.Static.Example
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((bc, cb) => { cb.AddJsonFile("appsettings.json"); })
                 .UseStartup<Startup>();
     }
 }

@@ -95,7 +95,7 @@ namespace Ormikon.Owin.Static
 
         private static string[] NormalizeSources(IEnumerable<string> sources, string webRoot)
         {
-            return sources.Select(s => s.NormalizePath().GetFullPathForLocalPath(webRoot)).ToArray();
+            return sources.Select(s => (s ?? ".").NormalizePath().GetFullPathForLocalPath(webRoot)).ToArray();
         }
 
         private static string[] ParseIndexFileString(string indexFile)
