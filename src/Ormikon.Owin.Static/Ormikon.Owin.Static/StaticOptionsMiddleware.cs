@@ -20,9 +20,9 @@ namespace Ormikon.Owin.Static
 
             if (!staticOptions.HasMappings())
             {
-                staticOptions.Maps = new[]
+                staticOptions = new StaticOptions
                 {
-                    new MapOptions {Path = null, Sources = null}
+                    Maps = new[] {new MapOptions {Path = null, Sources = null}}
                 };
             }
 
