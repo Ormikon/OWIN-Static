@@ -7,12 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ormikon.AspNetCore.Static",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ormikon.AspNetCore.Static.Example", "Ormikon.AspNetCore.Static.Example\Ormikon.AspNetCore.Static.Example.csproj", "{5F7684D4-97B3-4298-895D-865D8D7F71F0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{A2682061-3C02-4C51-9DE4-8FA4914D67D1}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\nuget\Ormikon.Owin.Static.Config.nuspec = ..\..\nuget\Ormikon.Owin.Static.Config.nuspec
-		..\..\nuget\Ormikon.Owin.Static.nuspec = ..\..\nuget\Ormikon.Owin.Static.nuspec
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ormikon.AspNetCore.Static.Tests", "Ormikon.AspNetCore.Static.Tests\Ormikon.AspNetCore.Static.Tests.csproj", "{AA235644-4057-44D4-A343-EF3770114C92}"
 EndProject
 Global
