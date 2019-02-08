@@ -25,7 +25,8 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             {
                 if (string.CompareOrdinal(encoding, "*") == 0)
                     return GZippedResponseSender.GZipCompressionMethod;
-                if (string.Compare(encoding, GZippedResponseSender.GZipCompressionMethod, StringComparison.OrdinalIgnoreCase) == 0 ||
+                if (string.Compare(encoding, BrotliResponseSender.BrotliCompressionMethod, StringComparison.OrdinalIgnoreCase) == 0 ||
+                    string.Compare(encoding, GZippedResponseSender.GZipCompressionMethod, StringComparison.OrdinalIgnoreCase) == 0 ||
                     string.Compare(encoding, DeflatedResponseSender.DeflatedCompressionMethod, StringComparison.OrdinalIgnoreCase) == 0)
                     return encoding.ToLowerInvariant();
             }
@@ -47,7 +48,9 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             string compressionMethod = GetClientCompressionMethod(context);
             if (compressionMethod == null)
                 return new RangedResponseSender();
-            if (string.CompareOrdinal(compressionMethod, "gzip") == 0)
+            if (string.CompareOrdinal(compressionMethod, BrotliResponseSender.BrotliCompressionMethod) == 0)
+                return new BrotliResponseSender();
+            if (string.CompareOrdinal(compressionMethod, GZippedResponseSender.GZipCompressionMethod) == 0)
                 return new GZippedResponseSender();
             return new DeflatedResponseSender();
         }
