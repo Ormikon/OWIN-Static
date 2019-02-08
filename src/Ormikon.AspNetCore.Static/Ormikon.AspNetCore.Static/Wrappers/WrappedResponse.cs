@@ -17,25 +17,19 @@ namespace Ormikon.AspNetCore.Static.Wrappers
             responseFeature = response.HttpContext.Features.Get<IHttpResponseFeature>();
         }
 
-        public Stream Body
-        {
-            get { return response.Body; }
-        }
+        public Stream Body => response.Body;
 
-        public IHttpResponseHeaders Headers
-        {
-            get { return responseHeaders ?? (responseHeaders = new HttpResponseHeaders(response.Headers)); }
-        }
+        public IHttpResponseHeaders Headers => responseHeaders ?? (responseHeaders = new HttpResponseHeaders(response.Headers));
 
         public int StatusCode
         {
-            get { return response.StatusCode; }
-            set { response.StatusCode = value; }
+            get => response.StatusCode;
+            set => response.StatusCode = value;
         }
 
         public string ReasonPhrase
         {
-            get { return responseFeature?.ReasonPhrase; }
+            get => responseFeature?.ReasonPhrase;
             set { if (responseFeature != null) responseFeature.ReasonPhrase = value; }
         }
     }

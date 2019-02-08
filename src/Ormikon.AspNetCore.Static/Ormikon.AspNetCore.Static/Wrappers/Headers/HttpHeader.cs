@@ -13,13 +13,11 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         protected HttpHeader(IDictionary<string, StringValues> headers, string code)
         {
-            if (headers == null)
-                throw new ArgumentNullException("headers");
             if (code == null)
-                throw new ArgumentNullException("code");
+                throw new ArgumentNullException(nameof(code));
             if (code.Length == 0)
-                throw new ArgumentException("Header code cannot be empty.", "code");
-            this.headers = headers;
+                throw new ArgumentException("Header code cannot be empty.", nameof(code));
+            this.headers = headers ?? throw new ArgumentNullException(nameof(headers));
             this.code = code;
         }
 
@@ -28,7 +26,7 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
             var values = Values;
             if (values.Count == 0)
                 return "";
-            return code + ": " + string.Join(SplitString, values);
+            return code + ": " + string.Join(SplitString, (IEnumerable<string>) values);
         }
 
         #region Helpers
@@ -57,20 +55,13 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
                 headers.Remove(code);
         }
 
-        public bool Available
-        {
-            get
-            {
-                return headers.ContainsKey(code);
-            }
-        }
+        public bool Available => headers.ContainsKey(code);
 
         public StringValues Values
         {
             get
             {
-                StringValues result;
-                if (headers.TryGetValue(code, out result))
+                if (headers.TryGetValue(code, out var result))
                     return result;
                 return StringValues.Empty;
             }

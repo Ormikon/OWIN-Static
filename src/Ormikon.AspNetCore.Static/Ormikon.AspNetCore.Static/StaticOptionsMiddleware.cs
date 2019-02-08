@@ -35,7 +35,7 @@ namespace Ormikon.AspNetCore.Static
             foreach (var mapOptions in staticOptions.Maps)
             {
                 var m = OptionsToMiddleware(mapOptions, next, hostEnvironment);
-                next = m.Invoke;
+                next = m.InvokeAsync;
                 yield return m;
             }
         }
@@ -47,12 +47,12 @@ namespace Ormikon.AspNetCore.Static
 
             if (!string.IsNullOrEmpty(mapOptions.Path))
             {
-                m = new MapMiddleware(next, mapOptions.Path, m.Invoke);
+                m = new MapMiddleware(next, mapOptions.Path, m.InvokeAsync);
             }
 
             return m;
         }
 
-        public Task Invoke(HttpContext context) => middleware.Invoke(context);
+        public async Task InvokeAsync(HttpContext context) => await middleware.InvokeAsync(context);
     }
 }

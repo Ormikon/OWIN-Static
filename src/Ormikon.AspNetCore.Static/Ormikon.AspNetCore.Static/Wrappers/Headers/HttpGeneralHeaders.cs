@@ -36,104 +36,44 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         }
 
-        public HttpCacheControlHeader CacheControl
-        {
-            get { return cacheControl ?? (cacheControl = new HttpCacheControlHeader(this)); }
-        }
+        public HttpCacheControlHeader CacheControl => cacheControl ?? (cacheControl = new HttpCacheControlHeader(this));
 
-        public HttpStringHeader Connection
-        {
-            get { return connection ?? (connection = new HttpStringHeader(this, Constants.Http.Headers.Connection)); }
-        }
+        public HttpStringHeader Connection => connection ?? (connection = new HttpStringHeader(this, Constants.Http.Headers.Connection));
 
-        public HttpEnumHeader ContentDisposition
-        {
-            get { return contentDisposition ?? (contentDisposition = new HttpEnumHeader(this, Constants.Http.Headers.ContentDisposition)); }
-        }
+        public HttpEnumHeader ContentDisposition => contentDisposition ?? (contentDisposition = new HttpEnumHeader(this, Constants.Http.Headers.ContentDisposition));
 
-        public HttpStringHeader ContentEncoding
-        {
-            get { return contentEncoding ?? (contentEncoding = new HttpStringHeader(this, Constants.Http.Headers.ContentEncoding)); }
-        }
+        public HttpStringHeader ContentEncoding => contentEncoding ?? (contentEncoding = new HttpStringHeader(this, Constants.Http.Headers.ContentEncoding));
 
-        public HttpEnumHeader ContentLanguage
-        {
-            get { return contentLanguage ?? (contentLanguage = new HttpEnumHeader(this, Constants.Http.Headers.ContentLanguage)); }
-        }
+        public HttpEnumHeader ContentLanguage => contentLanguage ?? (contentLanguage = new HttpEnumHeader(this, Constants.Http.Headers.ContentLanguage));
 
-        public HttpLongHeader ContentLength
-        {
-            get { return contentLength ?? (contentLength = new HttpLongHeader(this, Constants.Http.Headers.ContentLength)); }
-        }
+        public HttpLongHeader ContentLength => contentLength ?? (contentLength = new HttpLongHeader(this, Constants.Http.Headers.ContentLength));
 
-        public HttpStringHeader ContentLocation
-        {
-            get { return contentLocation ?? (contentLocation = new HttpStringHeader(this, Constants.Http.Headers.ContentLocation)); }
-        }
+        public HttpStringHeader ContentLocation => contentLocation ?? (contentLocation = new HttpStringHeader(this, Constants.Http.Headers.ContentLocation));
 
-        public HttpStringHeader ContentMd5
-        {
-            get { return contentMd5 ?? (contentMd5 = new HttpStringHeader(this, Constants.Http.Headers.ContentMd5)); }
-        }
+        public HttpStringHeader ContentMd5 => contentMd5 ?? (contentMd5 = new HttpStringHeader(this, Constants.Http.Headers.ContentMd5));
 
-        public HttpContentRangeHeader ContentRange
-        {
-            get { return contentRange ?? (contentRange = new HttpContentRangeHeader(this)); }
-        }
+        public HttpContentRangeHeader ContentRange => contentRange ?? (contentRange = new HttpContentRangeHeader(this));
 
-        public HttpPropertyHeader ContentType
-        {
-            get { return contentType ?? (contentType = new HttpPropertyHeader(this, Constants.Http.Headers.ContentType)); }
-        }
+        public HttpPropertyHeader ContentType => contentType ?? (contentType = new HttpPropertyHeader(this, Constants.Http.Headers.ContentType));
 
-        public HttpDateHeader Date
-        {
-            get { return date ?? (date = new HttpDateHeader(this, Constants.Http.Headers.Date)); }
-        }
+        public HttpDateHeader Date => date ?? (date = new HttpDateHeader(this, Constants.Http.Headers.Date));
 
-        public HttpDateHeader Expires
-        {
-            get { return expires ?? (expires = new HttpDateHeader(this, Constants.Http.Headers.Expires)); }
-        }
+        public HttpDateHeader Expires => expires ?? (expires = new HttpDateHeader(this, Constants.Http.Headers.Expires));
 
-        public HttpDateHeader LastModified
-        {
-            get { return lastModified ?? (lastModified = new HttpDateHeader(this, Constants.Http.Headers.LastModified)); }
-        }
+        public HttpDateHeader LastModified => lastModified ?? (lastModified = new HttpDateHeader(this, Constants.Http.Headers.LastModified));
 
-        public HttpStringHeader Link
-        {
-            get { return link ?? (link = new HttpStringHeader(this, Constants.Http.Headers.Link)); }
-        }
+        public HttpStringHeader Link => link ?? (link = new HttpStringHeader(this, Constants.Http.Headers.Link));
 
-        public HttpStringHeader Title
-        {
-            get { return title ?? (title = new HttpStringHeader(this, Constants.Http.Headers.Title)); }
-        }
+        public HttpStringHeader Title => title ?? (title = new HttpStringHeader(this, Constants.Http.Headers.Title));
 
-        public HttpEnumHeader Trailer
-        {
-            get { return trailer ?? (trailer = new HttpEnumHeader(this, Constants.Http.Headers.Trailer)); }
-        }
+        public HttpEnumHeader Trailer => trailer ?? (trailer = new HttpEnumHeader(this, Constants.Http.Headers.Trailer));
 
-        public HttpEnumHeader TransferEncoding
-        {
-            get { return transferEncoding ?? (transferEncoding = new HttpEnumHeader(this, Constants.Http.Headers.TransferEncoding)); }
-        }
+        public HttpEnumHeader TransferEncoding => transferEncoding ?? (transferEncoding = new HttpEnumHeader(this, Constants.Http.Headers.TransferEncoding));
 
-        public HttpEnumHeader Upgrade
-        {
-            get { return upgrade ?? (upgrade = new HttpEnumHeader(this, Constants.Http.Headers.Upgrade)); }
-        }
+        public HttpEnumHeader Upgrade => upgrade ?? (upgrade = new HttpEnumHeader(this, Constants.Http.Headers.Upgrade));
 
-        public HttpEnumHeader Via
-        {
-            get { return via ?? (via = new HttpEnumHeader(this, Constants.Http.Headers.Via)); }
-        }
+        public HttpEnumHeader Via => via ?? (via = new HttpEnumHeader(this, Constants.Http.Headers.Via));
 
-        public HttpStringHeader Warning
-        {
-            get { return warning ?? (warning = new HttpStringHeader(this, Constants.Http.Headers.Warning)); }
-        }
+        public HttpStringHeader Warning => warning ?? (warning = new HttpStringHeader(this, Constants.Http.Headers.Warning));
     }
 }

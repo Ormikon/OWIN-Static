@@ -1002,8 +1002,7 @@ namespace Ormikon.AspNetCore.Static.Extensions
         public static string GetContentType(this string fileName)
         {
             string ext = Path.GetExtension(fileName);
-            string contentType;
-            if (string.IsNullOrEmpty(ext) || !extensionContentTypeMap.TryGetValue(ext, out contentType))
+            if (string.IsNullOrEmpty(ext) || !extensionContentTypeMap.TryGetValue(ext, out var contentType))
                 return DefaultContentType;
             return contentType;
         }

@@ -78,23 +78,12 @@ namespace Ormikon.AspNetCore.Static.Responses
         /// </summary>
         public string ReasonPhrase { get; set; }
 
-        IHttpResponseHeaders IStaticResponse.Headers {
-            get
-            {
-                return headers;
-            }
-        }
+        IHttpResponseHeaders IStaticResponse.Headers => headers;
 
         /// <summary>
         /// HTTP Response headers collection
         /// </summary>
-        public IDictionary<string, StringValues> Headers
-        {
-            get
-            {
-                return headers;
-            }
-        }
+        public IDictionary<string, StringValues> Headers => headers;
 
         /// <summary>
         /// Response body data encoded

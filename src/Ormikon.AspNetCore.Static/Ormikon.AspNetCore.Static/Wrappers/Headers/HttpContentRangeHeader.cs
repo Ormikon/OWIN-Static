@@ -21,13 +21,13 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         protected void SetContentRange(HttpContentRange range)
         {
-            SetSingleValue(range == null ? null : range.ToString());
+            SetSingleValue(range?.ToString());
         }
 
         public HttpContentRange Range
         {
-            get { return GetContentRange(); }
-            set { SetContentRange(value); }
+            get => GetContentRange();
+            set => SetContentRange(value);
         }
     }
 
@@ -36,12 +36,11 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
         private readonly long start;
         private readonly long end;
         private readonly long length;
-        private readonly bool valid;
 
         public HttpContentRange(string range)
         {
             ParseRange(range, out start, out end, out length);
-            valid = CheckRange(start, end, length);
+            Valid = CheckRange(start, end, length);
         }
 
         public HttpContentRange(long start, long end, long length)
@@ -49,7 +48,7 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
             this.start = start;
             this.end = end;
             this.length = length;
-            valid = CheckRange(start, end, length);
+            Valid = CheckRange(start, end, length);
         }
 
         private static void ParseRange(string range, out long start, out long end, out long length)
@@ -113,24 +112,12 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
             return b.ToString();
         }
 
-        public long Start
-        {
-            get { return start; }
-        }
+        public long Start => start;
 
-        public long End
-        {
-            get { return end; }
-        }
+        public long End => end;
 
-        public long Length
-        {
-            get { return length; }
-        }
+        public long Length => length;
 
-        public bool Valid
-        {
-            get { return valid; }
-        }
+        public bool Valid { get; }
     }
 }

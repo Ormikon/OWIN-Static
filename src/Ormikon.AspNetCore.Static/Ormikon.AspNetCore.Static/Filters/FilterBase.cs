@@ -59,10 +59,7 @@ namespace Ormikon.AspNetCore.Static.Filters
 
         #endregion
 
-        protected virtual char[] FilterSeparators
-        {
-            get{ return filterSeparator; }
-        }
+        protected virtual char[] FilterSeparators => filterSeparator;
     }
 }
 

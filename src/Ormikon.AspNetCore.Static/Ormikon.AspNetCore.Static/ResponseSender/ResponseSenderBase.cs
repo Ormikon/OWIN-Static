@@ -21,91 +21,60 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
 
         private const int CopyBufferSize = 32768;
 
-        protected static Task SendStreamAsync(Stream from, Stream to, CancellationToken cancellationToken)
+        protected static async Task SendStreamAsync(Stream from, Stream to, CancellationToken cancellationToken)
         {
-            return from.CopyToAsync(to, CopyBufferSize, cancellationToken)
-                    .ContinueWith(
-                        task =>
-                        {
-                            from.Close();
-                            task.Wait(cancellationToken);
-                        }, TaskContinuationOptions.ExecuteSynchronously);
+            await from.CopyToAsync(to, CopyBufferSize, cancellationToken);
+            from.Close();
         }
 
-        private static Task ReadAsync(byte[] buffer, Stream stream, long length, CancellationToken cancellationToken)
+        private static async Task ReadAsync(byte[] buffer, Stream stream, long length, CancellationToken cancellationToken)
         {
-            var copyLength = (int)Math.Min(CopyBufferSize, length);
-            if (copyLength <= 0)
-                return Task.FromResult<object>(null);
-            return stream.ReadAsync(buffer, 0, copyLength, cancellationToken)
-                    .ContinueWith(
-                        task =>
-                        {
-                            task.Wait(cancellationToken);
-                            if (task.Result <= 0 || task.Result < copyLength)
-                                return Task.FromResult<object>(null);
-                            return ReadAsync(buffer, stream, length - task.Result, cancellationToken);
-                        }, TaskContinuationOptions.ExecuteSynchronously)
-                    .Unwrap();
+            while (length > 0)
+            {
+                var copyLength = (int) Math.Min(CopyBufferSize, length);
+                length -= await stream.ReadAsync(buffer, 0, copyLength, cancellationToken);
+            }
         }
 
-        private static Task SeekAsync(Stream stream, long length, CancellationToken cancellationToken)
+        private static async Task SeekAsync(Stream stream, long length, CancellationToken cancellationToken)
         {
             if (length == 0)
             {
-                return Task.FromResult<object>(null);
+                return;
             }
             if (stream.CanSeek)
             {
                 stream.Seek(length, SeekOrigin.Current);
-                return Task.FromResult<object>(null);
+                return;
             }
             var buffer = new byte[Math.Min(CopyBufferSize, length)];
-            return ReadAsync(buffer, stream, length, cancellationToken);
+            await ReadAsync(buffer, stream, length, cancellationToken);
         }
 
-        private static Task SendStreamAsync(byte[] buffer, Stream from, Stream to, long length, CancellationToken cancellationToken)
+        private static async Task SendStreamAsync(byte[] buffer, Stream from, Stream to, long length, CancellationToken cancellationToken)
         {
-            var copyLength = (int)Math.Min(CopyBufferSize, length);
-            if (copyLength <= 0)
-                return Task.FromResult<object>(null);
-            return from.ReadAsync(buffer, 0, copyLength, cancellationToken)
-                    .ContinueWith(
-                        task =>
-                        {
-                            task.Wait(cancellationToken);
-                            if (task.Result <= 0)
-                                return Task.FromResult<object>(null);
-                            return to.WriteAsync(buffer, 0, task.Result, cancellationToken)
-                                    .ContinueWith(
-                                        subTask =>
-                                        {
-                                            subTask.Wait(cancellationToken);
-                                            return SendStreamAsync(buffer, from, to, length - task.Result, cancellationToken);
-                                        }, TaskContinuationOptions.ExecuteSynchronously)
-                                    .Unwrap();
-                        }, TaskContinuationOptions.ExecuteSynchronously)
-                    .Unwrap();
+            while (length > 0)
+            {
+                var copyLength = (int) Math.Min(CopyBufferSize, length);
+                int bytesRead = await from.ReadAsync(buffer, 0, copyLength, cancellationToken);
+                length -= bytesRead;
+                await to.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+            }
         }
 
-        protected static Task SendStreamAsync(Stream from, Stream to, long start, long length, CancellationToken cancellationToken)
+        protected static async Task SendStreamAsync(Stream from, Stream to, long start, long length, CancellationToken cancellationToken)
         {
             if (length <= 0)
             {
                 from.Close();
-                return Task.FromResult<object>(null);
+                return;
             }
             if (start < 0)
                 start = 0;
-            return SeekAsync(from, start, cancellationToken)
-                    .ContinueWith(
-                        task =>
-                        {
-                            task.Wait(cancellationToken);
-                            var buffer = new byte[Math.Min(CopyBufferSize, length)];
-                            return SendStreamAsync(buffer, from, to, length, cancellationToken);
-                        }, cancellationToken)
-                    .Unwrap();
+
+            await SeekAsync(from, start, cancellationToken);
+            var buffer = new byte[Math.Min(CopyBufferSize, length)];
+            await SendStreamAsync(buffer, from, to, length, cancellationToken);
         }
 
         protected static void SetResponseHeaders(int statusCode, string reasonPhrase, IHttpHeaders headers,
@@ -127,10 +96,10 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             SetResponseHeaders(staticResponse.StatusCode, staticResponse.ReasonPhrase, staticResponse.Headers, response, except);
         }
 
-        protected static Task SendFullResponse(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
+        protected static async Task SendFullResponseAsync(IStaticResponse response, Stream responseStream, IWrappedContext ctx, CancellationToken cancellationToken)
         {
             SetResponseHeaders(response, ctx.Response);
-            return SendStreamAsync(responseStream, ctx.Response.Body, ctx.CallCancelled);
+            await SendStreamAsync(responseStream, ctx.Response.Body, cancellationToken);
         }
 
         protected static bool IsBodyRequested(string method)
@@ -138,19 +107,18 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             return string.Compare(method, Constants.Http.Methods.Get, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
-        private static Task SendCacheStatus(IStaticResponse response, Stream responseStream, IWrappedContext ctx, int statusCode)
+        private static void SendCacheStatus(IStaticResponse response, Stream responseStream, IWrappedContext ctx, int statusCode)
         {
             responseStream.Close();
             SetResponseHeaders(statusCode, response.Headers, ctx.Response, Constants.Http.Headers.ContentLength);
-            return Task.FromResult<object>(null);
         }
 
-        private static Task SendPreconditionResult(PreconditionResult result, IStaticResponse response, Stream responseStream, IWrappedContext ctx)
+        private static void SendPreconditionResult(PreconditionResult result, IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             var cacheStatus = result == PreconditionResult.PreconditionFailed
                                   ? Constants.Http.StatusCodes.ClientError.PreconditionFailed
                                   : Constants.Http.StatusCodes.Redirection.NotModified;
-            return SendCacheStatus(response, responseStream, ctx, cacheStatus);
+            SendCacheStatus(response, responseStream, ctx, cacheStatus);
         }
 
         private static PreconditionResult IfMatch(IWrappedContext ctx, string respETag)
@@ -221,7 +189,7 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             return PreconditionResult.Continue;
         }
 
-        private static Task ProcessCacheHeaders(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
+        private static bool ProcessCacheHeaders(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
         {
             PreconditionResult preconditionResult;
 
@@ -231,12 +199,14 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
                 preconditionResult = IfMatch(ctx, respETag);
                 if (preconditionResult != PreconditionResult.Continue)
                 {
-                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    return true;
                 }
                 preconditionResult = IfNoneMatch(ctx, respETag);
                 if (preconditionResult != PreconditionResult.Continue)
                 {
-                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    return true;
                 }
             }
 
@@ -246,29 +216,35 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
                 preconditionResult = IfModifiedSince(ctx, lastModified.Value);
                 if (preconditionResult != PreconditionResult.Continue)
                 {
-                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    return true;
                 }
                 preconditionResult = IfUnmodifiedSince(ctx, lastModified.Value);
                 if (preconditionResult != PreconditionResult.Continue)
                 {
-                    return SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    SendPreconditionResult(preconditionResult, response, responseStream, ctx);
+                    return true;
                 }
             }
 
-            return null;
+            return false;
         }
 
-        protected abstract Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IWrappedContext ctx);
+        protected abstract Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IWrappedContext ctx, CancellationToken cancellationToken);
 
         #region IResponseSender implementation
 
-        public Task SendAsync(IStaticResponse response, Stream responseStream, IWrappedContext context)
+        public async Task SendAsync(IStaticResponse response, Stream responseStream, IWrappedContext context, CancellationToken cancellationToken)
         {
             if (response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
             {
-                return SendFullResponse(response, responseStream, context);
+                await SendFullResponseAsync(response, responseStream, context, cancellationToken);
             }
-            return ProcessCacheHeaders(response, responseStream, context) ?? SendAsyncInternal(response, responseStream, context);
+
+            if (!ProcessCacheHeaders(response, responseStream, context))
+            {
+                await SendAsyncInternal(response, responseStream, context, cancellationToken);
+            }
         }
 
         #endregion

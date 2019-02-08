@@ -21,8 +21,7 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
                     var splits = val.Split('=');
                     if (splits.Length == 2 && splits[0].Trim().ToLowerInvariant() == "max-age")
                     {
-                        int maxAge;
-                        if (int.TryParse(splits[1], out maxAge))
+                        if (int.TryParse(splits[1], out var maxAge))
                             return maxAge;
                     }
                 }
@@ -65,8 +64,8 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         public int? MaxAge
         {
-            get { return GetMaxAge(); }
-            set { SetMaxAge(value); }
+            get => GetMaxAge();
+            set => SetMaxAge(value);
         }
     }
 }

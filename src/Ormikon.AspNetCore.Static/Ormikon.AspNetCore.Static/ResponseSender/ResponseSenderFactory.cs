@@ -24,9 +24,9 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             foreach (var encoding in encodings)
             {
                 if (string.CompareOrdinal(encoding, "*") == 0)
-                    return "gzip";
-                if (string.Compare(encoding, "gzip", StringComparison.OrdinalIgnoreCase) == 0 ||
-                    string.Compare(encoding, "deflate", StringComparison.OrdinalIgnoreCase) == 0)
+                    return GZippedResponseSender.GZipCompressionMethod;
+                if (string.Compare(encoding, GZippedResponseSender.GZipCompressionMethod, StringComparison.OrdinalIgnoreCase) == 0 ||
+                    string.Compare(encoding, DeflatedResponseSender.DeflatedCompressionMethod, StringComparison.OrdinalIgnoreCase) == 0)
                     return encoding.ToLowerInvariant();
             }
             return null;
@@ -37,13 +37,7 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             if (!compressedContentFilter.IsActive() || response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
                 return false;
             var propValues = response.Headers.ContentType.PropertyValues;
-            if (propValues.Length == 0)
-                return false;
-            if (compressedContentFilter.Contains(propValues[0].Value))
-            {
-                return true;
-            }
-            return false;
+            return propValues.Length != 0 && compressedContentFilter.Contains(propValues[0].Value);
         }
 
         public IResponseSender CreateSenderFor(IStaticResponse response, IWrappedContext context)

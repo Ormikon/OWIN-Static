@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -13,29 +13,20 @@ namespace Ormikon.AspNetCore.Static.Wrappers
             this.next = next;
         }
 
-        public Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
-            try
-            {
-                var wrappedContext = new WrappedContext(context);
-                return Invoke(wrappedContext);
-            }
-            catch(Exception exception)
-            {
-                var tcs = new TaskCompletionSource<object>();
-                tcs.SetException(exception);
-                return tcs.Task;
-            }
+            var wrappedContext = new WrappedContext(context);
+            await InvokeAsync(wrappedContext, context.RequestAborted);
         }
 
-        protected virtual Task Invoke(IWrappedContext context)
+        protected virtual async Task InvokeAsync(IWrappedContext context, CancellationToken cancellationToken)
         {
-            return Next(context);
+            await Next(context);
         }
 
-        protected Task Next(IWrappedContext context)
+        protected async Task Next(IWrappedContext context)
         {
-            return next(context.CoreContext);
+            await next(((WrappedContext)context).CoreContext);
         }
     }
 }

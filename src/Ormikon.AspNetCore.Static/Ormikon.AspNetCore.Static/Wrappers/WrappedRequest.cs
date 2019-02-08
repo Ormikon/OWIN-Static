@@ -14,52 +14,34 @@ namespace Ormikon.AspNetCore.Static.Wrappers
             this.request = request;
         }
 
-        public Stream Body
-        {
-            get { return request.Body; }
-        }
+        public Stream Body => request.Body;
 
-        public IHttpRequestHeaders Headers
-        {
-            get { return requestHeaders ?? (requestHeaders = new HttpRequestHeaders(request.Headers)); }
-        }
+        public IHttpRequestHeaders Headers => requestHeaders ?? (requestHeaders = new HttpRequestHeaders(request.Headers));
 
-        public string Method
-        {
-            get { return request.Method; }
-        }
+        public string Method => request.Method;
 
         public string Path
         {
-            get { return request.Path; }
-            set { request.Path = value; }
+            get => request.Path;
+            set => request.Path = value;
         }
 
         public string PathBase
         {
-            get { return request.PathBase; }
-            set { request.PathBase = value; }
+            get => request.PathBase;
+            set => request.PathBase = value;
         }
 
         public Location Location
         {
-            get { return new Location(Path, PathBase); }
-            set { value.SetToRequest(request); }
+            get => new Location(Path, PathBase);
+            set => value.SetToRequest(request);
         }
 
-        public string Protocol
-        {
-            get { return request.Protocol; }
-        }
+        public string Protocol => request.Protocol;
 
-        public QueryString QueryString
-        {
-            get { return request.QueryString; }
-        }
+        public QueryString QueryString => request.QueryString;
 
-        public string Scheme
-        {
-            get { return request.Scheme; }
-        }
+        public string Scheme => request.Scheme;
     }
 }

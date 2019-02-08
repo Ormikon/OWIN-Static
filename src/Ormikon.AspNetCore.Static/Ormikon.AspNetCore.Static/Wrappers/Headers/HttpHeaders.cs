@@ -34,9 +34,9 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
                                     ? internalHeaders
                                     : internalHeaders.Where(
                                         h => !except.Contains(h.Key, StringComparer.OrdinalIgnoreCase));
-            foreach(var kv in copiedHeaders)
+            foreach(var (key, value) in copiedHeaders)
             {
-                headers[kv.Key] = kv.Value;
+                headers[key] = value;
             }
         }
 
@@ -82,31 +82,13 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         public StringValues this[string index]
         {
-            get
-            {
-                return internalHeaders[index];
-            }
-            set
-            {
-                internalHeaders[index] = value;
-            }
+            get => internalHeaders[index];
+            set => internalHeaders[index] = value;
         }
 
-        public ICollection<string> Keys
-        {
-            get
-            {
-                return internalHeaders.Keys;
-            }
-        }
+        public ICollection<string> Keys => internalHeaders.Keys;
 
-        public ICollection<StringValues> Values
-        {
-            get
-            {
-                return internalHeaders.Values;
-            }
-        }
+        public ICollection<StringValues> Values => internalHeaders.Values;
 
         #endregion
 
@@ -137,21 +119,9 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
             return internalHeaders.Remove(item);
         }
 
-        public int Count
-        {
-            get
-            {
-                return internalHeaders.Count;
-            }
-        }
+        public int Count => internalHeaders.Count;
 
-        public bool IsReadOnly
-        {
-            get
-            {
-                return internalHeaders.IsReadOnly;
-            }
-        }
+        public bool IsReadOnly => internalHeaders.IsReadOnly;
 
         #endregion
 

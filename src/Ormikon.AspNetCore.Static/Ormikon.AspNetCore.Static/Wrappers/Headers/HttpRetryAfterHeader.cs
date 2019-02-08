@@ -19,18 +19,15 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         protected void SetLongValue(long? value)
         {
-            SetSingleValue(value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : null);
+            SetSingleValue(value?.ToString(CultureInfo.InvariantCulture));
         }
 
-        public bool IsDate
-        {
-            get { return Value.HasValue; }
-        }
+        public bool IsDate => Value.HasValue;
 
         public long? Seconds
         {
-            get { return GetLongValue(); }
-            set { SetLongValue(value); }
+            get => GetLongValue();
+            set => SetLongValue(value);
         }
     }
 }

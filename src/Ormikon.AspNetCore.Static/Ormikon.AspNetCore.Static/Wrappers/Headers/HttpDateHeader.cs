@@ -21,13 +21,13 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         protected void SetRfc1123DateValue(DateTimeOffset? value)
         {
-            SetSingleValue(value.HasValue ? value.Value.ToString("R") : null);
+            SetSingleValue(value?.ToString("R"));
         }
 
         public DateTimeOffset? Value
         {
-            get { return GetRfc1123DateValue(); }
-            set { SetRfc1123DateValue(value); }
+            get => GetRfc1123DateValue();
+            set => SetRfc1123DateValue(value);
         }
     }
 }

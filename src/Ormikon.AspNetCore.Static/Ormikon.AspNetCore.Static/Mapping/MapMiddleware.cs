@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Ormikon.AspNetCore.Static.Wrappers;
@@ -20,26 +21,22 @@ namespace Ormikon.AspNetCore.Static.Mapping
             this.chain = chain;
         }
 
-        protected override Task Invoke(IWrappedContext context)
+        protected override async Task InvokeAsync(IWrappedContext context, CancellationToken cancellationToken)
         {
             var location = context.Request.Location;
             if (PathMatches(location.Path))
             {
                 context.Request.PathBase = location.PathBase + path;
                 context.Request.Path = location.Path.Value.Substring(path.Length);
-                return chain(context.CoreContext)
-                    .ContinueWith(
-                        task =>
-                        {
-                            context.Request.Location = location;
-                            task.Wait(context.CallCancelled);
-                            // If nothing found and no errors we will continue requests chain
-                            return context.Response.StatusCode == 404 ? Next(context) : task;
-                        }, TaskContinuationOptions.ExecuteSynchronously)
-                    .Unwrap();
+                await chain(((WrappedContext) context).CoreContext);
+                context.Request.Location = location;
+                if (context.Response.StatusCode != 404)
+                {
+                    return;
+                }
             }
 
-            return Next(context);
+            await Next(context);
         }
 
         private bool PathMatches(string requestPath)

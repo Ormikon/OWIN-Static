@@ -20,7 +20,7 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         protected void SetPropertyValues(ICollection<HttpPropertyHeaderValue> values)
         {
-            SetEnumValues(values == null ? null : values.Select(pv => pv.ToString()).ToList());
+            SetEnumValues(values?.Select(pv => pv.ToString()).ToList());
         }
 
         public void AddPropertyValue(string enumValue, string propKey, string propValue)
@@ -77,28 +77,25 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         public HttpPropertyHeaderValue[] PropertyValues
         {
-            get { return GetPropertyValues(); }
-            set { SetPropertyValues(value); }
+            get => GetPropertyValues();
+            set => SetPropertyValues(value);
         }
     }
 
     internal class HttpPropertyHeaderValue
     {
-        private readonly string enumValue;
-        private readonly IDictionary<string, string> properties;
-
         public HttpPropertyHeaderValue(string enumValue)
         {
-            properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            this.enumValue = ParseEnumValue(enumValue, properties);
+            Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Value = ParseEnumValue(enumValue, Properties);
         }
 
         private static string ParseEnumValue(string enumValue, IDictionary<string, string> properties)
         {
             if (enumValue == null)
-                throw new ArgumentNullException("enumValue");
+                throw new ArgumentNullException(nameof(enumValue));
             if (enumValue.Length == 0)
-                throw new ArgumentException("Property value cannot be empty.", "enumValue");
+                throw new ArgumentException("Property value cannot be empty.", nameof(enumValue));
             if (enumValue.IndexOf(';') < 0)
                 return enumValue;
             var parts = enumValue.Split(';');
@@ -128,31 +125,27 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         public override string ToString()
         {
-            if (properties.Count == 0)
-                return enumValue;
-            var b = new StringBuilder(enumValue);
-            foreach (var prop in properties)
+            if (Properties.Count == 0)
+                return Value;
+            var b = new StringBuilder(Value);
+            foreach (var (key, value) in Properties)
             {
                 b.Append(';');
-                b.Append(prop.Key);
+                b.Append(key);
                 b.Append('=');
-                b.Append(prop.Value ?? "");
+                b.Append(value ?? "");
             }
 
             return b.ToString();
         }
 
-        public string Value
-        {
-            get { return enumValue; }
-        }
+        public string Value { get; }
 
         public string this[string propName]
         {
             get
             {
-                string result;
-                if (properties.TryGetValue(propName, out result))
+                if (Properties.TryGetValue(propName, out var result))
                     return result;
                 return null;
             }
@@ -160,16 +153,13 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
             {
                 if (value == null)
                 {
-                    if (properties.ContainsKey(propName))
-                        properties.Remove(propName);
+                    if (Properties.ContainsKey(propName))
+                        Properties.Remove(propName);
                 }
-                properties[propName] = value;
+                Properties[propName] = value;
             }
         }
 
-        public IDictionary<string, string> Properties
-        {
-            get { return properties; }
-        }
+        public IDictionary<string, string> Properties { get; }
     }
 }

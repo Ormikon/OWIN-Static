@@ -10,15 +10,12 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
         {
         }
 
-        public bool IsDate
-        {
-            get { return Value.HasValue; }
-        }
+        public bool IsDate => Value.HasValue;
 
         public string Entity
         {
-            get { return GetSingleValue(); }
-            set { SetSingleValue(value); }
+            get => GetSingleValue();
+            set => SetSingleValue(value);
         }
     }
 }

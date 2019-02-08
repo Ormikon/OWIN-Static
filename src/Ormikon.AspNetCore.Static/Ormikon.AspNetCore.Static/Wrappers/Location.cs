@@ -4,45 +4,32 @@ namespace Ormikon.AspNetCore.Static.Wrappers
 {
     internal struct Location
     {
-        private readonly PathString path;
-        private readonly PathString pathBase;
-        private readonly PathString fullPath;
-
         public Location(HttpRequest request) : this(request.Path, request.PathBase)
         {
         }
 
         public Location(PathString path, PathString pathBase)
         {
-            this.path = path;
-            this.pathBase = pathBase;
-            fullPath = this.pathBase + this.path;
+            Path = path;
+            PathBase = pathBase;
+            FullPath = PathBase + Path;
         }
 
         public void SetToRequest(HttpRequest request)
         {
-            request.Path = path;
-            request.PathBase = pathBase;
+            request.Path = Path;
+            request.PathBase = PathBase;
         }
 
         public override string ToString ()
         {
-            return fullPath;
+            return FullPath;
         }
 
-        public PathString Path
-        {
-            get { return path; }
-        }
+        public PathString Path { get; }
 
-        public PathString PathBase
-        {
-            get { return pathBase; }
-        }
+        public PathString PathBase { get; }
 
-        public PathString FullPath
-        {
-            get { return fullPath; }
-        }
+        public PathString FullPath { get; }
     }
 }

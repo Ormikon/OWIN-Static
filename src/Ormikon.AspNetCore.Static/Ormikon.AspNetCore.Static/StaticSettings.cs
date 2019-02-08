@@ -55,8 +55,8 @@ namespace Ormikon.AspNetCore.Static
         /// </summary>
         public static IStaticCache DefaultCache
         {
-            get { return defaultCache; }
-            set { defaultCache = value ?? DefaultMemoryCache; }
+            get => defaultCache;
+            set => defaultCache = value ?? DefaultMemoryCache;
         }
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace Ormikon.AspNetCore.Static
         /// </summary>
         public int MaxAge
         {
-            get { return maxAge; }
-            set { maxAge = value < 0 ? 0 : value; }
+            get => maxAge;
+            set => maxAge = value < 0 ? 0 : value;
         }
 
         /// <summary>

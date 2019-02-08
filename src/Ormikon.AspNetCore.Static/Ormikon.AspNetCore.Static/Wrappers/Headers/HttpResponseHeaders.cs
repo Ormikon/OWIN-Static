@@ -32,64 +32,28 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
             return new HttpResponseHeaders();
         }
 
-        public HttpAcceptHeader AcceptRanges
-        {
-            get { return acceptRanges ?? (acceptRanges = new HttpAcceptHeader(this, Constants.Http.Headers.AcceptRanges)); }
-        }
+        public HttpAcceptHeader AcceptRanges => acceptRanges ?? (acceptRanges = new HttpAcceptHeader(this, Constants.Http.Headers.AcceptRanges));
 
-        public HttpLongHeader Age
-        {
-            get { return age ?? (age = new HttpLongHeader(this, Constants.Http.Headers.Age)); }
-        }
+        public HttpLongHeader Age => age ?? (age = new HttpLongHeader(this, Constants.Http.Headers.Age));
 
-        public HttpEnumHeader Allow
-        {
-            get { return allow ?? (allow = new HttpEnumHeader(this, Constants.Http.Headers.Allow)); }
-        }
+        public HttpEnumHeader Allow => allow ?? (allow = new HttpEnumHeader(this, Constants.Http.Headers.Allow));
 
-        public HttpStringHeader ETag
-        {
-            get { return eTag ?? (eTag = new HttpStringHeader(this, Constants.Http.Headers.ETag)); }
-        }
+        public HttpStringHeader ETag => eTag ?? (eTag = new HttpStringHeader(this, Constants.Http.Headers.ETag));
 
-        public HttpStringHeader Location
-        {
-            get { return location ?? (location = new HttpStringHeader(this, Constants.Http.Headers.Location)); }
-        }
+        public HttpStringHeader Location => location ?? (location = new HttpStringHeader(this, Constants.Http.Headers.Location));
 
-        public HttpStringHeader ProxyAuthenticate
-        {
-            get { return proxyAuthenticate ?? (proxyAuthenticate = new HttpStringHeader(this, Constants.Http.Headers.ProxyAuthenticate)); }
-        }
+        public HttpStringHeader ProxyAuthenticate => proxyAuthenticate ?? (proxyAuthenticate = new HttpStringHeader(this, Constants.Http.Headers.ProxyAuthenticate));
 
-        public HttpEnumHeader Public
-        {
-            get { return @public ?? (@public = new HttpEnumHeader(this, Constants.Http.Headers.Public)); }
-        }
+        public HttpEnumHeader Public => @public ?? (@public = new HttpEnumHeader(this, Constants.Http.Headers.Public));
 
-        public HttpRetryAfterHeader RetryAfter
-        {
-            get { return retryAfter ?? (retryAfter = new HttpRetryAfterHeader(this)); }
-        }
+        public HttpRetryAfterHeader RetryAfter => retryAfter ?? (retryAfter = new HttpRetryAfterHeader(this));
 
-        public HttpStringHeader Server
-        {
-            get { return server ?? (server = new HttpStringHeader(this, Constants.Http.Headers.Server)); }
-        }
+        public HttpStringHeader Server => server ?? (server = new HttpStringHeader(this, Constants.Http.Headers.Server));
 
-        public HttpPropertyHeader SetCookie
-        {
-            get { return setCookie ?? (setCookie = new HttpPropertyHeader(this, Constants.Http.Headers.SetCookie)); }
-        }
+        public HttpPropertyHeader SetCookie => setCookie ?? (setCookie = new HttpPropertyHeader(this, Constants.Http.Headers.SetCookie));
 
-        public HttpEnumHeader Vary
-        {
-            get { return vary ?? (vary = new HttpEnumHeader(this, Constants.Http.Headers.Vary)); }
-        }
+        public HttpEnumHeader Vary => vary ?? (vary = new HttpEnumHeader(this, Constants.Http.Headers.Vary));
 
-        public HttpStringHeader WwwAuthenticate
-        {
-            get { return wwwAuthenticate ?? (wwwAuthenticate = new HttpStringHeader(this, Constants.Http.Headers.WwwAuthenticate)); }
-        }
+        public HttpStringHeader WwwAuthenticate => wwwAuthenticate ?? (wwwAuthenticate = new HttpStringHeader(this, Constants.Http.Headers.WwwAuthenticate));
     }
 }

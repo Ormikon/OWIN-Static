@@ -11,14 +11,9 @@ namespace Ormikon.AspNetCore.Static.Responses
 
         private static readonly string poweredBy;
 
-        private readonly int statusCode;
-        private readonly string reasonPhrase;
-        private readonly IHttpResponseHeaders headers;
-        private readonly Stream body;
-
         static StaticResponse()
         {
-            poweredBy = "Ormikon.Owin.Static " + typeof(StaticResponse).Assembly.GetName().Version;
+            poweredBy = $"{nameof(Ormikon)}.{nameof(AspNetCore)}.{nameof(Static)} " + typeof(StaticResponse).Assembly.GetName().Version;
         }
 
         public StaticResponse(int statusCode)
@@ -48,13 +43,13 @@ namespace Ormikon.AspNetCore.Static.Responses
 
         public StaticResponse(int statusCode, string reasonPhrase, string contentType, Stream body)
         {
-            this.statusCode = statusCode;
-            this.reasonPhrase = reasonPhrase;
-            headers = new HttpResponseHeaders();
+            StatusCode = statusCode;
+            ReasonPhrase = reasonPhrase;
+            Headers = new HttpResponseHeaders();
             if (!string.IsNullOrEmpty((contentType)))
-                headers.ContentType.Value = contentType;
-            headers[Constants.Http.Headers.PoweredBy] = new[] {poweredBy};
-            this.body = body ?? Stream.Null;
+                Headers.ContentType.Value = contentType;
+            Headers[Constants.Http.Headers.PoweredBy] = new[] {poweredBy};
+            Body = body ?? Stream.Null;
         }
 
         private static Stream GetBodyFromString(string text)
@@ -95,28 +90,15 @@ namespace Ormikon.AspNetCore.Static.Responses
 
         public void Dispose()
         {
-            if (body != null)
-                body.Dispose();
+            Body?.Dispose();
         }
 
-        public int StatusCode
-        {
-            get { return statusCode; }
-        }
+        public int StatusCode { get; }
 
-        public string ReasonPhrase
-        {
-            get { return reasonPhrase; }
-        }
+        public string ReasonPhrase { get; }
 
-        public IHttpResponseHeaders Headers
-        {
-            get { return headers; }
-        }
+        public IHttpResponseHeaders Headers { get; }
 
-        public Stream Body
-        {
-            get { return body; }
-        }
+        public Stream Body { get; }
     }
 }

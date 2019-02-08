@@ -2,7 +2,7 @@
 
 namespace Ormikon.AspNetCore.Static.Responses
 {
-    interface IStaticResponse
+    internal interface IStaticResponse
     {
         int StatusCode { get; }
         string ReasonPhrase { get; }

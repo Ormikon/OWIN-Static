@@ -8,7 +8,7 @@ namespace Ormikon.AspNetCore.Static.Extensions
         public static string NormalizePath(this string path)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             return path.Trim('/', '\\', ' ', '\t')
                 .Replace('\\', Path.DirectorySeparatorChar) // windows -> linux
                 .Replace('/', Path.DirectorySeparatorChar); // linux -> windows
@@ -17,7 +17,7 @@ namespace Ormikon.AspNetCore.Static.Extensions
         private static string NormalizePathEnd(this string path)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             return path.TrimEnd('/', '\\');
         }
 

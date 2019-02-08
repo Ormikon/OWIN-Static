@@ -12,8 +12,8 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         public string Value
         {
-            get { return GetSingleValue(); }
-            set { SetSingleValue(value); }
+            get => GetSingleValue();
+            set => SetSingleValue(value);
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Ormikon.AspNetCore.Static.Filters;
@@ -35,7 +37,7 @@ namespace Ormikon.AspNetCore.Static
         {
             sources = settings.Sources ?? new[] {"\\"};
             if (sources.Length == 0)
-                throw new ArgumentException("Sources count should be one or more.", "settings");
+                throw new ArgumentException("Sources count should be one or more.", nameof(settings));
             sources = NormalizeSources(sources, hostEnvironment.WebRootPath);
             indexFiles = ParseIndexFileString(settings.DefaultFile);
             redirectIfFolder = settings.RedirectIfFolderFound;
@@ -47,31 +49,30 @@ namespace Ormikon.AspNetCore.Static
             maxAge = settings.MaxAge;
         }
 
-        protected override StaticResponse GetResponse(Location location)
+        protected override Task<StaticResponse> GetResponseAsync(Location location, CancellationToken cancellationToken)
         {
             if (!TestFilters(location))
-                return null;
+                return Task.FromResult<StaticResponse>(null);
 
             var info = GetLocalFileInfo(location.Path, sources, indexFiles, allowHidden);
             if (info == null)
-                return null;
+                return Task.FromResult<StaticResponse>(null);
 
             if (info is DirectoryInfo)
-                return redirectIfFolder ? StaticResponse.Redirect(GetFolderRedirectLocation(location)) : null;
+                return Task.FromResult(redirectIfFolder ? StaticResponse.Redirect(GetFolderRedirectLocation(location)) : null);
 
             var result = new StaticResponse(info.FullName.GetContentType(), GetFileStream(info.FullName));
             if (expires != DateTimeOffset.MinValue)
                 result.Headers.Expires.Value = expires;
             if (maxAge != 0)
                 result.Headers.CacheControl.MaxAge = maxAge;
-            var fileInfo = info as FileInfo;
-            if (fileInfo != null)
+            if (info is FileInfo fileInfo)
             {
                 result.Headers.LastModified.Value = fileInfo.LastWriteTimeUtc;
                 result.Headers.ContentLength.Value = fileInfo.Length;
             }
 
-            return result;
+            return Task.FromResult(result);
         }
 
         #region private methods

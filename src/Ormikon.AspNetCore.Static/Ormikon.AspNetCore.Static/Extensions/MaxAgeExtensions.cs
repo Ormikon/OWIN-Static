@@ -92,8 +92,7 @@ namespace Ormikon.AspNetCore.Static.Extensions
             if (string.IsNullOrWhiteSpace(maxAgeExpression))
                 return 0;
             maxAgeExpression = maxAgeExpression.Trim();
-            int maxAge;
-            if (int.TryParse(maxAgeExpression, out maxAge))
+            if (int.TryParse(maxAgeExpression, out var maxAge))
                 return maxAge < 0 ? 0 : maxAge;
             maxAgeExpression = maxAgeExpression.Replace(" ", "").Replace("\t", "").ToLowerInvariant();
             bool hasNumbersBefore = false;
@@ -113,11 +112,10 @@ namespace Ormikon.AspNetCore.Static.Extensions
                         }
                     }
                     if (token.Length > 1 && token.EndsWith("s") && !hasNumbersBefore)
-                        token.Remove(token.Length - 1);
-                    Periods period;
-                    if (!periodTokens.TryGetValue(token, out period))
+                        token = token.Remove(token.Length - 1);
+                    if (!periodTokens.TryGetValue(token, out var period))
                     {
-                        throw new ArgumentException("Invalid max-age token value: '" + token + "'", "maxAgeExpression");
+                        throw new ArgumentException("Invalid max-age token value: '" + token + "'", nameof(maxAgeExpression));
                     }
                     maxAgeExpression = maxAgeExpression.Remove(0, token.Length);
                     int periodSeconds = 1;
@@ -144,6 +142,8 @@ namespace Ormikon.AspNetCore.Static.Extensions
                         case Periods.Second:
                             periodSeconds = 1;
                             break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(maxAgeExpression));
                     }
                     if (hasNumbersBefore)
                         periodSeconds *= (int)number;
@@ -162,7 +162,7 @@ namespace Ormikon.AspNetCore.Static.Extensions
                             continue;
                         }
                     }
-                    throw new ArgumentException("Invalid max-age token value: '" + maxAgeExpression + "'", "maxAgeExpression");
+                    throw new ArgumentException("Invalid max-age token value: '" + maxAgeExpression + "'", nameof(maxAgeExpression));
                 }
             }
 

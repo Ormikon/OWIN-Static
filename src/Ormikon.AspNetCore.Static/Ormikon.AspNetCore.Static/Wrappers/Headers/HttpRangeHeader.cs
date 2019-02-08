@@ -20,13 +20,13 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         protected void SetRange(HttpRange range)
         {
-            SetSingleValue(range == null ? null : range.ToString());
+            SetSingleValue(range?.ToString());
         }
 
         public HttpRange Range
         {
-            get { return GetRange(); }
-            set { SetRange(value); }
+            get => GetRange();
+            set => SetRange(value);
         }
     }
 
@@ -34,11 +34,10 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
     {
         private readonly long? start;
         private readonly long? end;
-        private readonly bool valid;
 
         public HttpRange(long range)
         {
-            valid = range != 0;
+            Valid = range != 0;
             if (range < 0)
             {
                 start = null;
@@ -55,12 +54,12 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
         {
             this.start = start;
             this.end = end;
-            valid = start >= end;
+            Valid = start >= end;
         }
 
         public HttpRange(string rangeValue)
         {
-            valid = ParseRangeValue(rangeValue, out start, out end);
+            Valid = ParseRangeValue(rangeValue, out start, out end);
         }
 
         private static Tuple<long?, long?> ParseRangePart(string rangePart)
@@ -72,27 +71,22 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
                 return null;
             if (rangeSeparatorPos == 0)
             {
-                long rangeEnd;
-                if (!long.TryParse(rangePart.Substring(1).TrimStart(), out rangeEnd))
+                if (!long.TryParse(rangePart.Substring(1).TrimStart(), out var rangeEnd))
                     return null;
                 return new Tuple<long?, long?>(null, -rangeEnd);
             }
             if (rangeSeparatorPos == rangePart.Length - 1)
             {
-                long rangeStart;
-                if (!long.TryParse(rangePart.Remove(rangePart.Length - 1).TrimEnd(), out rangeStart))
+                if (!long.TryParse(rangePart.Remove(rangePart.Length - 1).TrimEnd(), out var rangeStart))
                     return null;
                 return new Tuple<long?,long?>(rangeStart, null);
             }
-            long start;
-            if (!long.TryParse(rangePart.Remove(rangeSeparatorPos).TrimEnd(), out start))
+
+            if (!long.TryParse(rangePart.Remove(rangeSeparatorPos).TrimEnd(), out var start))
                 return null;
-            long end;
-            if (!long.TryParse(rangePart.Substring(rangeSeparatorPos + 1).TrimStart(), out end))
+            if (!long.TryParse(rangePart.Substring(rangeSeparatorPos + 1).TrimStart(), out var end))
                 return null;
-            if (start > end)
-                return null;
-            return new Tuple<long?,long?>(start, end);
+            return start > end ? null : new Tuple<long?,long?>(start, end);
         }
 
         private static bool ParseRangeValue(string rangeValue, out long? start, out long? end)
@@ -136,19 +130,10 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
                 + end.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        public long? Start
-        {
-            get { return start; }
-        }
+        public long? Start => start;
 
-        public long? End
-        {
-            get { return end; }
-        }
+        public long? End => end;
 
-        public bool Valid
-        {
-            get { return valid; }
-        }
+        public bool Valid { get; }
     }
 }

@@ -24,7 +24,7 @@ namespace Ormikon.AspNetCore.Static.Filters
         {
             if (filter.IndexOfAny(invalidChars) >= 0)
             {
-                throw new ArgumentException("The filter contains invalid chars: " + filter, "filter");
+                throw new ArgumentException("The filter contains invalid chars: " + filter, nameof(filter));
             }
             return filter;
         }

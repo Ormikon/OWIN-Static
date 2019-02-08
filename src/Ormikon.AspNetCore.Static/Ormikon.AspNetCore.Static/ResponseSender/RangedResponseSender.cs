@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Ormikon.AspNetCore.Static.Responses;
 using Ormikon.AspNetCore.Static.Wrappers;
@@ -11,12 +12,11 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
     {
         private const string AllowedRange = "bytes";
 
-        private static Task SendRequestedRangeNotSatisfiable(IWrappedContext ctx, Stream responseStream)
+        private static void SendRequestedRangeNotSatisfiable(IWrappedContext ctx, Stream responseStream)
         {
             responseStream.Close();
             var resp = StaticResponse.HttpStatus(Constants.Http.StatusCodes.ClientError.RequestedRangeNotSatisfiable);
             SetResponseHeaders(resp, ctx.Response);
-            return Task.FromResult<object>(null);
         }
 
         private static long GetRangeLength(HttpRange range, long contentLength, out long start, out long end)
@@ -32,21 +32,22 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             return end - start + 1;
         }
 
-        private static Task SendRange(HttpRange range, IStaticResponse response, Stream responseStream, IWrappedContext ctx)
+        private static async Task SendRangeAsync(HttpRange range, IStaticResponse response, Stream responseStream, IWrappedContext ctx, CancellationToken cancellationToken)
         {
             long? length = response.Headers.ContentLength.Value;
             if (!length.HasValue || length.Value == 0)
             {
-                return SendFullResponse(response, responseStream, ctx);
+                await SendFullResponseAsync(response, responseStream, ctx, cancellationToken);
+                return;
             }
 
-            long start, end;
 // ReSharper disable PossibleInvalidOperationException
-            long rangeLength = GetRangeLength(range, length.Value, out start, out end);
+            long rangeLength = GetRangeLength(range, length.Value, out var start, out var end);
 // ReSharper restore PossibleInvalidOperationException
             if (start < 0 || start >= length.Value || end >= length.Value || rangeLength <= 0)
             {
-                return SendRequestedRangeNotSatisfiable(ctx, responseStream);
+                SendRequestedRangeNotSatisfiable(ctx, responseStream);
+                return;
             }
 
             SetResponseHeaders(Constants.Http.StatusCodes.Successful.PartialContent, response.Headers, ctx.Response,
@@ -54,7 +55,7 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             ctx.Response.Headers.ContentRange.Range = new HttpContentRange(start, end, length.Value);
             ctx.Response.Headers.ContentLength.Value = rangeLength;
 
-            return SendStreamAsync(responseStream, ctx.Response.Body, start, rangeLength, ctx.CallCancelled);
+            await SendStreamAsync(responseStream, ctx.Response.Body, start, rangeLength, cancellationToken);
         }
 
         private static bool IfRange(HttpIfRangeHeader ifRange, string respETag, DateTimeOffset? lastModified)
@@ -74,26 +75,29 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             return string.CompareOrdinal(respETag, entity) == 0;
         }
 
-        protected override Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IWrappedContext ctx)
+        protected override async Task SendAsyncInternal(IStaticResponse response, Stream responseStream, IWrappedContext ctx, CancellationToken cancellationToken)
         {
             ctx.Response.Headers.AcceptRanges.AddAcceptValue(AllowedRange);
             var rangeHeader = ctx.Request.Headers.Range;
             if (!rangeHeader.Available)
             {
-                return SendFullResponse(response, responseStream, ctx);
+                await SendFullResponseAsync(response, responseStream, ctx, cancellationToken);
+                return;
             }
             var range = rangeHeader.Range;
             if (!range.Valid)
             {
-                return SendRequestedRangeNotSatisfiable(ctx, responseStream);
+                SendRequestedRangeNotSatisfiable(ctx, responseStream);
+                return;
             }
             var ifRange = ctx.Request.Headers.IfRange;
             if (ifRange.Available && !IfRange(ifRange, response.Headers.ETag.Value, response.Headers.LastModified.Value))
             {
-                return SendFullResponse(response, responseStream, ctx);
+                await SendFullResponseAsync(response, responseStream, ctx, cancellationToken);
+                return;
             }
 
-            return SendRange(range, response, responseStream, ctx);
+            await SendRangeAsync(range, response, responseStream, ctx, cancellationToken);
         }
     }
 }

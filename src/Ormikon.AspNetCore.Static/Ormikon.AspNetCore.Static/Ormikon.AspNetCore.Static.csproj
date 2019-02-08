@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>Ormikon.Owin.Static</AssemblyName>
+    <AssemblyName>Ormikon.AspNetCore.Static</AssemblyName>
     <Version>0.4.0</Version>
     <Authors>Ormikon</Authors>
     <Company>Ormikon</Company>
@@ -15,7 +15,9 @@
     <PackageProjectUrl>https://github.com/Ormikon/OWIN-Static</PackageProjectUrl>
     <PackageIconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RootNamespace>Ormikon.Owin.Static</RootNamespace>
+    <RootNamespace>Ormikon.AspNetCore.Static</RootNamespace>
+    <PackageId>Ormikon.AspNetCore.Static</PackageId>
+    <Product>Ormikon.AspNetCore.Static</Product>
   </PropertyGroup>
 
   <ItemGroup>

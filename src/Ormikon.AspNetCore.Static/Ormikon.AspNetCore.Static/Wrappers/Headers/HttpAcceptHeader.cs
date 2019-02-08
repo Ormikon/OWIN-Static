@@ -19,7 +19,7 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         protected void SetAcceptValues(ICollection<HttpAcceptHeaderValue> values)
         {
-            SetEnumValues(values == null ? null : values.Select(av => av.ToString()).ToList());
+            SetEnumValues(values?.Select(av => av.ToString()).ToList());
         }
 
         public void AddAcceptValue(string acceptValue)
@@ -38,10 +38,7 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
             SetSingleValue(string.Join(SplitString, values.Select(v => v.ToString())));
         }
 
-        public HttpAcceptHeaderValue[] AcceptValues
-        {
-            get { return GetAcceptValues(); }
-        }
+        public HttpAcceptHeaderValue[] AcceptValues => GetAcceptValues();
     }
 
     internal class HttpAcceptHeaderValue : HttpPropertyHeaderValue
@@ -66,13 +63,9 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
                 string strValue = this[QualityFactorProp];
                 if (string.IsNullOrEmpty(strValue))
                     return 1;
-                float result;
-                return float.TryParse(strValue, NumberStyles.Any, CultureInfo.InvariantCulture, out result) ? result : 1;
+                return float.TryParse(strValue, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 1;
             }
-            set
-            {
-                this[QualityFactorProp] = value.ToString(CultureInfo.InvariantCulture);
-            }
+            set => this[QualityFactorProp] = value.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

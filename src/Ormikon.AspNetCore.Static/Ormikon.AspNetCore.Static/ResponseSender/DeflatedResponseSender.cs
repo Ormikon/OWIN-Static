@@ -5,14 +5,13 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
 {
     internal class DeflatedResponseSender : CompressedResponseSender
     {
+        public const string DeflatedCompressionMethod = "deflate";
+
         protected override Stream WrapToCompressedStream(Stream outputStream)
         {
             return new DeflateStream(outputStream, CompressionMode.Compress, true);
         }
 
-        protected override string CompressionMethod
-        {
-            get { return "deflate"; }
-        }
+        protected override string CompressionMethod => DeflatedCompressionMethod;
     }
 }

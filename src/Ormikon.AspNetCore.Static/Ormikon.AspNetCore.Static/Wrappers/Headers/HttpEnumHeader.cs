@@ -71,8 +71,8 @@ namespace Ormikon.AspNetCore.Static.Wrappers.Headers
 
         public string[] EnumValues
         {
-            get { return GetEnumValues(); }
-            set { SetEnumValues(value); }
+            get => GetEnumValues();
+            set => SetEnumValues(value);
         }
     }
 }
