@@ -9,16 +9,28 @@ namespace Ormikon.AspNetCore.Static
     /// </summary>
     public class StaticSettings
     {
+        /// <summary>
+        /// Represents a default file names for a default HTML file like 'index.html'
+        /// </summary>
         public const string DefaultFileValue = "index.html;index.htm;start.html;start.htm;default.html;default.htm";
+        /// <summary>
+        /// Represents a default types need to be compressed if client support compressed content
+        /// </summary>
         public const string DefaultCompressedTypesFilter = "text/*;*/xml;application/*javascript;application/*json*"
             + ";application/*+xml;image/*+xml";
         private static readonly char[] sourceSeparators = { ';' };
 
+        /// <summary>
+        /// Default cache class implementation for caching static content
+        /// </summary>
         public static readonly IStaticCache DefaultMemoryCache = new SimpleMemoryStaticCache();
         private static IStaticCache defaultCache = DefaultMemoryCache;
 
         private int maxAge;
 
+        /// <summary>
+        /// Creates a new instance with defaults
+        /// </summary>
         public StaticSettings()
         {
             Expires = DateTimeOffset.MinValue;

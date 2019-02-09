@@ -17,12 +17,15 @@
         /// <summary>
         /// Is any mapping found in the configuration
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if mapping configuration has map options inside</returns>
         public bool HasMappings()
         {
             return Maps != null && Maps.Length > 0;
         }
 
+        /// <summary>
+        /// Map options collection
+        /// </summary>
         public MapOptions[] Maps { get; set; }
     }
 }
