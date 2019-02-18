@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Ormikon.AspNetCore.Static;
@@ -107,6 +108,102 @@ namespace Microsoft.AspNetCore.Builder
         public static IApplicationBuilder MapStatic(this IApplicationBuilder builder, string pathMatch)
         {
             return Map(builder, pathMatch, app => app.UseStatic());
+        }
+
+        /// <summary>
+        /// Use static files from resources of an entry Assembly
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder UseStaticResources(this IApplicationBuilder builder)
+        {
+            return builder.UseStaticResources((StaticResourcesSettings) null);
+        }
+
+        /// <summary>
+        /// Use static files from resources of an entry Assembly
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <param name="pathMatch">Custom path</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder MapStaticResources(this IApplicationBuilder builder, string pathMatch)
+        {
+            return Map(builder, pathMatch, app => app.UseStaticResources());
+        }
+
+        /// <summary>
+        /// Use static files from resources of <paramref name="assembly"/>
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <param name="assembly">Assembly with resources</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder UseStaticResources(this IApplicationBuilder builder, Assembly assembly)
+        {
+            return builder.UseStaticResources(assembly, null);
+        }
+
+        /// <summary>
+        /// Use static files from resources of <paramref name="assembly"/>
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <param name="pathMatch">Custom path</param>
+        /// <param name="assembly">Assembly with resources</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder MapStaticResources(this IApplicationBuilder builder, string pathMatch, Assembly assembly)
+        {
+            return Map(builder, pathMatch, app => app.UseStaticResources(assembly));
+        }
+
+        /// <summary>
+        /// Use static files from resources of <paramref name="assembly"/> and filtered by <paramref name="resources"/>
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <param name="assembly">Assembly with resources</param>
+        /// <param name="resources">Resources filter</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder UseStaticResources(this IApplicationBuilder builder, Assembly assembly, string resources)
+        {
+            return builder.UseStaticResources(new StaticResourcesSettings
+            {
+                Assembly = assembly,
+                Resources = resources
+            });
+        }
+
+        /// <summary>
+        /// Use static files from resources of <paramref name="assembly"/> and filtered by <paramref name="resources"/>
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <param name="pathMatch">Custom path</param>
+        /// <param name="assembly">Assembly with resources</param>
+        /// <param name="resources">Resources filter</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder MapStaticResources(this IApplicationBuilder builder, string pathMatch, Assembly assembly, string resources)
+        {
+            return Map(builder, pathMatch, app => app.UseStaticResources(assembly, resources));
+        }
+
+        /// <summary>
+        /// Use static files from resources
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <param name="settings">Settings</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder UseStaticResources(this IApplicationBuilder builder, StaticResourcesSettings settings)
+        {
+            return builder.UseMiddleware<AssemblyResourcesMiddleware>(settings ?? new StaticResourcesSettings());
+        }
+
+        /// <summary>
+        /// Use static files from resources
+        /// </summary>
+        /// <param name="builder">Application builder</param>
+        /// <param name="pathMatch">Custom path</param>
+        /// <param name="settings">Settings</param>
+        /// <returns>Application builder</returns>
+        public static IApplicationBuilder MapStaticResources(this IApplicationBuilder builder, string pathMatch, StaticResourcesSettings settings)
+        {
+            return Map(builder, pathMatch, app => app.UseStaticResources(settings));
         }
 
         /// <summary>

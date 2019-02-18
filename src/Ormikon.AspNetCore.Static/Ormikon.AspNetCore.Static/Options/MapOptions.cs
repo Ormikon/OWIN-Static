@@ -50,7 +50,7 @@ namespace Ormikon.AspNetCore.Static.Options
         /// <summary>
         /// Content default file names
         /// </summary>
-        public string Default { get; set; } = StaticSettings.DefaultFileValue;
+        public string Default { get; set; } = StaticSettingsBase.DefaultFileValue;
 
         /// <summary>
         /// Redirect if path is folder

@@ -197,13 +197,13 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             if (!string.IsNullOrEmpty(respETag))
             {
                 preconditionResult = IfMatch(ctx, respETag);
-                if (preconditionResult != PreconditionResult.Continue)
+                if (preconditionResult == PreconditionResult.NotModified)
                 {
                     SendPreconditionResult(preconditionResult, response, responseStream, ctx);
                     return true;
                 }
                 preconditionResult = IfNoneMatch(ctx, respETag);
-                if (preconditionResult != PreconditionResult.Continue)
+                if (preconditionResult == PreconditionResult.NotModified)
                 {
                     SendPreconditionResult(preconditionResult, response, responseStream, ctx);
                     return true;
@@ -214,13 +214,13 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             if (lastModified.HasValue)
             {
                 preconditionResult = IfModifiedSince(ctx, lastModified.Value);
-                if (preconditionResult != PreconditionResult.Continue)
+                if (preconditionResult == PreconditionResult.NotModified)
                 {
                     SendPreconditionResult(preconditionResult, response, responseStream, ctx);
                     return true;
                 }
                 preconditionResult = IfUnmodifiedSince(ctx, lastModified.Value);
-                if (preconditionResult != PreconditionResult.Continue)
+                if (preconditionResult == PreconditionResult.NotModified)
                 {
                     SendPreconditionResult(preconditionResult, response, responseStream, ctx);
                     return true;
@@ -239,6 +239,7 @@ namespace Ormikon.AspNetCore.Static.ResponseSender
             if (response.StatusCode != Constants.Http.StatusCodes.Successful.Ok)
             {
                 await SendFullResponseAsync(response, responseStream, context, cancellationToken);
+                return;
             }
 
             if (!ProcessCacheHeaders(response, responseStream, context))

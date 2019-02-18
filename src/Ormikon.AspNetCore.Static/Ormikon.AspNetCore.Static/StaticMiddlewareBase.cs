@@ -42,7 +42,7 @@ namespace Ormikon.AspNetCore.Static
 
         protected StaticMiddlewareBase(RequestDelegate next, bool cached, IStaticCache cache,
             DateTimeOffset expires, int maxAge)
-            : this(next, cached, cache, expires, maxAge, StaticSettings.DefaultCompressedTypesFilter)
+            : this(next, cached, cache, expires, maxAge, StaticSettingsBase.DefaultCompressedTypesFilter)
         {
         }
 
@@ -98,13 +98,13 @@ namespace Ormikon.AspNetCore.Static
 
         private async Task<CachedResponse> CacheGetAsync(Location location, CancellationToken cancellationToken)
         {
-            var c = cache ?? StaticSettings.DefaultCache;
+            var c = cache ?? StaticSettingsBase.DefaultCache;
             return await c.GetAsync(location.FullPath, cancellationToken);
         }
 
         private async Task CacheSetAsync(string path, CachedResponse data, CancellationToken cancellationToken)
         {
-            var c = cache ?? StaticSettings.DefaultCache;
+            var c = cache ?? StaticSettingsBase.DefaultCache;
             await c.SetAsync(path, data, GetCacheOffset(), cancellationToken);
         }
 

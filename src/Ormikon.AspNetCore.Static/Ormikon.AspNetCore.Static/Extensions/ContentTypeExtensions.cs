@@ -6,7 +6,7 @@ namespace Ormikon.AspNetCore.Static.Extensions
 {
     internal static class ContentTypeExtensions
     {
-        private const string DefaultContentType = "application/octet-stream";
+        public const string DefaultContentType = "application/octet-stream";
         private static readonly IDictionary<string, string> extensionContentTypeMap;
 
         static ContentTypeExtensions()

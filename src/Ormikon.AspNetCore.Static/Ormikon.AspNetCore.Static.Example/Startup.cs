@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,8 @@ namespace Ormikon.AspNetCore.Static.Example
 
             app.MapStatic("/content", new StaticSettings {Cached = true})
                 .UseStatic(new StaticSettings {Cached = true})
-                .UseStatic();
+                .UseStatic()
+                .MapStaticResources("/res", typeof(Startup).Assembly, "Ormikon.AspNetCore.Static.Example.wwwroot");
         }
     }
 }

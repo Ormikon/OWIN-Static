@@ -63,7 +63,7 @@ namespace Ormikon.AspNetCore.Static.Tests
         [Test]
         public void TestDefaultFilter()
         {
-            var filter = new ContentTypeFilter(StaticSettings.DefaultCompressedTypesFilter);
+            var filter = new ContentTypeFilter(StaticSettingsBase.DefaultCompressedTypesFilter);
             Assert.IsTrue(filter.Contains("text/xml"));
             Assert.IsTrue(filter.Contains("text/html"));
             Assert.IsTrue(filter.Contains("text/plain"));

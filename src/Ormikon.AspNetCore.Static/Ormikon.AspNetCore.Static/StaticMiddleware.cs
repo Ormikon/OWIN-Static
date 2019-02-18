@@ -2,111 +2,66 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Ormikon.AspNetCore.Static.Filters;
-using Ormikon.AspNetCore.Static.Responses;
 using Ormikon.AspNetCore.Static.Wrappers;
 using Ormikon.AspNetCore.Static.Extensions;
 
-// Make internals visible for the test assembly
-[assembly: InternalsVisibleTo("Ormikon.AspNetCore.Static.Tests")]
-
 namespace Ormikon.AspNetCore.Static
 {
-    internal class StaticMiddleware : StaticMiddlewareBase
+    internal class StaticMiddleware : StaticFilesMiddlewareBase
     {
-        private static readonly char[] indexFileSeparator = { ';' };
-
         private readonly string[] sources;
-        private readonly string[] indexFiles;
-        private readonly bool redirectIfFolder;
-        private readonly IFilter include;
-        private readonly IFilter exclude;
         private readonly IFilter unixHidden;
         private readonly bool allowHidden;
-        private readonly DateTimeOffset expires;
-        private readonly int maxAge;
 
         public StaticMiddleware(RequestDelegate next, StaticSettings settings, IHostingEnvironment hostEnvironment)
-            : base(next, settings.Cached, settings.Cache, settings.Expires, settings.MaxAge,
-                settings.CompressedContentTypes)
+            : base(next, settings)
         {
             sources = settings.Sources ?? new[] {"\\"};
             if (sources.Length == 0)
                 throw new ArgumentException("Sources count should be one or more.", nameof(settings));
             sources = NormalizeSources(sources, hostEnvironment.WebRootPath);
-            indexFiles = ParseIndexFileString(settings.DefaultFile);
-            redirectIfFolder = settings.RedirectIfFolderFound;
-            include = new FileFilter(settings.Include);
-            exclude = new FileFilter(settings.Exclude);
             unixHidden = new FileFilter(allowHidden ? null : @"**\.*");
             allowHidden = settings.AllowHidden;
-            expires = settings.Expires;
-            maxAge = settings.MaxAge;
         }
 
-        protected override Task<StaticResponse> GetResponseAsync(Location location, CancellationToken cancellationToken)
+        #region protected overridden methods
+
+        protected sealed override bool TestFilters(Location location)
         {
-            if (!TestFilters(location))
-                return Task.FromResult<StaticResponse>(null);
-
-            var info = GetLocalFileInfo(location.Path, sources, indexFiles, allowHidden);
-            if (info == null)
-                return Task.FromResult<StaticResponse>(null);
-
-            if (info is DirectoryInfo)
-                return Task.FromResult(redirectIfFolder ? StaticResponse.Redirect(GetFolderRedirectLocation(location)) : null);
-
-            var result = new StaticResponse(info.FullName.GetContentType(), GetFileStream(info.FullName));
-            if (expires != DateTimeOffset.MinValue)
-                result.Headers.Expires.Value = expires;
-            if (maxAge != 0)
-                result.Headers.CacheControl.MaxAge = maxAge;
-            if (info is FileInfo fileInfo)
-            {
-                result.Headers.LastModified.Value = fileInfo.LastWriteTimeUtc;
-                result.Headers.ContentLength.Value = fileInfo.Length;
-            }
-
-            return Task.FromResult(result);
+            return !(unixHidden.IsActive() && unixHidden.Contains(location.Path))
+                   && base.TestFilters(location);
         }
 
-        #region private methods
-
-        private bool TestFilters(Location location)
-        {
-            return !((unixHidden.IsActive() && unixHidden.Contains(location.Path))
-                || (include.IsActive() && !include.Contains(location.Path))
-                || (exclude.IsActive() && exclude.Contains(location.Path)));
-        }
-
-        private static Stream GetFileStream(string path)
+        protected override Stream GetFileStream(string path)
         {
             return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
 
-        private static string GetFolderRedirectLocation(Location location)
+        protected override EntityInfo GetLocalFileInfo(string path)
         {
-            return location.FullPath + "/";
+            bool isPathEmpty = string.IsNullOrEmpty(path);
+            // ReSharper disable AssignNullToNotNullAttribute
+            foreach (string fullPath in sources.Select(src => isPathEmpty ? src : Path.Combine(src, path)))
+            // ReSharper restore AssignNullToNotNullAttribute
+            {
+                var info = TryResolvePath(fullPath, true, allowHidden);
+                if (info != null)
+                    return AsEntityInfo(info);
+            }
+
+            return null;
         }
+
+        #endregion
+
+        #region private methods
 
         private static string[] NormalizeSources(IEnumerable<string> sources, string webRoot)
         {
             return sources.Select(s => (s ?? ".").NormalizePath().GetFullPathForLocalPath(webRoot)).ToArray();
-        }
-
-        private static string[] ParseIndexFileString(string indexFile)
-        {
-            if (string.IsNullOrWhiteSpace(indexFile))
-                return null;
-            string[] files = indexFile.Split(indexFileSeparator, StringSplitOptions.RemoveEmptyEntries)
-                                      .Where(f => !string.IsNullOrWhiteSpace(f))
-                                      .ToArray();
-            return files.Length == 0 ? null : files;
         }
 
         private static FileSystemInfo GetFileInfo(string fileName)
@@ -170,44 +125,19 @@ namespace Ormikon.AspNetCore.Static
             return null;
         }
 
-        public static FileSystemInfo GetLocalFileInfo(string path, string[] sources, string[] indexFiles,
-                                                      bool allowHidden)
+        private static EntityInfo AsEntityInfo(FileSystemInfo systemInfo)
         {
-            bool isFolderRequested = path.EndsWith("/", StringComparison.Ordinal);
-            string pathStr = path.NormalizePath();
-
-            if (isFolderRequested)
+            if (systemInfo is null)
             {
-                if (indexFiles == null || indexFiles.Length == 0)
-                    return null;
-
-                foreach (var source in sources)
-                {
-                    foreach (var indexFile in indexFiles)
-                    {
-                        string fullPath = string.IsNullOrEmpty(pathStr)
-                                              ? Path.Combine(source, indexFile)
-                                              : Path.Combine(source, pathStr, indexFile);
-                        var info = TryResolvePath(fullPath, false, allowHidden);
-                        if (info != null)
-                            return info;
-                    }
-                }
-
                 return null;
             }
 
-            bool isPathEmpty = string.IsNullOrEmpty(pathStr);
-// ReSharper disable AssignNullToNotNullAttribute
-            foreach (string fullPath in sources.Select(src => isPathEmpty ? src : Path.Combine(src, pathStr)))
-// ReSharper restore AssignNullToNotNullAttribute
+            if (systemInfo is DirectoryInfo)
             {
-                var info = TryResolvePath(fullPath, true, allowHidden);
-                if (info != null)
-                    return info;
+                return new EntityInfo(systemInfo.FullName);
             }
 
-            return null;
+            return new EntityInfo(systemInfo.FullName, systemInfo.LastWriteTimeUtc, ((FileInfo) systemInfo).Length);
         }
 
         #endregion
